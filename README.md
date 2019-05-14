@@ -62,6 +62,8 @@
       - [Pub/Sub](https://redis.io/topics/pubsub)
         - [example](https://github.com/andymccurdy/redis-py/#publish--subscribe)
         - [Only one client can get the message.](https://stackoverflow.com/questions/7196306/competing-consumer-on-redis-pub-sub-supported) (not one to many)
+      - [Distributed lock](https://redis.io/topics/distlock) (Redlock algorithm)
+        - [python implementation](https://github.com/SPSCommerce/redlock-py)
       
       
 ## WebServices
