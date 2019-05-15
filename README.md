@@ -111,17 +111,28 @@
   * [TCP three way handshake](https://notfalse.net/7/three-way-handshake)
 ## WebServices
   * Auth
+    - Authentication vs Authorization
+      - Authentication is the process of ascertaining that somebody really is who they claim to be.
+      - Authorization refers to rules that determine who is allowed to do what. E.g. Adam may be authorized to create and delete databases, while Usama is only authorised to read.
     * TLS handshake
     * JWT
     * OAuth2.0
   * HTTP1.1 vs HTTP2.0
   * Design Patterns
     * RestAPI
-  * Profiling
-    * wrk
+  * [Forward vs Redirect](https://stackoverflow.com/questions/6068891/difference-between-jsp-forward-and-redirect)
+    * Forward
+      - redirect sets the response status to 302, and the new url in a Location header, and sends the response to the browser. Then the browser, according to the http specification, makes another request to the new url
+    * Redirect
+      - forward happens entirely on the server. The servlet container just forwards the same request to the target url, without the browser knowing about that. Hence you can use the same request attributes and the same request parameters when handling the new url. And the browser won't know the url has changed (because it has happened entirely on the server)
   * MicroServices
-    * Drawback:
+    * Advantages:
+    * Drawbacks:
       * Performance
-      * Account Limits (e.g. aws lambda instance count)
+      * Lambda Limits
+        * Account Limits (e.g. aws lambda instance count)
+        * Cold Start Time
+  * Profiling
+    * wrk 
 ## Reference 
   * [awsesome-interview-questions](https://github.com/MaximAbramchuck/awesome-interview-questions)
