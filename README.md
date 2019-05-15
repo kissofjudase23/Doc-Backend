@@ -5,6 +5,7 @@
    - [MySQL](#MySQL)
  - [Caching](#Caching)
    - [Redis](#Redis)
+ - [ComputerNetwork](#ComputerNetwork)
  - [WebServices](#WebServices)
  - [Reference](#Reference)
  
@@ -104,6 +105,17 @@
       * [python implementation](https://github.com/SPSCommerce/redlock-py)
       
       
+## ComputerNetwork
+  * [OSI Model](https://en.wikipedia.org/wiki/OSI_model)
+  * [TCP vs UDP](https://stackoverflow.com/questions/5970383/difference-between-tcp-and-udp)
+  * [TCP three way handshake](https://notfalse.net/7/three-way-handshake)
 ## WebServices
+  * Auth
+    * TLS handshake
+    * JWT
+    * OAuth2.0
+  * HTTP1.1 vs HTTP2.0
+  * Design Patterns
+    * RestAPI
 ## Reference 
   * [awsesome-interview-questions](https://github.com/MaximAbramchuck/awesome-interview-questions)
