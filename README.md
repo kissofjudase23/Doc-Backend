@@ -114,10 +114,19 @@
     - Authentication vs Authorization
       - Authentication is the process of ascertaining that somebody really is who they claim to be.
       - Authorization refers to rules that determine who is allowed to do what. E.g. Adam may be authorized to create and delete databases, while Usama is only authorised to read.
-    * TLS handshake
     * JWT
     * OAuth2.0
-  * HTTP1.1 vs HTTP2.0
+  * TLS
+    - [TLS handshake](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.1.0/com.ibm.mq.doc/sy10660_.htm)
+    - [Symmetric/Asymmetric/Hybrid Encryption](http://david50.pixnet.net/blog/post/28796015)
+    - [Cipher Suite](https://curl.haxx.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
+  * [HTTP/2](https://http2.github.io/faq/)
+    - Key differents to HTTP/1.x 
+      - is binary, instead of textual
+      - is fully multiplexed, instead of ordered and blocking can therefore use one connection for parallelism
+      - Header Compression
+      - Allows servers to “push” responses proactively into client caches
+
   * Design Patterns
     * RestAPI
   * [Forward vs Redirect](https://stackoverflow.com/questions/6068891/difference-between-jsp-forward-and-redirect)
