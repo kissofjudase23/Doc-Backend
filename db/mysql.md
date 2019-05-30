@@ -48,7 +48,41 @@
         ```sql
         SELECT * FROM users WHERE name = '' OR '1'='1';
         ```
-     
+    * solution:
+      * Prepare statement, Parameter Binding
+        * If you have any "special" characters (such as semicolons or apostrophes) in your data, they will be automatically quoted for you by the SQLEngine object, so you don't have to worry about quoting.
+          ```python
+          #!/bin/env python
+          #-*- encoding: utf-8 -*-
+          import time
+          from sqlalchemy import text
+          def insert_into_xxx_tbl(user_id, user_name, nickname):
+              insert_params_dict = {
+                  'user_id': user_id,
+                  'user_name': user_name,
+                  'nickname': nickname,
+                  'db_insert_time': int(time.time()),
+                  'db_update_time': int(time.time()),
+              }
+
+          ## use sqlalchemy bindparams to prevent sql injection
+          pre_sql = 'insert into xxx_tbl (user_id, user_name, nickname, db_insert_time, db_update_time) values(:user_id, :user_name, :nickname, :db_insert_time, :db_update_time)'
+          bind_sql = text(pre_sql)
+          resproxy = _db_inst.connect().execute(bind_sql, insert_params_dict)
+
+          ## return lastid as event_id
+          event_id = resproxy.lastrowid
+          ```
+       * [Pure ORM](https://stackoverflow.com/questions/6501583/sqlalchemy-sql-injection/6501664)
+         *  This also means that unless you deliberately bypass SQLAlchemy's quoting mechanisms, SQL-injection attacks are basically impossible.
+         * Correct Example:
+           ```python
+           session.query(MyClass).filter(MyClass.foo==getArgs['val']))
+           ```
+         * Bad Example:
+            ```python
+            session.query(MyClass).filter("foo={}".format(getArgs['val']))
+            ```
 ## [Normalization](https://medium.com/@habibul.hasan.hira/database-normalization-8cdaddbb7715)
   * 1NF
     * Every column of a table should be atomic. That means you **can not put multiple values in a database column**.
