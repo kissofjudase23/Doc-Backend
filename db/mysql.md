@@ -30,11 +30,25 @@
       - SERIALIZABLE
     * Durability
       * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to. 
-      * 
+       
 ## [Security]
-  * SQL Injection
- 
-## [Normalization](https://www.mysql.tw/2013/03/normalization.html)
+  * [SQL Injection](https://en.wikipedia.org/wiki/SQL_injection)
+      * SQL injection is a code injection technique, used to attack data-driven applications, in which malicious SQL statements are inserted into an entry field for execution.
+        ```sql
+        SELECT * FROM users WHERE name = '' OR '1'='1';
+        ```
+     
+## [Normalization](https://medium.com/@habibul.hasan.hira/database-normalization-8cdaddbb7715)
+  * 1NF
+    * Every column of a table should be atomic. That means you **can not put multiple values in a database column**.
+  * 2NF
+    * If we have **composite primary key**! every non key field should be fully **depended on both key**. 
+  * 3NF
+    * When a database table is in second normal form , there should be no transitive functional dependency. That means any non primary key field should not be depend on other on primary key field.
+  * BCNF
+  * 4NF
+  * 5NF
+
 ## [Partitions](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)
 ## [Stored Objects](https://dev.mysql.com/doc/refman/8.0/en/stored-objects.html)
   * Stored procedure
@@ -44,16 +58,17 @@
 ## [Optimization](https://dev.mysql.com/doc/refman/8.0/en/optimization.html)
   * Indexes:
     * Use good indexes
-      * Columns that you are querying (SELECT, GROUP BY, ORDER BY, JOIN) could be faster with indices.
-      * Indices are usually represented as self-balancing B-tree that keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
+      * Columns that you are querying (**SELECT, GROUP BY, ORDER BY, JOIN**) could be faster with indices.
+      * Indices are usually represented as **self-balancing B-tree** that keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
       * Writes could also be slower since the index also needs to be updated.
-    * Use good composite indexes:
-      * If certain fields tend to appear together in queries, then it’s a good idea to create a composite index on them. 
+       
+    * Use good **composite indexes**:
+      * If certain fields tend to **appear together in queries**, then it’s a good idea to create a composite index on them. 
       * Similar to single indexes, the cardinality of the fields matters to the effectiveness composite indexes.
        
     * Avoid Unnecessary Indexes 
-      * Do not use an index for low-read but high-write tables. 
-      * Do not use an index if the field has low cardinality, the number of distinct values in that field.
+      * Do not use an index for **low-read** but **high-write** tables. 
+      * Do not use an index if the field has **low cardinality**, the number of distinct values in that field.
         * Low-cardinality: Refers to columns with few unique values. 
 
 ## Profiling
