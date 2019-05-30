@@ -1,5 +1,15 @@
 # MySQL  
 
+# Table of Contents
+- [Data Types](#data-types)
+- [ACID Model（InnoDB Engine) (from mysql5.7)](#acid-modelinnodb-engine-from-mysql57)
+- [Security](#security)
+- [Normalization](#normalization)
+- [Partitions](#partitions)
+- [Stored Objects](#stored-objects)
+- [Optimization](#optimization)
+- [Profiling](#profiling)
+
 ## [Data Types](https://dev.mysql.com/doc/refman/8.0/en/data-type-overview.html)
   * [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
   * [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
@@ -11,7 +21,8 @@
             ```sql
             ALTER TABLE test_features ADD COLUMN street VARCHAR(30) GENERATED ALWAYS AS (json_unquote(json_extract(`feature`,'$.properties.STREET'))) VIRTUAL;
             ```
-        * create an index on it
+        * create an index on it- [MySQL](#mysql)
+
             ```sql
             ALTER TABLE test_features ADD KEY `street` (`street`);
             ```
@@ -31,7 +42,7 @@
     * Durability
       * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to. 
        
-## [Security]
+## Security
   * [SQL Injection](https://en.wikipedia.org/wiki/SQL_injection)
       * SQL injection is a code injection technique, used to attack data-driven applications, in which malicious SQL statements are inserted into an entry field for execution.
         ```sql
