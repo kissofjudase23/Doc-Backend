@@ -2,7 +2,8 @@
 
 # Table of Contents
 - [Data Types](#data-types)
-- [ACID Model（InnoDB Engine) (from mysql5.7)](#acid-modelinnodb-engine-from-mysql57)
+- [Charset](#charset)
+- [ACID Model（InnoDB Engine)](#acid-modelinnodb-engine)
 - [Security](#security)
 - [Normalization](#normalization)
 - [Partitions](#partitions)
@@ -10,12 +11,13 @@
 - [Optimization](#optimization)
 - [Profiling](#profiling)
 
+
 ## [Data Types](https://dev.mysql.com/doc/refman/8.0/en/data-type-overview.html)
   * [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
   * [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
   * [String Type](https://dev.mysql.com/doc/refman/8.0/en/string-type-overview.html)
-  * [JSON](https://dev.mysql.com/doc/refman/8.0/en/json.html)
-    * [How to create index on JSON](https://blog.gslin.org/archives/2016/03/09/6406/mysql-5-7-%E7%9A%84-json%E3%80%81virtual-column-%E4%BB%A5%E5%8F%8A-index/)
+  * [JSON](https://dev.mysql.com/doc/refman/8.0/en/json.html) (from mysql 5.7)
+    * [How to create index on JSON](https://blog.gslin.org/archives/2016/03/09/6406/mysql-5-7-%E7%9A%84-json%E3%80%81virtual-column-%E4%BB%A5%E5%8F%8A-index/) 
       * Use [Virtual Column](https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html)
         * create virtual column on the key street
             ```sql
@@ -26,8 +28,13 @@
             ```sql
             ALTER TABLE test_features ADD KEY `street` (`street`);
             ```
-            
-## [ACID Model](https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html)（InnoDB Engine) (from mysql5.7)
+## Charset
+  * [Never use “utf8”. Use “utf8mb4”](https://medium.com/@adamhooper/in-mysql-never-use-utf8-use-utf8mb4-11761243e434)
+    * MySQL's **utf8mb4** means **UTF-8**.
+    * MySQL's **utf8** means a proprietary character encoding. This encoding can’t encode many Unicode characters.
+
+
+## [ACID Model](https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html)（InnoDB Engine)
   * Atomicity
     * **Transactions** are atomic units of work that can be committed or rolled back. When a transaction makes multiple changes to the database, **either all the changes succeed when the transaction is committed, or all the changes are undone when the transaction is rolled back**.
   * Consistency
