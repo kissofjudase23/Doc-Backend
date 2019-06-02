@@ -35,20 +35,35 @@
 
 
 ## [ACID Model](https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html)（InnoDB Engine)
-  * Atomicity
+  * **A**tomicity
     * **Transactions** are atomic units of work that can be committed or rolled back. When a transaction makes multiple changes to the database, **either all the changes succeed when the transaction is committed, or all the changes are undone when the transaction is rolled back**.
-  * Consistency
+  * **C**onsistency
     * The database remains in a consistent state at all times, if related data is being updated across multiple tables, **queries see either all old values or all new values, not a mix of old and new values**. 
-  * Isolation
+  * **I**solation
     * Transactions are protected (isolated) from each other while they are in progress; they cannot interfere with each other or see each other's uncommitted data. 
     * [Isolation Level](https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html)
       - READ UNCOMMITTED
       - READ COMMITTED
       - REPEATABLE READ
       - SERIALIZABLE
-    * Durability
-      * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to. 
+  * **D**urability
+    * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to. 
        
+## [CAP](https://speakerdeck.com/shlominoach/mysql-and-the-cap-theorem-relevance-and-misconceptions)
+* [atomic] **C**onsistentency:
+  * Once a write is successful on a node, any read on any node must reflect that write or any later write 
+* [high] **A**vailability:
+  * Every non-crashed node must respond to requests in a finite amount of time, it is implied that response must be valid, non-error.
+* **P**artition Tolerant:
+  * The system is able to operate on network partitioning.
+    * **Partition tolerance is considered as a given condition**, since network partitioning can and does take place regardless of a system’s design
+  
+* A distributed data store [web service] **cannot provide more than two** out of the three properties. Better illustrated as:
+  * If the network is good:
+    * you may achieve both **A**vailability and **C**onsisteny (AC)
+  * If the network is **P**artitioned 
+    * you must choose between **A**valibility and **C**onsisteny (AP) or (CP)
+      
 ## Security
   * [SQL Injection](https://en.wikipedia.org/wiki/SQL_injection)
       * SQL injection is a code injection technique, used to attack data-driven applications, in which malicious SQL statements are inserted into an entry field for execution.
