@@ -1,17 +1,35 @@
-# MySQL  
+# MySQL
 
 # Table of Contents
-- [Data Types](#data-types)
-- [Charset](#charset)
-- [ACID Model（InnoDB Engine)](#acid-modelinnodb-engine)
-- [Security](#security)
-- [Normalization](#normalization)
-- [Partitions](#partitions)
-- [Stored Objects](#stored-objects)
-- [Optimization](#optimization)
-- [Profiling](#profiling)
+- [MySQL](#mysql)
+- [Table of Contents](#table-of-contents)
+  - [Design](#design)
+  - [Data Types](#data-types)
+  - [Charset](#charset)
+  - [ACID Model](#acid-model)
+  - [CAP](#cap)
+  - [Security](#security)
+  - [Normalization](#normalization)
+  - [Partitions](#partitions)
+  - [Stored Objects](#stored-objects)
+  - [Optimization](#optimization)
+    - [Indexes](#indexes)
+    - [Clustered Index, Secondary Index (InnoDB)](#clustered-index-secondary-index-innodb)
+      - [Clustered Indexes](#clustered-indexes)
+      - [Secondary Indexes](#secondary-indexes)
+  - [Profiling](#profiling)
 
-
+## Design
+  * Table
+    * [Normalization](#normalization)
+    * [Clustered Indexes](#clustered-indexes) (every thing is **trade off**)
+    * [Secondary Indexes](#secondary-indexes)
+    * [Profiling](#profiling)
+    * [Partitions](#partitions)
+  * APP
+    * Connection Pool
+      * Depend on your process ,thread in your app and capability of your mysql server
+  
 ## [Data Types](https://dev.mysql.com/doc/refman/8.0/en/data-type-overview.html)
   * [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
   * [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
@@ -34,7 +52,7 @@
     * MySQL's **utf8** means a proprietary character encoding. This encoding can’t encode many Unicode characters.
 
 
-## [ACID Model](https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html)（InnoDB Engine)
+## [ACID Model](https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html)
   * **A**tomicity
     * **Transactions** are atomic units of work that can be committed or rolled back. When a transaction makes multiple changes to the database, **either all the changes succeed when the transaction is committed, or all the changes are undone when the transaction is rolled back**.
   * **C**onsistency
@@ -106,37 +124,138 @@
             session.query(MyClass).filter("foo={}".format(getArgs['val']))
             ```
 ## [Normalization](https://medium.com/@habibul.hasan.hira/database-normalization-8cdaddbb7715)
+  * What is Normalization:
+    *  It is a database **design technique** which organizes tables in a manner that **reduces redundancy and dependency** of data.
+    *  It divides larger tables to smaller tables and links them using relationships.
   * 1NF
     * Every column of a table should be atomic. That means you **can not put multiple values in a database column**.
   * 2NF
     * If we have **composite primary key**! every non key field should be fully **depended on both key**. 
   * 3NF
-    * When a database table is in second normal form , there should be no transitive functional dependency. That means any non primary key field should not be depend on other on primary key field.
+    * When a database table is in second normal form , there should be no transitive functional dependency. That means **any non primary key field should not be depend on other** on primary key field.
   * BCNF
   * 4NF
   * 5NF
 
 ## [Partitions](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)
+  * [What is MySQL Partition](http://blog.kenyang.net/2017/06/11/whats-mysql-partition)
+  * Purpose:
+    * Partition Pruning
+      * Make your query faster (select, insert, update, delete)
+    * Purge Data
+      * Drop partition is much fasterd
+    * Note:
+      * App does not aware the partition
+  * Key 
+    * example:
+      ```sql
+      CREATE TABLE t (
+	            id INT, 
+	            create_time DATETIME
+      )    
+      PARTITION BY KEY(create_time)
+      PARTITIONS 10;
+      ```
+    * Note
+      * Deleted by partition does not work
+  * Hash (INT expression)
+    * example:
+      ```sql
+      CREATE TABLE t (
+              id INT, 
+              create_time DATETIME
+      )    
+      PARTITION BY HASH(MONTH(create_time))
+      PARTITIONS 12;
+      ```
+    * Note
+      * Deleted by partition does not work
+  * List (INT expression)
+    * example:
+      ```sql
+      CREATE TABLE t (
+              id INT, 
+              create_time DATETIME
+      )    
+      PARTITION BY LIST(DAYOFWEEK(create_time)) (
+        PARTITION pMon VALUES IN (1),
+        PARTITION pTue VALUES IN (2),
+        PARTITION pWed VALUES IN (3),
+        PARTITION pThu VALUES IN (4)		
+      );
+      ```  
+  * Range (INT expression)
+    * example:
+      ```sql
+      CREATE TABLE t (
+              id INT, 
+              create_time DATETIME
+      )    
+      PARTITION BY RANGE(YEAR(create_time)) (
+        PARTITION p2017 VALUES LESS THAN (2018),
+        PARTITION p2018 VALUES LESS THAN (2019),
+        PARTITION p2019 VALUES LESS THAN (2020)
+      );
+      ```
+
 ## [Stored Objects](https://dev.mysql.com/doc/refman/8.0/en/stored-objects.html)
   * Stored procedure
   * Trigger
   * Event
   * View
+   
 ## [Optimization](https://dev.mysql.com/doc/refman/8.0/en/optimization.html)
-  * Indexes:
-    * Use good indexes
-      * Columns that you are querying (**SELECT, GROUP BY, ORDER BY, JOIN**) could be faster with indices.
-      * Indices are usually represented as **self-balancing B-tree** that keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
-      * Writes could also be slower since the index also needs to be updated.
-       
-    * Use good **composite indexes**:
-      * If certain fields tend to **appear together in queries**, then it’s a good idea to create a composite index on them. 
-      * Similar to single indexes, the cardinality of the fields matters to the effectiveness composite indexes.
-       
-    * Avoid Unnecessary Indexes 
-      * Do not use an index for **low-read** but **high-write** tables. 
-      * Do not use an index if the field has **low cardinality**, the number of distinct values in that field.
-        * Low-cardinality: Refers to columns with few unique values. 
+### Indexes
+  * Use good indexes
+    * Columns that you are querying (**SELECT, GROUP BY, ORDER BY, JOIN**) could be faster with indices.
+    * Indices are usually represented as **self-balancing B-tree** that keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
+    * Writes could also be slower since the index also needs to be updated.
+     
+  * Use good **composite indexes**:
+    * If certain fields tend to **appear together in queries**, then it’s a good idea to create a composite index on them. 
+    * Similar to single indexes, the cardinality of the fields matters to the effectiveness composite indexes.
+     
+  * Avoid Unnecessary Indexes 
+    * Do not use an index for **low-read** but **high-write** tables. 
+    * Do not use an index if the field has **low cardinality**, the number of distinct values in that field.
+      * Low-cardinality: Refers to columns with few unique values. 
+
+### [Clustered Index, Secondary Index](https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e) (InnoDB)
+
+#### Clustered Indexes
+  * Every InnoDB table has a special index called the clustered index where the data for the rows is stored. Typically, the clustered index is synonymous with the primary key. 
+    * When you define a PRIMARY KEY on your table, InnoDB uses it as the clustered index.
+    * If you do not define a PRIMARY KEY for your table, MySQL locates the first UNIQUE index where all the key columns are NOT NULL andInnoDB uses it as the clustered index.
+    * If the table has no PRIMARY KEY or suitable UNIQUE index, InnoDB internally generates a hidden clustered index named GEN_CLUST_INDEX on a synthetic column containing row ID values.
+  * Data Structure
+    * B-Tree
+        *  The data of Node is stored in the same page (physical storage unit) 
+           *  e.g., Data of key5 and key6 are in the page 5.
+        *  Non-Leaf Nodes
+           *  **Clustered Keys** and **Pointers to the Child Nodes**
+        *  Leaf Nodes
+           *  **Clustered Keys**, **Raw Data** and **Pointers to the Sibling Nodes**
+           =*  **List of Leaf Nodes, sorted by the Clustered Key is the Data Structure used to Store this Table**
+        * ![cluster_indexes](images/cluster_indexes.png)
+         
+#### Secondary Indexes
+  * All indexes other than the clustered index are known as secondary indexes.
+  * In InnoDB, **each record in a secondary index contains the primary key columns for the row, as well as the columns specified for the secondary index. InnoDB uses this primary key value to search for the row in the clustered index**.
+    
+  * Data Structure
+    * B-Tree
+      *  The data of Node is stored in the same page (physical storage unit)
+      *  Non-Leaf Nodes
+         *  **Secondary Keys** and **Pointers to the Child Nodes**
+      *  Leaf Nodes
+         *  **Secondary Keys** , **Clustered Keys** and and **Pointers to the Sibling Nodes**
+         *  The List of leaf nodes is the **sorted clustered keys**
+         *  **If the primary key is long, the secondary indexes use more space**, so it is advantageous to have a short primary key.
+         
+      * ![secondary_indexes](images/secondary_indexes.png)        
+      * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
+        * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
+
 
 ## Profiling
   * [explain](https://medium.com/@sj82516/mysql-explain%E5%88%86%E6%9E%90%E8%88%87index%E8%A8%AD%E5%AE%9A%E6%9F%A5%E8%A9%A2%E5%84%AA%E5%8C%96-3e0708206ebf)
