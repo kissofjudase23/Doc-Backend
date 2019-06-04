@@ -237,6 +237,10 @@
            *  **Clustered Keys**, **Raw Data** and **Pointers to the Sibling Nodes**
            =*  **List of Leaf Nodes, sorted by the Clustered Key is the Data Structure used to Store this Table**
         * ![cluster_indexes](images/cluster_indexes.png)
+  * Data Coverage:
+    * All, since list of leaf nodes is the table
+  * Condition Coverage:
+    * Depended on the clustered key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
          
 #### Secondary Indexes
   * All indexes other than the clustered index are known as secondary indexes.
@@ -255,6 +259,10 @@
       * ![secondary_indexes](images/secondary_indexes.png)        
       * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
         * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
+  * Data Coverage:
+    * Fields in secondary key and clustered key (permutation)
+  * Condition Coverage:
+    * Depended on the secondary key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
 
 
 ## Profiling
