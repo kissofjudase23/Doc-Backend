@@ -16,7 +16,7 @@
   - [View](#view)
 - [Optimization](#optimization)
   - [Indexes](#indexes)
-  - [Clustered Index, Secondary Index (InnoDB)](#clustered-index-secondary-index-innodb)
+  - [Clustered Indexes, Secondary Indexes (InnoDB)](#clustered-indexes-secondary-indexes-innodb)
     - [Clustered Indexes](#clustered-indexes)
     - [Secondary Indexes](#secondary-indexes)
 - [Profiling](#profiling)
@@ -229,7 +229,7 @@
     * Do not use an index if the field has **low cardinality**, the number of distinct values in that field.
       * Low-cardinality: Refers to columns with few unique values. 
 
-### [Clustered Index, Secondary Index](https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e) (InnoDB)
+### [Clustered Indexes, Secondary Indexes](https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e) (InnoDB)
 
 #### Clustered Indexes
   * Every InnoDB table has a special index called the clustered index where the data for the rows is stored. Typically, the clustered index is synonymous with the primary key. 
@@ -244,7 +244,7 @@
            *  **Clustered Keys** and **Pointers to the Child Nodes**
         *  Leaf Nodes
            *  **Clustered Keys**, **Raw Data** and **Pointers to the Sibling Nodes**
-           =*  **List of Leaf Nodes, sorted by the Clustered Key is the Data Structure used to Store this Table**
+           *  **List of Leaf Nodes, sorted by the Clustered Key is the Data Structure used to Store this Table**
         * ![cluster_indexes](images/cluster_indexes.png)
   * Data Coverage:
     * All, since list of leaf nodes is the table
