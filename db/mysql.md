@@ -1,23 +1,28 @@
-# MySQL
+ # MySQL
 
-# Table of Contents
-- [MySQL](#mysql)
-- [Table of Contents](#table-of-contents)
-  - [Design](#design)
-  - [Data Types](#data-types)
-  - [Charset](#charset)
-  - [ACID Model](#acid-model)
-  - [CAP](#cap)
-  - [Security](#security)
-  - [Normalization](#normalization)
-  - [Partitions](#partitions)
-  - [Stored Objects](#stored-objects)
-  - [Optimization](#optimization)
-    - [Indexes](#indexes)
-    - [Clustered Index, Secondary Index (InnoDB)](#clustered-index-secondary-index-innodb)
-      - [Clustered Indexes](#clustered-indexes)
-      - [Secondary Indexes](#secondary-indexes)
-  - [Profiling](#profiling)
+ # Table of Contents
+ - [Design](#design)
+- [Data Types](#data-types)
+- [Charset](#charset)
+- [ACID Model](#acid-model)
+- [CAP](#cap)
+- [Security](#security)
+- [Normalization](#normalization)
+- [Partitions](#partitions)
+- [Stored Objects](#stored-objects)
+  - [Stored procedure](#stored-procedure)
+  - [Trigger](#trigger)
+  - [Event](#event)
+  - [View](#view)
+- [Optimization](#optimization)
+  - [Indexes](#indexes)
+  - [Clustered Index, Secondary Index (InnoDB)](#clustered-index-secondary-index-innodb)
+    - [Clustered Indexes](#clustered-indexes)
+    - [Secondary Indexes](#secondary-indexes)
+- [Profiling](#profiling)
+  - [explain](#explain)
+  - [How to find slow query](#how-to-find-slow-query)
+
 
 ## Design
   * Table
@@ -199,10 +204,14 @@
       ```
 
 ## [Stored Objects](https://dev.mysql.com/doc/refman/8.0/en/stored-objects.html)
-  * Stored procedure
-  * Trigger
-  * Event
-  * View
+### Stored procedure
+  * An object created with CREATE FUNCTION and used much like a **built-in function**. You invoke it in an expression and it returns a value during expression evaluation.
+### Trigger
+  * An object created with CREATE TRIGGER that is associated with a table. **A trigger is activated when a particular event occurs for the table**, such as an insert or update.
+### Event
+  * An object created with CREATE EVENT and invoked by the server according to schedule.
+### View
+  * An object created with CREATE VIEW that when referenced produces a result set. A view acts as a virtual table.
    
 ## [Optimization](https://dev.mysql.com/doc/refman/8.0/en/optimization.html)
 ### Indexes
@@ -266,5 +275,5 @@
 
 
 ## Profiling
-  * [explain](https://medium.com/@sj82516/mysql-explain%E5%88%86%E6%9E%90%E8%88%87index%E8%A8%AD%E5%AE%9A%E6%9F%A5%E8%A9%A2%E5%84%AA%E5%8C%96-3e0708206ebf)
-  * How to find slow query
+### [explain](https://medium.com/@sj82516/mysql-explain%E5%88%86%E6%9E%90%E8%88%87index%E8%A8%AD%E5%AE%9A%E6%9F%A5%E8%A9%A2%E5%84%AA%E5%8C%96-3e0708206ebf)
+### How to find slow query
