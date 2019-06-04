@@ -1,14 +1,20 @@
-# Table of Contents
+Table of Contents
 - [FAQ](#faq)
   - [Memcached vs. Redis](#memcached-vs-redis)
 - [Redis](#redis)
-  - [Document](#document)
-  - [Persistence](#persistence)
-  - [Eviction Policies](#eviction-policies)
-  - [Data Types](#data-types)
-  - [Lua Scripting](#lua-scripting)
+- [Document](#document)
+- [Persistence](#persistence)
+- [Eviction Policies](#eviction-policies)
+- [Data Types](#data-types)
+- [Transactions and Atomicity](#transactions-and-atomicity)
+- [Lua Scripting](#lua-scripting)
+- [Performance](#performance)
+  - [Mget](#mget)
   - [Pipelining](#pipelining)
-  - [Design Patterns](#design-patterns)
+- [Design Patterns](#design-patterns)
+  - [Reliable queue](#reliable-queue)
+  - [Pub/Sub](#pubsub)
+  - [Distributed lock (Redlock algorithm)](#distributed-lock-redlock-algorithm)
 
 
 ## FAQ
@@ -17,11 +23,11 @@
 
 ## [Redis](https://redis.io/)
   
-###  Document
-###  [Persistence](https://redis.io/topics/persistence)
+##  Document
+##  [Persistence](https://redis.io/topics/persistence)
   * By default redis persists your data to disk using a mechanism called snapshotting.
    
-### [Eviction Policies](https://redis.io/topics/lru-cache)
+## [Eviction Policies](https://redis.io/topics/lru-cache)
   * noneviction
   * allkeys-lru
   * volatile-lru
@@ -29,7 +35,7 @@
   * volatile-random
   * volatile-ttl 
    
-### [Data Types](https://redis.io/topics/data-types-intro)
+## [Data Types](https://redis.io/topics/data-types-intro)
   * Strings
   * Hashed
   * Lists
@@ -39,12 +45,16 @@
   * Bitmap
   * HyperLoglog
  
-  ### Transactions and Atomicity
+## Transactions and Atomicity
 
-###  [Lua Scripting](https://redis.io/commands/eval)
+##  [Lua Scripting](https://redis.io/commands/eval)
   * You can kind of think of lua scripts like redis's own SQL or stored procedures. It's both more and less than that, but the analogy mostly works.
-  * 
-###  [Pipelining](https://redis.io/topics/pipelining)
+  
+
+## Performance
+### [Mget](https://redis.io/commands/mget)
+  * Returns the values of **all specified keys**
+### [Pipelining](https://redis.io/topics/pipelining)
   * If you have many redis commands you want to execute you can use pipelining to send them to redis all-at-once instead of one-at-a-time.
   * ```python
     import redis
@@ -67,11 +77,11 @@
         print(response)
     ```
 
-### Design Patterns
-  * [Reliable queue](https://redis.io/commands/rpoplpush)
+## Design Patterns
+### [Reliable queue](https://redis.io/commands/rpoplpush)
   * [Circular list](https://redis.io/commands/rpoplpush)
-  * [Pub/Sub](https://redis.io/topics/pubsub)
-    * [example](https://github.com/andymccurdy/redis-py/#publish--subscribe)
-    * [Only one client can get the message.](https://stackoverflow.com/questions/7196306/competing-consumer-on-redis-pub-sub-supported) (not one to many)
-  * [Distributed lock](https://redis.io/topics/distlock) (Redlock algorithm)
-    * [python implementation](https://github.com/SPSCommerce/redlock-py)
+### [Pub/Sub](https://redis.io/topics/pubsub)
+  * [example](https://github.com/andymccurdy/redis-py/#publish--subscribe)
+  * [Only one client can get the message.](https://stackoverflow.com/questions/7196306/competing-consumer-on-redis-pub-sub-supported) (not one to many)
+### [Distributed lock](https://redis.io/topics/distlock) (Redlock algorithm)
+  * [python implementation](https://github.com/SPSCommerce/redlock-py)
