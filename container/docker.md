@@ -42,7 +42,7 @@
 * [dockerfile reference](https://docs.docker.com/engine/reference/builder/)
 * [General guidelines and recommendations](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
   * [Understand build context](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#understand-build-context)
-  * [Exlucde with .dockerignore](Exclude with .dockerignore)
+  * [Exlucde with .dockerignore](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#exclude-with-dockerignore)
   * [Use multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build/)
     ```Dockerfile
     FROM golang:alpine AS build-env
