@@ -28,6 +28,10 @@
 ## FAQ
 ### [Memcached vs. Redis](https://stackoverflow.com/questions/10558465/memcached-vs-redis)
   - Redis is more powerful, more popular, and better supported than memcached. Memcached can only do a small fraction of the things Redis can do. Redis is better even where their features overlap. For anything new, use Redis
+### [Memory Metrics]
+  * [memory usage](https://redis.io/commands/memory-usage)
+  * evicted keys
+    * Number of keys removed due to reaching the maxmemory limit
 
 ## Reference
   * [Redis.io](https://redis.io/)
