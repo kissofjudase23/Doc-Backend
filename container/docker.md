@@ -1,16 +1,19 @@
 # Table of Contents
 - [Overview](#overview)
 - [FAQ](#faq)
+  - [How to minimize docker image size?](#how-to-minimize-docker-image-size)
+  - [CMD & ENTRYPOINT](#cmd--entrypoint)
 - [Image](#image)
   - [Dockerfile](#dockerfile)
 - [Container](#container)
+  - [docker container CLI](#docker-container-cli)
 - [Networking](#networking)
   - [Overview](#overview-1)
   - [Bridge Network](#bridge-network)
   - [Overlay](#overlay)
   - [Host](#host)
   - [Macvian](#macvian)
-  - [Summary:](#summary)
+  - [Summary](#summary)
   - [docker network CLI](#docker-network-cli)
 - [Storage](#storage)
   - [Overview](#overview-2)
@@ -24,13 +27,57 @@
 ![overview](https://docs.docker.com/engine/images/engine-components-flow.png)
 
 ## FAQ
-* How to minimize docker image size?
+### How to minimize docker image size?
   * Build Context
     * [Understand build context](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#understand-build-context)
     * [Exclude with .dockerignore](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#exclude-with-dockerignore)
   * [Use multi-stage builds](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#use-multi-stage-builds)
   * [Minimize the number of layers](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers)
   * [Leverage build cache](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#leverage-build-cache)
+### [CMD](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#cmd) & [ENTRYPOINT](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#entrypoint)
+  * CMD should almost always be used in the form of CMD **["executable", "param1", "param2"…].**
+      * Such as Apache and Rails, you would run something like CMD ["apache2","-DFOREGROUND"].
+  * [CMD and ENTRYPOINT together](http://crosbymichael.com/dockerfile-best-practices.html)
+    * CMD should rarely be used in the manner of CMD **["param", "param"]** in conjunction with ENTRYPOINT
+    * ENTRYPONT:
+      * Provide executable for the container
+    * CMD:
+      * Provide default param for the container
+    * [Rethinkdb](https://rethinkdb.com/) Dockerfile
+      ```Dockerfile
+      FROM ubuntu
+
+      MAINTAINER Michael Crosby <michael@crosbymichael.com>
+
+      RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
+      RUN apt-get update
+      RUN apt-get upgrade -y
+
+      RUN apt-get install -y python-software-properties
+      RUN add-apt-repository ppa:rethinkdb/ppa
+      RUN apt-get update
+      RUN apt-get install -y rethinkdb
+
+      # Rethinkdb process
+      EXPOSE 28015
+      # Rethinkdb admin console
+      EXPOSE 8080
+
+      # Create the /rethinkdb_data dir structure
+      RUN /usr/bin/rethinkdb create
+
+      ENTRYPOINT ["/usr/bin/rethinkdb"]
+
+      CMD ["--help"]
+      ```
+      * Get help
+          ```bash
+          docker run crosbymichael/rethinkdb
+          ```
+      * Start the service
+          ```bash
+          docker run crosbymichael/rethinkdb --bind all
+          ```
 
 ## Image
 * [docker image CLI](https://docs.docker.com/engine/reference/commandline/image/)
@@ -63,10 +110,10 @@
 
 
 ## Container
-* [docker container CLI](https://docs.docker.com/engine/reference/commandline/container/)
-    ```bash
-    $ docker container --help
-    ```
+### [docker container CLI](https://docs.docker.com/engine/reference/commandline/container/)
+```bash
+$ docker container --help
+```
 
 
 ## [Networking](https://docs.docker.com/network/)
@@ -82,7 +129,7 @@
 ### [Overlay](https://docs.docker.com/network/overlay/)
 ### [Host](https://docs.docker.com/network/host/)
 ### [Macvian](https://docs.docker.com/network/macvlan/)
-### Summary:
+### Summary
 * User-defined bridge networks:
   *  When you need multiple containers to communicate **on the same Docker host**.
 * Host networks
