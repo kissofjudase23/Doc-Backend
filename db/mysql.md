@@ -4,8 +4,13 @@
 - [FAQ:](#FAQ)
   - [Find the second largetst value](#Find-the-second-largetst-value)
   - [Query to find nth max value of a column](#Query-to-find-nth-max-value-of-a-column)
+  - [Normalized vs. Denormalized Databases](#Normalized-vs-Denormalized-Databases)
 - [Design](#Design)
 - [Data Types](#Data-Types)
+  - [Numeric Type](#Numeric-Type)
+  - [Date and Time Type](#Date-and-Time-Type)
+  - [String Type](#String-Type)
+  - [JSON (from mysql 5.7)](#JSON-from-mysql-57)
 - [Charset](#Charset)
 - [ACID Model](#ACID-Model)
 - [CAP](#CAP)
@@ -25,6 +30,16 @@
 - [Profiling](#Profiling)
   - [explain](#explain)
   - [How to find slow query](#How-to-find-slow-query)
+- [Join](#Join)
+  - [!sql joins](#sql-joins)
+  - [Cross Join#Cross_join)](#Cross-JoinCross_join)
+  - [(INNTE) JOINR#Inner_join)](#INNTE-JOINRInner_join)
+  - [Left (outer) Join](#Left-outer-Join)
+  - [Right (outer) Join](#Right-outer-Join)
+  - [Full (outer )Join](#Full-outer-Join)
+  - [Self Join](#Self-Join)
+  - [Left Anti Join](#Left-Anti-Join)
+  - [Right Anti Join](#Right-Anti-Join)
 
 
 ## FAQ:
@@ -47,6 +62,13 @@ WHERE col < ( SELECT MAX( col )
     ```sql
     SELECT DOB FROM (SELECT DOB FROM USERS ORDER BY DOB DESC) WHERE ROWID = 6
     ```
+
+### [Normalized vs. Denormalized Databases](https://medium.com/@katedoesdev/normalized-vs-denormalized-databases-210e1d67927d)
+  * Normalized databases are designed to minimize **redundancy**, while denomalized databases are designed to optimized **read time**
+  * For example:
+    * In a traditional normzlied database with data like Courses and Teachers, Courses might contain a column called TeachersID, which is a foreign key to Teacher.
+      * One Benefit of this is that information about the teacher is **only stored once in the databases**.
+      * The drawback is that many common queries will require expensive joins.
 
 ## Design
   * Table
@@ -165,6 +187,7 @@ WHERE col < ( SELECT MAX( col )
   * BCNF
   * 4NF
   * 5NF
+
 
 ## [Partitions](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)
   * [What is MySQL Partition](http://blog.kenyang.net/2017/06/11/whats-mysql-partition)
@@ -301,3 +324,18 @@ WHERE col < ( SELECT MAX( col )
 ## Profiling
 ### [explain](https://medium.com/@sj82516/mysql-explain%E5%88%86%E6%9E%90%E8%88%87index%E8%A8%AD%E5%AE%9A%E6%9F%A5%E8%A9%A2%E5%84%AA%E5%8C%96-3e0708206ebf)
 ### How to find slow query
+
+
+## Join
+* Ref
+  * https://katiekodes.com/sql-every-join/
+### ![sql joins](https://i2.wp.com/blog.aheil.de/wp-content/uploads/2013/06/Foto.jpg)
+### [Cross Join](https://en.wikipedia.org/wiki/Join_(SQL)#Cross_join)
+  * CROSS JOIN returns the **Cartesian product of rows** from tables in the join. In other words, it will produce rows which combine each row from the first table with each row from the second table
+### [(INNTE) JOINR](https://en.wikipedia.org/wiki/Join_(SQL)#Inner_join)
+### Left (outer) Join
+### Right (outer) Join
+### Full (outer )Join
+### Self Join
+### Left Anti Join
+### Right Anti Join
