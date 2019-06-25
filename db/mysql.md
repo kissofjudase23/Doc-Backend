@@ -24,6 +24,26 @@
   - [How to find slow query](#how-to-find-slow-query)
 
 
+## FAQ:
+  * [Find the second largetst value](https://stackoverflow.com/questions/32100/what-is-the-simplest-sql-query-to-find-the-second-largest-value)
+    ```sql
+    ELECT MAX( col )
+    FROM table
+    WHERE col < ( SELECT MAX( col )
+                  FROM table )
+    ```
+  * [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
+    * on MySQL you can do
+
+      ```sql
+      SELECT column FROM table ORDER BY column DESC LIMIT 7,10;
+      ```
+    * Updated as per comment request. WARNING completely untested!
+
+        ```sql
+        SELECT DOB FROM (SELECT DOB FROM USERS ORDER BY DOB DESC) WHERE ROWID = 6
+        ```
+
 ## Design
   * Table
     * [Normalization](#normalization)
@@ -34,13 +54,13 @@
   * APP
     * Connection Pool
       * Depend on your process ,thread in your app and capability of your mysql server
-  
+
 ## [Data Types](https://dev.mysql.com/doc/refman/8.0/en/data-type-overview.html)
   * [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
   * [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
   * [String Type](https://dev.mysql.com/doc/refman/8.0/en/string-type-overview.html)
   * [JSON](https://dev.mysql.com/doc/refman/8.0/en/json.html) (from mysql 5.7)
-    * [How to create index on JSON](https://blog.gslin.org/archives/2016/03/09/6406/mysql-5-7-%E7%9A%84-json%E3%80%81virtual-column-%E4%BB%A5%E5%8F%8A-index/) 
+    * [How to create index on JSON](https://blog.gslin.org/archives/2016/03/09/6406/mysql-5-7-%E7%9A%84-json%E3%80%81virtual-column-%E4%BB%A5%E5%8F%8A-index/)
       * Use [Virtual Column](https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html)
         * create virtual column on the key street
             ```sql
@@ -61,32 +81,32 @@
   * **A**tomicity
     * **Transactions** are atomic units of work that can be committed or rolled back. When a transaction makes multiple changes to the database, **either all the changes succeed when the transaction is committed, or all the changes are undone when the transaction is rolled back**.
   * **C**onsistency
-    * The database remains in a consistent state at all times, if related data is being updated across multiple tables, **queries see either all old values or all new values, not a mix of old and new values**. 
+    * The database remains in a consistent state at all times, if related data is being updated across multiple tables, **queries see either all old values or all new values, not a mix of old and new values**.
   * **I**solation
-    * Transactions are protected (isolated) from each other while they are in progress; they cannot interfere with each other or see each other's uncommitted data. 
+    * Transactions are protected (isolated) from each other while they are in progress; they cannot interfere with each other or see each other's uncommitted data.
     * [Isolation Level](https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html)
       - READ UNCOMMITTED
       - READ COMMITTED
       - REPEATABLE READ
       - SERIALIZABLE
   * **D**urability
-    * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to. 
-       
+    * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to.
+
 ## [CAP](https://speakerdeck.com/shlominoach/mysql-and-the-cap-theorem-relevance-and-misconceptions)
 * [atomic] **C**onsistentency:
-  * Once a write is successful on a node, any read on any node must reflect that write or any later write 
+  * Once a write is successful on a node, any read on any node must reflect that write or any later write
 * [high] **A**vailability:
   * Every non-crashed node must respond to requests in a finite amount of time, it is implied that response must be valid, non-error.
 * **P**artition Tolerant:
   * The system is able to operate on network partitioning.
     * **Partition tolerance is considered as a given condition**, since network partitioning can and does take place regardless of a system’s design
-  
+
 * A distributed data store [web service] **cannot provide more than two** out of the three properties. Better illustrated as:
   * If the network is good:
     * you may achieve both **A**vailability and **C**onsisteny (AC)
-  * If the network is **P**artitioned 
+  * If the network is **P**artitioned
     * you must choose between **A**valibility and **C**onsisteny (AP) or (CP)
-      
+
 ## Security
   * [SQL Injection](https://en.wikipedia.org/wiki/SQL_injection)
       * SQL injection is a code injection technique, used to attack data-driven applications, in which malicious SQL statements are inserted into an entry field for execution.
@@ -151,13 +171,13 @@
       * Drop partition is much fasterd
     * Note:
       * App does not aware the partition
-  * Key 
+  * Key
     * example:
       ```sql
       CREATE TABLE t (
-	            id INT, 
+	            id INT,
 	            create_time DATETIME
-      )    
+      )
       PARTITION BY KEY(create_time)
       PARTITIONS 10;
       ```
@@ -167,9 +187,9 @@
     * example:
       ```sql
       CREATE TABLE t (
-              id INT, 
+              id INT,
               create_time DATETIME
-      )    
+      )
       PARTITION BY HASH(MONTH(create_time))
       PARTITIONS 12;
       ```
@@ -179,23 +199,23 @@
     * example:
       ```sql
       CREATE TABLE t (
-              id INT, 
+              id INT,
               create_time DATETIME
-      )    
+      )
       PARTITION BY LIST(DAYOFWEEK(create_time)) (
         PARTITION pMon VALUES IN (1),
         PARTITION pTue VALUES IN (2),
         PARTITION pWed VALUES IN (3),
-        PARTITION pThu VALUES IN (4)		
+        PARTITION pThu VALUES IN (4)
       );
-      ```  
+      ```
   * Range (INT expression)
     * example:
       ```sql
       CREATE TABLE t (
-              id INT, 
+              id INT,
               create_time DATETIME
-      )    
+      )
       PARTITION BY RANGE(YEAR(create_time)) (
         PARTITION p2017 VALUES LESS THAN (2018),
         PARTITION p2018 VALUES LESS THAN (2019),
@@ -212,33 +232,33 @@
   * An object created with CREATE EVENT and invoked by the server according to schedule.
 ### View
   * An object created with CREATE VIEW that when referenced produces a result set. A view acts as a virtual table.
-   
+
 ## [Optimization](https://dev.mysql.com/doc/refman/8.0/en/optimization.html)
 ### Indexes
   * Use good indexes
     * Columns that you are querying (**SELECT, GROUP BY, ORDER BY, JOIN**) could be faster with indices.
     * Indices are usually represented as **self-balancing B-tree** that keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
     * Writes could also be slower since the index also needs to be updated.
-     
+
   * Use good **composite indexes**:
-    * If certain fields tend to **appear together in queries**, then it’s a good idea to create a composite index on them. 
+    * If certain fields tend to **appear together in queries**, then it’s a good idea to create a composite index on them.
     * Similar to single indexes, the cardinality of the fields matters to the effectiveness composite indexes.
-     
-  * Avoid Unnecessary Indexes 
-    * Do not use an index for **low-read** but **high-write** tables. 
+
+  * Avoid Unnecessary Indexes
+    * Do not use an index for **low-read** but **high-write** tables.
     * Do not use an index if the field has **low cardinality**, the number of distinct values in that field.
-      * Low-cardinality: Refers to columns with few unique values. 
+      * Low-cardinality: Refers to columns with few unique values.
 
 ### [Clustered Indexes, Secondary Indexes](https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e) (InnoDB)
 
 #### Clustered Indexes
-  * Every InnoDB table has a special index called the clustered index where the data for the rows is stored. Typically, the clustered index is synonymous with the primary key. 
+  * Every InnoDB table has a special index called the clustered index where the data for the rows is stored. Typically, the clustered index is synonymous with the primary key.
     * When you define a PRIMARY KEY on your table, InnoDB uses it as the clustered index.
     * If you do not define a PRIMARY KEY for your table, MySQL locates the first UNIQUE index where all the key columns are NOT NULL andInnoDB uses it as the clustered index.
     * If the table has no PRIMARY KEY or suitable UNIQUE index, InnoDB internally generates a hidden clustered index named GEN_CLUST_INDEX on a synthetic column containing row ID values.
   * Data Structure
     * B-Tree
-        *  The data of Node is stored in the same page (physical storage unit) 
+        *  The data of Node is stored in the same page (physical storage unit)
            *  e.g., Data of key5 and key6 are in the page 5.
         *  Non-Leaf Nodes
            *  **Clustered Keys** and **Pointers to the Child Nodes**
@@ -250,11 +270,11 @@
     * All, since list of leaf nodes is the table
   * Condition Coverage:
     * Depended on the clustered key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
-         
+
 #### Secondary Indexes
   * All indexes other than the clustered index are known as secondary indexes.
   * In InnoDB, **each record in a secondary index contains the primary key columns for the row, as well as the columns specified for the secondary index. InnoDB uses this primary key value to search for the row in the clustered index**.
-    
+
   * Data Structure
     * B-Tree
       *  The data of Node is stored in the same page (physical storage unit)
@@ -264,8 +284,8 @@
          *  **Secondary Keys** , **Clustered Keys** and and **Pointers to the Sibling Nodes**
          *  The List of leaf nodes is the **sorted clustered keys**
          *  **If the primary key is long, the secondary indexes use more space**, so it is advantageous to have a short primary key.
-         
-      * ![secondary_indexes](images/secondary_indexes.png)        
+
+      * ![secondary_indexes](images/secondary_indexes.png)
       * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
         * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
   * Data Coverage:
