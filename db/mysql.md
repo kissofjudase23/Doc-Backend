@@ -1,48 +1,52 @@
  # MySQL
 
- # Table of Contents
- - [Design](#design)
-- [Data Types](#data-types)
-- [Charset](#charset)
-- [ACID Model](#acid-model)
-- [CAP](#cap)
-- [Security](#security)
-- [Normalization](#normalization)
-- [Partitions](#partitions)
-- [Stored Objects](#stored-objects)
-  - [Stored procedure](#stored-procedure)
-  - [Trigger](#trigger)
-  - [Event](#event)
-  - [View](#view)
-- [Optimization](#optimization)
-  - [Indexes](#indexes)
-  - [Clustered Indexes, Secondary Indexes (InnoDB)](#clustered-indexes-secondary-indexes-innodb)
-    - [Clustered Indexes](#clustered-indexes)
-    - [Secondary Indexes](#secondary-indexes)
-- [Profiling](#profiling)
+ Table of Contents
+- [FAQ:](#FAQ)
+  - [Find the second largetst value](#Find-the-second-largetst-value)
+  - [Query to find nth max value of a column](#Query-to-find-nth-max-value-of-a-column)
+- [Design](#Design)
+- [Data Types](#Data-Types)
+- [Charset](#Charset)
+- [ACID Model](#ACID-Model)
+- [CAP](#CAP)
+- [Security](#Security)
+- [Normalization](#Normalization)
+- [Partitions](#Partitions)
+- [Stored Objects](#Stored-Objects)
+  - [Stored procedure](#Stored-procedure)
+  - [Trigger](#Trigger)
+  - [Event](#Event)
+  - [View](#View)
+- [Optimization](#Optimization)
+  - [Indexes](#Indexes)
+  - [Clustered Indexes, Secondary Indexes (InnoDB)](#Clustered-Indexes-Secondary-Indexes-InnoDB)
+    - [Clustered Indexes](#Clustered-Indexes)
+    - [Secondary Indexes](#Secondary-Indexes)
+- [Profiling](#Profiling)
   - [explain](#explain)
-  - [How to find slow query](#how-to-find-slow-query)
+  - [How to find slow query](#How-to-find-slow-query)
 
 
 ## FAQ:
-  * [Find the second largetst value](https://stackoverflow.com/questions/32100/what-is-the-simplest-sql-query-to-find-the-second-largest-value)
+### [Find the second largetst value](https://stackoverflow.com/questions/32100/what-is-the-simplest-sql-query-to-find-the-second-largest-value)
+
+```sql
+ELECT MAX( col )
+FROM table
+WHERE col < ( SELECT MAX( col )
+              FROM table )
+```
+### [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
+  * on MySQL you can do
+
     ```sql
-    ELECT MAX( col )
-    FROM table
-    WHERE col < ( SELECT MAX( col )
-                  FROM table )
+    SELECT column FROM table ORDER BY column DESC LIMIT 7,10;
     ```
-  * [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
-    * on MySQL you can do
+  * Updated as per comment request. WARNING completely untested!
 
-      ```sql
-      SELECT column FROM table ORDER BY column DESC LIMIT 7,10;
-      ```
-    * Updated as per comment request. WARNING completely untested!
-
-        ```sql
-        SELECT DOB FROM (SELECT DOB FROM USERS ORDER BY DOB DESC) WHERE ROWID = 6
-        ```
+    ```sql
+    SELECT DOB FROM (SELECT DOB FROM USERS ORDER BY DOB DESC) WHERE ROWID = 6
+    ```
 
 ## Design
   * Table
@@ -56,21 +60,21 @@
       * Depend on your process ,thread in your app and capability of your mysql server
 
 ## [Data Types](https://dev.mysql.com/doc/refman/8.0/en/data-type-overview.html)
-  * [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
-  * [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
-  * [String Type](https://dev.mysql.com/doc/refman/8.0/en/string-type-overview.html)
-  * [JSON](https://dev.mysql.com/doc/refman/8.0/en/json.html) (from mysql 5.7)
-    * [How to create index on JSON](https://blog.gslin.org/archives/2016/03/09/6406/mysql-5-7-%E7%9A%84-json%E3%80%81virtual-column-%E4%BB%A5%E5%8F%8A-index/)
-      * Use [Virtual Column](https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html)
-        * create virtual column on the key street
-            ```sql
-            ALTER TABLE test_features ADD COLUMN street VARCHAR(30) GENERATED ALWAYS AS (json_unquote(json_extract(`feature`,'$.properties.STREET'))) VIRTUAL;
-            ```
-        * create an index on it- [MySQL](#mysql)
+### [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
+### [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
+### [String Type](https://dev.mysql.com/doc/refman/8.0/en/string-type-overview.html)
+### [JSON](https://dev.mysql.com/doc/refman/8.0/en/json.html) (from mysql 5.7)
+  * [How to create index on JSON](https://blog.gslin.org/archives/2016/03/09/6406/mysql-5-7-%E7%9A%84-json%E3%80%81virtual-column-%E4%BB%A5%E5%8F%8A-index/)
+    * Use [Virtual Column](https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html)
+      * create virtual column on the key street
+          ```sql
+          ALTER TABLE test_features ADD COLUMN street VARCHAR(30) GENERATED ALWAYS AS (json_unquote(json_extract(`feature`,'$.properties.STREET'))) VIRTUAL;
+          ```
+      * create an index on it- [MySQL](#mysql)
 
-            ```sql
-            ALTER TABLE test_features ADD KEY `street` (`street`);
-            ```
+          ```sql
+          ALTER TABLE test_features ADD KEY `street` (`street`);
+          ```
 ## Charset
   * [Never use “utf8”. Use “utf8mb4”](https://medium.com/@adamhooper/in-mysql-never-use-utf8-use-utf8mb4-11761243e434)
     * MySQL's **utf8mb4** means **UTF-8**.
