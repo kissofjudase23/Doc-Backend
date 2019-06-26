@@ -16,6 +16,7 @@
 - [CAP](#CAP)
 - [Security](#Security)
 - [Normalization](#Normalization)
+- [Denormalization](#Denormalization)
 - [Partitions](#Partitions)
 - [Stored Objects](#Stored-Objects)
   - [Stored procedure](#Stored-procedure)
@@ -31,12 +32,12 @@
   - [explain](#explain)
   - [How to find slow query](#How-to-find-slow-query)
 - [Join](#Join)
-  - [!sql joins](#sql-joins)
-  - [Cross Join#Cross_join)](#Cross-JoinCross_join)
-  - [(INNTE) JOINR#Inner_join)](#INNTE-JOINRInner_join)
-  - [Left (outer) Join](#Left-outer-Join)
-  - [Right (outer) Join](#Right-outer-Join)
-  - [Full (outer )Join](#Full-outer-Join)
+  - [Cross Join](#Cross-Join)
+  - [(Inner) Join](#Inner-Join)
+  - [Outer Join](#Outer-Join)
+    - [Left (outer) Join](#Left-outer-Join)
+    - [Right (outer) Join](#Right-outer-Join)
+    - [FULL (outer )](#FULL-outer-)
   - [Self Join](#Self-Join)
   - [Left Anti Join](#Left-Anti-Join)
   - [Right Anti Join](#Right-Anti-Join)
@@ -188,6 +189,17 @@ WHERE col < ( SELECT MAX( col )
   * 4NF
   * 5NF
 
+## Denormalization
+  * A database optimization technique in which we add redundant data to one or more tables, this can help us avoid costly joins in a relational database.
+  * Pros
+    * Retrieving data is faster since we do fewer joins.
+    * Queries to retireve can be simpler, since we need to look at fewer tables.
+  * Cons
+    * Updates and Inserts are more expensive.
+    * Making Update and Insert Code harder to write.
+    * Data may be inconsistent.
+    * Data redundancy necessitates more storage.
+
 
 ## [Partitions](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)
   * [What is MySQL Partition](http://blog.kenyang.net/2017/06/11/whats-mysql-partition)
@@ -329,13 +341,27 @@ WHERE col < ( SELECT MAX( col )
 ## Join
 * Ref
   * https://katiekodes.com/sql-every-join/
-### ![sql joins](https://i2.wp.com/blog.aheil.de/wp-content/uploads/2013/06/Foto.jpg)
-### [Cross Join](https://en.wikipedia.org/wiki/Join_(SQL)#Cross_join)
+* ![sql joins](https://i2.wp.com/blog.aheil.de/wp-content/uploads/2013/06/Foto.jpg)
+
+### Cross Join
   * CROSS JOIN returns the **Cartesian product of rows** from tables in the join. In other words, it will produce rows which combine each row from the first table with each row from the second table
-### [(INNTE) JOINR](https://en.wikipedia.org/wiki/Join_(SQL)#Inner_join)
-### Left (outer) Join
-### Right (outer) Join
-### Full (outer )Join
+
+### (Inner) Join
+  * The result set would contain only the data **where the criteria match**.
+
+### Outer Join
+  * The result set would contain the results of **INNER JOIN**, but it may also contain **some records that have no matching record** in the other table.
+
+#### Left (outer) Join
+  * The result set will **contain all records from the left table**.
+  * If **no matching recrods were found in the right table**, then **its fields will contain the NULL vales**.
+
+#### Right (outer) Join
+  * The opposite of Left JOIN.
+  * A LEFT JOIN B is equivalent .to B RIGHT JOIN A
+#### FULL (outer )
+  * The type of join **combines the results of LEFT and RIGHT JOINS**. All records from both tables will be included in the result set. If no matching record was found, then the corresponding result fields will have a NULL value.
+
 ### Self Join
 ### Left Anti Join
 ### Right Anti Join
