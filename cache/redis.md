@@ -61,18 +61,42 @@
 ### Sorted Sets
 ### Geo
 ### Bitmap
-### HyperLoglog
+### [HyperLoglog](https://thoughtbot.com/blog/hyperloglogs-in-redis)
 
 
 ## [Transactions](https://redis.io/topics/transactions)
-  * MULTI, EXEC, DISCARD and WATCH are the foundation of transactions in Redis. They allow the execution of a group of commands in a single step, with two important guarantees:
-  * Atomicity
-    * Either **all of the commands or none are processed**, so a Redis transaction is also atomic.
-  * Isolation
-    * All the commands in a transaction are serialized and executed sequentially.
-    * It can never happen that a request issued by another client is served in the middle of the execution of a Redis transaction. **This guarantees that the commands are executed as a single isolated operation**.
-  * **Does not support roll back**
-    * Redis commands can fail during a transaction, **but still Redis will execute the rest of the transaction instead of rolling back**.
+  * **MULTI**, **EXEC**, **DISCARD** and **WATCH** are the foundation of transactions in Redis.
+    * MULTI and EXEC
+        ```redis
+        MULTI
+
+        INCR foo
+        INCR bar
+        ...
+
+        EXEC
+        ```
+    * DISCARD
+      * Used to abort a transaction.
+    * WATCH
+      * It is a command that will make the EXEC conditional: we are asking Redis to perform the transaction only if none of the WATCHed keys were modified.
+      ```redis
+      WATCH mykey
+      val = GET mykey
+      val = val + 1
+
+      MULTI
+      SET mykey $val
+      EXEC
+      ```
+  * They allow the execution of a group of commands in a single step, with two important guarantees:
+    * **Atomicity**
+      * Either **all of the commands or none are processed**, so a Redis transaction is also atomic.
+    * **Isolation**
+      * All the commands in a transaction are serialized and executed sequentially.
+      * It can never happen that a request issued by another client is served in the middle of the execution of a Redis transaction. **This guarantees that the commands are executed as a single isolated operation**.
+    * **Does not support roll back**
+      * Redis commands can fail during a transaction, **but still Redis will execute the rest of the transaction instead of rolling back**.
 * [What are equivalent functions of MULTI and EXEC commands in redis-py?](https://stackoverflow.com/questions/31769163/what-are-equivalent-functions-of-multi-and-exec-commands-in-redis-py)
   * In redis-py MULTI and EXEC can only be used through a [Pipeline](https://redis-py.readthedocs.io/en/latest/index.html?redis.Redis.pipeline#redis.Redis.pipeline) object.
     * ```python
