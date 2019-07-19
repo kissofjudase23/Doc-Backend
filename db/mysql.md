@@ -34,10 +34,9 @@
 - [Join](#Join)
   - [Cross Join](#Cross-Join)
   - [(Inner) Join](#Inner-Join)
-  - [Outer Join](#Outer-Join)
-    - [Left (outer) Join](#Left-outer-Join)
-    - [Right (outer) Join](#Right-outer-Join)
-    - [FULL (outer )](#FULL-outer-)
+  - [Left (outer) Join](#Left-outer-Join)
+  - [Right (outer) Join](#Right-outer-Join)
+  - [FULL (outer)](#FULL-outer)
   - [Self Join](#Self-Join)
   - [Left Anti Join](#Left-Anti-Join)
   - [Right Anti Join](#Right-Anti-Join)
@@ -54,18 +53,16 @@ WHERE col < ( SELECT MAX( col )
 ```
 ### [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
   * on MySQL you can do
-
     ```sql
     SELECT column FROM table ORDER BY column DESC LIMIT 7,10;
     ```
   * Updated as per comment request. WARNING completely untested!
-
     ```sql
     SELECT DOB FROM (SELECT DOB FROM USERS ORDER BY DOB DESC) WHERE ROWID = 6
     ```
 
 ### [Normalized vs. Denormalized Databases](https://medium.com/@katedoesdev/normalized-vs-denormalized-databases-210e1d67927d)
-  * Normalized databases are designed to minimize **redundancy**, while denomalized databases are designed to optimized **read time**
+  * **Normalized databases** are designed to minimize **redundancy**, while **denomalized databases** are designed to optimized **read time**.
   * For example:
     * In a traditional normzlied database with data like Courses and Teachers, Courses might contain a column called TeachersID, which is a foreign key to Teacher.
       * One Benefit of this is that information about the teacher is **only stored once in the databases**.
@@ -74,13 +71,17 @@ WHERE col < ( SELECT MAX( col )
 ## Design
   * Table
     * [Normalization](#normalization)
-    * [Clustered Indexes](#clustered-indexes) (every thing is **trade off**)
+    * [Clustered Indexes](#clustered-indexes)
+      * Unsigned big int incremental
+        * Faster when insert
+        * Duplicated issue
+      * User defined (unique or composite fields)
     * [Secondary Indexes](#secondary-indexes)
     * [Profiling](#profiling)
     * [Partitions](#partitions)
   * APP
     * Connection Pool
-      * Depend on your process ,thread in your app and capability of your mysql server
+      * Depend on your processes, threads in your app and capability of your mysql server.
 
 ## [Data Types](https://dev.mysql.com/doc/refman/8.0/en/data-type-overview.html)
 ### [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
@@ -89,12 +90,11 @@ WHERE col < ( SELECT MAX( col )
 ### [JSON](https://dev.mysql.com/doc/refman/8.0/en/json.html) (from mysql 5.7)
   * [How to create index on JSON](https://blog.gslin.org/archives/2016/03/09/6406/mysql-5-7-%E7%9A%84-json%E3%80%81virtual-column-%E4%BB%A5%E5%8F%8A-index/)
     * Use [Virtual Column](https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html)
-      * create virtual column on the key street
+      * create **virtual column** on the key street
           ```sql
           ALTER TABLE test_features ADD COLUMN street VARCHAR(30) GENERATED ALWAYS AS (json_unquote(json_extract(`feature`,'$.properties.STREET'))) VIRTUAL;
           ```
       * create an index on it- [MySQL](#mysql)
-
           ```sql
           ALTER TABLE test_features ADD KEY `street` (`street`);
           ```
@@ -106,9 +106,11 @@ WHERE col < ( SELECT MAX( col )
 
 ## [ACID Model](https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html)
   * **A**tomicity
-    * **Transactions** are atomic units of work that can be committed or rolled back. When a transaction makes multiple changes to the database, **either all the changes succeed when the transaction is committed, or all the changes are undone when the transaction is rolled back**.
+    * **Transactions** are atomic units of work that can be committed or rolled back.
+    * When a transaction makes multiple changes to the database, **either all the changes succeed when the transaction is committed, or all the changes are undone when the transaction is rolled back**.
   * **C**onsistency
-    * The database remains in a consistent state at all times, if related data is being updated across multiple tables, **queries see either all old values or all new values, not a mix of old and new values**.
+    * The database remains in a **consistent state** at all times.
+    * If related data is being updated across multiple tables, **queries see either all old values or all new values, not a mix of old and new values**.
   * **I**solation
     * Transactions are protected (isolated) from each other while they are in progress; they cannot interfere with each other or see each other's uncommitted data.
     * [Isolation Level](https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html)
@@ -120,9 +122,9 @@ WHERE col < ( SELECT MAX( col )
     * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to.
 
 ## [CAP](https://speakerdeck.com/shlominoach/mysql-and-the-cap-theorem-relevance-and-misconceptions)
-* [atomic] **C**onsistentency:
+* [Atomic] **C**onsistentency:
   * Once a write is successful on a node, any read on any node must reflect that write or any later write
-* [high] **A**vailability:
+* [High] **A**vailability:
   * Every non-crashed node must respond to requests in a finite amount of time, it is implied that response must be valid, non-error.
 * **P**artition Tolerant:
   * The system is able to operate on network partitioning.
@@ -130,9 +132,9 @@ WHERE col < ( SELECT MAX( col )
 
 * A distributed data store [web service] **cannot provide more than two** out of the three properties. Better illustrated as:
   * If the network is good:
-    * you may achieve both **A**vailability and **C**onsisteny (AC)
+    * You may achieve both **A**vailability and **C**onsisteny (AC)
   * If the network is **P**artitioned
-    * you must choose between **A**valibility and **C**onsisteny (AP) or (CP)
+    * You must choose between **A**valibility and **C**onsisteny (AP) or (CP)
 
 ## Security
   * [SQL Injection](https://en.wikipedia.org/wiki/SQL_injection)
@@ -140,14 +142,13 @@ WHERE col < ( SELECT MAX( col )
         ```sql
         SELECT * FROM users WHERE name = '' OR '1'='1';
         ```
-    * solution:
-      * Prepare statement, Parameter Binding
-        * If you have any "special" characters (such as semicolons or apostrophes) in your data, they will be automatically quoted for you by the SQLEngine object, so you don't have to worry about quoting.
+    * Solution:
+      * **Prepare statement**, **Parameter Binding**
+        * If you have any "special" characters (such as semicolons or apostrophes) in your data, they will be **automatically quoted** for you by the SQLEngine object, so you don't have to worry about quoting.
           ```python
-          #!/bin/env python
-          #-*- encoding: utf-8 -*-
           import time
           from sqlalchemy import text
+
           def insert_into_xxx_tbl(user_id, user_name, nickname):
               insert_params_dict = {
                   'user_id': user_id,
@@ -176,41 +177,42 @@ WHERE col < ( SELECT MAX( col )
             session.query(MyClass).filter("foo={}".format(getArgs['val']))
             ```
 ## [Normalization](https://medium.com/@habibul.hasan.hira/database-normalization-8cdaddbb7715)
-  * What is Normalization:
+  * Definition:
     *  It is a database **design technique** which organizes tables in a manner that **reduces redundancy and dependency** of data.
     *  It divides larger tables to smaller tables and links them using relationships.
-  * 1NF
+  * **1NF**
     * Every column of a table should be atomic. That means you **can not put multiple values in a database column**.
-  * 2NF
+  * **2NF**
     * If we have **composite primary key**! every non key field should be fully **depended on both key**. 
-  * 3NF
-    * When a database table is in second normal form , there should be no transitive functional dependency. That means **any non primary key field should not be depend on other** on primary key field.
-  * BCNF
-  * 4NF
-  * 5NF
+  * **3NF**
+    * When a database table is in second normal form, there should be no transitive functional dependency. That means **any non primary key field should not be depend on other** on primary key field.
+  * **BCNF**
+  * **4NF**
+  * **5NF**
 
 ## Denormalization
-  * A database optimization technique in which we add redundant data to one or more tables, this can help us avoid costly joins in a relational database.
+  * Definition:
+    * A database optimization technique in which we **add redundant data to one or more tables**, this can help us avoid costly joins in a relational database.
   * Pros
-    * Retrieving data is faster since we do fewer joins.
+    * **Retrieving data is faster since we do fewer joins.**
     * Queries to retireve can be simpler, since we need to look at fewer tables.
   * Cons
     * Updates and Inserts are more expensive.
     * Making Update and Insert Code harder to write.
-    * Data may be inconsistent.
-    * Data redundancy necessitates more storage.
+    * **Data may be inconsistent.**
+    * **Data redundancy necessitates more storage.**
 
 
 ## [Partitions](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)
   * [What is MySQL Partition](http://blog.kenyang.net/2017/06/11/whats-mysql-partition)
   * Purpose:
-    * Partition Pruning
-      * Make your query faster (select, insert, update, delete)
-    * Purge Data
+    * **Partition Pruning**
+      * Make your queries faster (select, insert, update, delete)
+    * **Purge Data**
       * Drop partition is much fasterd
     * Note:
       * App does not aware the partition
-  * Key
+  * **Key**
     * example:
       ```sql
       CREATE TABLE t (
@@ -222,7 +224,7 @@ WHERE col < ( SELECT MAX( col )
       ```
     * Note
       * Deleted by partition does not work
-  * Hash (INT expression)
+  * **Hash** (INT expression)
     * example:
       ```sql
       CREATE TABLE t (
@@ -234,7 +236,7 @@ WHERE col < ( SELECT MAX( col )
       ```
     * Note
       * Deleted by partition does not work
-  * List (INT expression)
+  * **List** (INT expression)
     * example:
       ```sql
       CREATE TABLE t (
@@ -248,7 +250,7 @@ WHERE col < ( SELECT MAX( col )
         PARTITION pThu VALUES IN (4)
       );
       ```
-  * Range (INT expression)
+  * **Range** (INT expression)
     * example:
       ```sql
       CREATE TABLE t (
@@ -264,11 +266,11 @@ WHERE col < ( SELECT MAX( col )
 
 ## [Stored Objects](https://dev.mysql.com/doc/refman/8.0/en/stored-objects.html)
 ### Stored procedure
-  * An object created with CREATE FUNCTION and used much like a **built-in function**. You invoke it in an expression and it returns a value during expression evaluation.
+  * An object created with CREATE FUNCTION and used much **like a built-in function**. You invoke it in an expression and it returns a value during expression evaluation.
 ### Trigger
   * An object created with CREATE TRIGGER that is associated with a table. **A trigger is activated when a particular event occurs for the table**, such as an insert or update.
 ### Event
-  * An object created with CREATE EVENT and invoked by the server according to schedule.
+  * An object created with CREATE EVENT and invoked by the server according to **schedule**.
 ### View
   * An object created with CREATE VIEW that when referenced produces a result set. A view acts as a virtual table.
 
@@ -285,28 +287,26 @@ WHERE col < ( SELECT MAX( col )
 
   * Avoid Unnecessary Indexes
     * Do not use an index for **low-read** but **high-write** tables.
-    * Do not use an index if the field has **low cardinality**, the number of distinct values in that field.
-      * Low-cardinality: Refers to columns with few unique values.
+    * Do not use an index if the field has **low cardinality**.
+      * Low-cardinality: refers to columns with few unique values.
 
 ### [Clustered Indexes, Secondary Indexes](https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e) (InnoDB)
 
 #### Clustered Indexes
-  * Every InnoDB table has a special index called the clustered index where the data for the rows is stored. Typically, the clustered index is synonymous with the primary key.
+  * Every InnoDB table has a special index called the clustered index where the data for the rows is stored. **Typically, the clustered index is synonymous with the primary key**.
     * When you define a PRIMARY KEY on your table, InnoDB uses it as the clustered index.
     * If you do not define a PRIMARY KEY for your table, MySQL locates the first UNIQUE index where all the key columns are NOT NULL andInnoDB uses it as the clustered index.
     * If the table has no PRIMARY KEY or suitable UNIQUE index, InnoDB internally generates a hidden clustered index named GEN_CLUST_INDEX on a synthetic column containing row ID values.
   * Data Structure
-    * B-Tree
-        *  The data of Node is stored in the same page (physical storage unit)
-           *  e.g., Data of key5 and key6 are in the page 5.
-        *  Non-Leaf Nodes
+    * **B-Tree**
+        * The data in a Node is in the same page (physical unit).
+        * Non-Leaf Nodes
            *  **Clustered Keys** and **Pointers to the Child Nodes**
-        *  Leaf Nodes
+        * Leaf Nodes
            *  **Clustered Keys**, **Raw Data** and **Pointers to the Sibling Nodes**
-           *  **List of Leaf Nodes, sorted by the Clustered Key is the Data Structure used to Store this Table**
         * ![cluster_indexes](images/cluster_indexes.png)
   * Data Coverage:
-    * All, since list of leaf nodes is the table
+    * All, since list of leaf nodes is the table.
   * Condition Coverage:
     * Depended on the clustered key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
 
@@ -316,8 +316,8 @@ WHERE col < ( SELECT MAX( col )
 
   * Data Structure
     * B-Tree
-      *  The data of Node is stored in the same page (physical storage unit)
-      *  Non-Leaf Nodes
+      * The data in a Node is in the same page (physical unit).
+      * Non-Leaf Nodes
          *  **Secondary Keys** and **Pointers to the Child Nodes**
       *  Leaf Nodes
          *  **Secondary Keys** , **Clustered Keys** and and **Pointers to the Sibling Nodes**
@@ -328,7 +328,7 @@ WHERE col < ( SELECT MAX( col )
       * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
         * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
   * Data Coverage:
-    * Fields in secondary key and clustered key (permutation)
+    * Fields in **secondary key and clustered key** (permutation)
   * Condition Coverage:
     * Depended on the secondary key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
 
@@ -347,19 +347,17 @@ WHERE col < ( SELECT MAX( col )
   * CROSS JOIN returns the **Cartesian product of rows** from tables in the join. In other words, it will produce rows which combine each row from the first table with each row from the second table
 
 ### (Inner) Join
-  * The result set would contain only the data **where the criteria match**.
+  * The result set would contain **only the data where the criteria match**.
 
-### Outer Join
-  * The result set would contain the results of **INNER JOIN**, but it may also contain **some records that have no matching record** in the other table.
-
-#### Left (outer) Join
+### Left (outer) Join
   * The result set will **contain all records from the left table**.
   * If **no matching recrods were found in the right table**, then **its fields will contain the NULL vales**.
 
-#### Right (outer) Join
+### Right (outer) Join
   * The opposite of Left JOIN.
-  * A LEFT JOIN B is equivalent .to B RIGHT JOIN A
-#### FULL (outer )
+  * A LEFT JOIN B is equivalent to B RIGHT JOIN A
+
+### FULL (outer)
   * The type of join **combines the results of LEFT and RIGHT JOINS**. All records from both tables will be included in the result set. If no matching record was found, then the corresponding result fields will have a NULL value.
 
 ### Self Join
