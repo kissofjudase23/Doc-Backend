@@ -1,45 +1,46 @@
  # MySQL
 
  Table of Contents
-- [FAQ:](#FAQ)
-  - [Find the second largetst value](#Find-the-second-largetst-value)
-  - [Query to find nth max value of a column](#Query-to-find-nth-max-value-of-a-column)
-  - [Normalized vs. Denormalized Databases](#Normalized-vs-Denormalized-Databases)
-- [Design](#Design)
-- [Data Types](#Data-Types)
-  - [Numeric Type](#Numeric-Type)
-  - [Date and Time Type](#Date-and-Time-Type)
-  - [String Type](#String-Type)
-  - [JSON (from mysql 5.7)](#JSON-from-mysql-57)
-- [Charset](#Charset)
-- [ACID Model](#ACID-Model)
-- [CAP](#CAP)
-- [Security](#Security)
-- [Normalization](#Normalization)
-- [Denormalization](#Denormalization)
-- [Partitions](#Partitions)
-- [Stored Objects](#Stored-Objects)
-  - [Stored procedure](#Stored-procedure)
-  - [Trigger](#Trigger)
-  - [Event](#Event)
-  - [View](#View)
-- [Optimization](#Optimization)
-  - [Indexes](#Indexes)
-  - [Clustered Indexes, Secondary Indexes (InnoDB)](#Clustered-Indexes-Secondary-Indexes-InnoDB)
-    - [Clustered Indexes](#Clustered-Indexes)
-    - [Secondary Indexes](#Secondary-Indexes)
-- [Profiling](#Profiling)
+- [FAQ:](#faq)
+  - [Find the second largetst value](#find-the-second-largetst-value)
+  - [Query to find nth max value of a column](#query-to-find-nth-max-value-of-a-column)
+  - [Normalized vs. Denormalized Databases](#normalized-vs-denormalized-databases)
+- [Design](#design)
+- [Data Types](#data-types)
+  - [Numeric Type](#numeric-type)
+  - [Date and Time Type](#date-and-time-type)
+  - [String Type](#string-type)
+  - [JSON (from mysql 5.7)](#json-from-mysql-57)
+- [Charset](#charset)
+- [ACID Model](#acid-model)
+- [CAP](#cap)
+- [Security](#security)
+- [Normalization](#normalization)
+- [Denormalization](#denormalization)
+- [Partitions](#partitions)
+- [Sharding](#sharding)
+- [Stored Objects](#stored-objects)
+  - [Stored procedure](#stored-procedure)
+  - [Trigger](#trigger)
+  - [Event](#event)
+  - [View](#view)
+- [Optimization](#optimization)
+  - [Indexes](#indexes)
+  - [Clustered Indexes, Secondary Indexes (InnoDB)](#clustered-indexes-secondary-indexes-innodb)
+    - [Clustered Indexes](#clustered-indexes)
+    - [Secondary Indexes](#secondary-indexes)
+- [Profiling](#profiling)
   - [explain](#explain)
-  - [How to find slow query](#How-to-find-slow-query)
-- [Join](#Join)
-  - [Cross Join](#Cross-Join)
-  - [(Inner) Join](#Inner-Join)
-  - [Left (outer) Join](#Left-outer-Join)
-  - [Right (outer) Join](#Right-outer-Join)
-  - [FULL (outer)](#FULL-outer)
-  - [Self Join](#Self-Join)
-  - [Left Anti Join](#Left-Anti-Join)
-  - [Right Anti Join](#Right-Anti-Join)
+  - [How to find slow query](#how-to-find-slow-query)
+- [Join](#join)
+  - [Cross Join](#cross-join)
+  - [(Inner) Join](#inner-join)
+  - [Left (outer) Join](#left-outer-join)
+  - [Right (outer) Join](#right-outer-join)
+  - [FULL (outer)](#full-outer)
+  - [Self Join](#self-join)
+  - [Left Anti Join](#left-anti-join)
+  - [Right Anti Join](#right-anti-join)
 
 
 ## FAQ:
@@ -263,6 +264,25 @@ WHERE col < ( SELECT MAX( col )
         PARTITION p2019 VALUES LESS THAN (2020)
       );
       ```
+
+
+
+## [Sharding](https://medium.com/system-design-blog/database-sharding-69f3f4bd96db)
+  * Approach 1 calculate shard key in the app layers
+  * Approach 2 use [mysql cluster](https://dev.mysql.com/doc/refman/8.0/en/mysql-cluster-overview.html)
+    * ![overview](https://dev.mysql.com/doc/refman/8.0/en/images/cluster-components-1.png)
+  * Advantages:
+    * Faster queries response.
+    * More write bacndwidth
+    * Scaling out
+  * Drawbacks:
+    * Adds complexity in the system.
+    * Rebalancing data.
+    * Joining data from multiple shards.
+  * Sharding Architecture:
+    * Hash Based
+    * Range Based
+    * Directory Based
 
 ## [Stored Objects](https://dev.mysql.com/doc/refman/8.0/en/stored-objects.html)
 ### Stored procedure
