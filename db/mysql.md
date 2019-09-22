@@ -2,8 +2,6 @@
 
  Table of Contents
 - [FAQ:](#faq)
-  - [Find the second largetst value](#find-the-second-largetst-value)
-  - [Query to find nth max value of a column](#query-to-find-nth-max-value-of-a-column)
   - [Normalized vs. Denormalized Databases](#normalized-vs-denormalized-databases)
 - [Design](#design)
 - [Data Types](#data-types)
@@ -30,29 +28,19 @@
     - [Clustered Indexes](#clustered-indexes)
     - [Secondary Indexes](#secondary-indexes)
 - [Profiling](#profiling)
-  - [explain](#explain)
-  - [How to find slow query](#how-to-find-slow-query)
 - [Join](#join)
-  - [Cross Join](#cross-join)
-  - [(Inner) Join](#inner-join)
-  - [Left (outer) Join](#left-outer-join)
-  - [Right (outer) Join](#right-outer-join)
-  - [FULL (outer)](#full-outer)
-  - [Self Join](#self-join)
-  - [Left Anti Join](#left-anti-join)
-  - [Right Anti Join](#right-anti-join)
+- [Example:](#example)
 
 
 ## FAQ:
-### [Find the second largetst value](https://stackoverflow.com/questions/32100/what-is-the-simplest-sql-query-to-find-the-second-largest-value)
-
-```sql
-ELECT MAX( col )
-FROM table
-WHERE col < ( SELECT MAX( col )
-              FROM table )
-```
-### [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
+* [Find the second largetst value](https://stackoverflow.com/questions/32100/what-is-the-simplest-sql-query-to-find-the-second-largest-value)
+  ```sql
+  SELECT MAX( col )
+  FROM table
+  WHERE col < ( SELECT MAX( col )
+                FROM table )
+  ```
+* [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
   * on MySQL you can do
     ```sql
     SELECT column FROM table ORDER BY column DESC LIMIT 7,10;
@@ -309,6 +297,7 @@ WHERE col < ( SELECT MAX( col )
     * Do not use an index for **low-read** but **high-write** tables.
     * Do not use an index if the field has **low cardinality**.
       * Low-cardinality: refers to columns with few unique values.
+      * [Why low cardinality indexes negatively impact performance](https://www.ibm.com/developerworks/data/library/techarticle/dm-1309cardinal/index.html])
 
 ### [Clustered Indexes, Secondary Indexes](https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e) (InnoDB)
 
@@ -339,13 +328,14 @@ WHERE col < ( SELECT MAX( col )
       * The data in a Node is in the same page (physical unit).
       * Non-Leaf Nodes
          *  **Secondary Keys** and **Pointers to the Child Nodes**
-      *  Leaf Nodes
+      * Leaf Nodes
          *  **Secondary Keys** , **Clustered Keys** and and **Pointers to the Sibling Nodes**
          *  The List of leaf nodes is the **sorted clustered keys**
          *  **If the primary key is long, the secondary indexes use more space**, so it is advantageous to have a short primary key.
 
       * ![secondary_indexes](images/secondary_indexes.png)
-      * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
+        * The data structure in the bottom is clustered indexes.
+        * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
         * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
   * Data Coverage:
     * Fields in **secondary key and clustered key** (permutation)
@@ -354,32 +344,86 @@ WHERE col < ( SELECT MAX( col )
 
 
 ## Profiling
-### [explain](https://medium.com/@sj82516/mysql-explain%E5%88%86%E6%9E%90%E8%88%87index%E8%A8%AD%E5%AE%9A%E6%9F%A5%E8%A9%A2%E5%84%AA%E5%8C%96-3e0708206ebf)
-### How to find slow query
+  * [explain](https://medium.com/@sj82516/mysql-explain%E5%88%86%E6%9E%90%E8%88%87index%E8%A8%AD%E5%AE%9A%E6%9F%A5%E8%A9%A2%E5%84%AA%E5%8C%96-3e0708206ebf)
+  * How to find slow query
 
 
 ## Join
-* Ref
-  * https://katiekodes.com/sql-every-join/
-* ![sql joins](https://i2.wp.com/blog.aheil.de/wp-content/uploads/2013/06/Foto.jpg)
+  * Ref
+    * https://katiekodes.com/sql-every-join/
 
-### Cross Join
-  * CROSS JOIN returns the **Cartesian product of rows** from tables in the join. In other words, it will produce rows which combine each row from the first table with each row from the second table
+  * Cross Join
+    * CROSS JOIN returns the **Cartesian product of rows** from tables in the join. In other words, it will produce rows which combine each row from the first table with each row from the second table
 
-### (Inner) Join
-  * The result set would contain **only the data where the criteria match**.
+  * (Inner) Join
+    * The result set would contain **only the data where the criteria match**.
 
-### Left (outer) Join
-  * The result set will **contain all records from the left table**.
-  * If **no matching recrods were found in the right table**, then **its fields will contain the NULL vales**.
+  * Left (outer) Join
+    * The result set will **contain all records from the left table**.
+    * If **no matching recrods were found in the right table**, then **its fields will contain the NULL vales**.
 
-### Right (outer) Join
-  * The opposite of Left JOIN.
-  * A LEFT JOIN B is equivalent to B RIGHT JOIN A
+  * Right (outer) Join
+    * The opposite of Left JOIN.
+    * A LEFT JOIN B is equivalent to B RIGHT JOIN A
 
-### FULL (outer)
-  * The type of join **combines the results of LEFT and RIGHT JOINS**. All records from both tables will be included in the result set. If no matching record was found, then the corresponding result fields will have a NULL value.
+  * FULL (outer)
+    * The type of join **combines the results of LEFT and RIGHT JOINS**. All records from both tables will be included in the result set. If no matching record was found, then the corresponding result fields will have a NULL value.
 
-### Self Join
-### Left Anti Join
-### Right Anti Join
+  * Self Join
+  * Left Anti Join
+  * Right Anti Join
+
+## Example:
+  * Tables
+    * Courses:
+      * CourseID*
+      * CourseName
+      * TeacherID
+    * Teachers:
+      * TeacherID*
+      * TeacherName
+    * Students:
+      * StudentID*
+      * StudentName
+    * StudentCourses:
+      * CourseID
+      * StudentID
+
+  * Questions
+    * Implement a query to get a list of all students and how many course each student is enrolled in.
+      * **We can only select values that are in aggregate function or in the GROUP BY clause.**
+      * Approach1: group by multiple keys
+        ```sql
+        SELECT StudentID, StudentName, count(StudentCourses.CourseID) as [Cnt]
+        FROM (Students LEFT JOIN StudentCourses ON Students.StudentID = StudentCourses.StudentID)
+        GROUP BY Students.StudentID, Students.StudentName;
+        ```
+      * Approach2: Use 2 aggregated functions
+        ```sql
+        SELECT StudentID, max(Students.StudentName), count(StudentCourses.CourseID) as [Cnt]
+        FROM (Students LEFT JOIN StudentCourses ON Students.StudentID = StudentCourses.StudentID)
+        GROUP BY Students.StudentID;
+        ```
+    * Implement a query to get a list of all teachers and how many students thery each teach.
+      * Get a list of TeacherID and how many students are associated with each TeacherID
+      * count(StudentCourses.CourseID) is the student cnt for each teacher
+        ```sql
+        SELECT TeacherID, count(Courses.CourseID) as [Number]
+        FROM (Courses INNER JOIN StudentCourses on Courses.CourseID = StudentCourses.CourseID)
+        GROUP BY Courses.TeacherID;
+        ```
+      * select the teachers who aren't teaching class
+        ```sql
+        SELECT TeacherName, isnull(StudentSize.Number, 0)
+        FROM Teachers LEFT JOIN
+          (SELECT TeacherID, count(Courses.CourseID) as [Number]
+           FROM (Courses INNER JOIN StudentCourses on Courses.CourseID == StudentCourses.CourseID)
+           GROUP BY Courses.TeacherID) StudentSize
+        on Teachers.TeacherID = StudentSize.TeacherID
+        ORDER BY StudentSize.Number DSEC;
+        ```
+
+
+
+
+
