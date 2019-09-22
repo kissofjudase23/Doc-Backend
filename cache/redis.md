@@ -1,9 +1,8 @@
 
 ## Table of Contents
-- [FAQ](#faq)
-  - [Memcached vs. Redis](#memcached-vs-redis)
-  - [Memory Metrics](#memory-metrics)
 - [Reference](#reference)
+- [FAQ](#faq)
+  - [Info](#info)
 - [Persistence](#persistence)
 - [Eviction Policies](#eviction-policies)
 - [Data Types](#data-types)
@@ -26,14 +25,6 @@
   - [Distributed lock (Redlock algorithm)](#distributed-lock-redlock-algorithm)
 
 
-## FAQ
-### [Memcached vs. Redis](https://stackoverflow.com/questions/10558465/memcached-vs-redis)
-  - Redis is more powerful, more popular, and better supported than memcached. Memcached can only do a small fraction of the things Redis can do. Redis is better even where their features overlap. For anything new, use Redis
-### Memory Metrics
-  * [memory usage](https://redis.io/commands/memory-usage)
-  * evicted keys
-    * Number of keys removed due to reaching the maxmemory limit
-
 ## Reference
   * [Redis.io](https://redis.io/)
   * [Try.Redis.io](try.redis.io)
@@ -42,8 +33,22 @@
     * [document](https://redis-py.readthedocs.io/en/latest/)
 
 
-##  [Persistence](https://redis.io/topics/persistence)
+## FAQ
+ * [Memcached vs. Redis](https://stackoverflow.com/questions/10558465/memcached-vs-redis)
+  - Redis is more powerful, more popular, and better supported than memcached. Memcached can only do a small fraction of the things Redis can do. Redis is better even where their features overlap. For anything new, use Redis
+  -
+
+
+### Info
+  * Ref:
+    * [AWS ElastiCache Metrics](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/CacheMetrics.Redis.html)
+  * [Redis Info](https://redis.io/commands/info)
+    * The INFO command returns information and statistics about the server in a format that is simple to parse by computers and easy to read by humans.
+
+
+## [Persistence](https://redis.io/topics/persistence)
   * By default redis persists your data to disk using a mechanism called **snapshotting**.
+
 
 ## [Eviction Policies](https://redis.io/topics/lru-cache)
   * noneviction
@@ -52,6 +57,7 @@
   * allkeys-random
   * volatile-random
   * volatile-ttl
+
 
 ## [Data Types](https://redis.io/topics/data-types-intro)
 ### Strings
@@ -79,22 +85,23 @@
     * DISCARD
       * Used to abort a transaction.
     * WATCH
-      * It is a command that will make the EXEC conditional: we are asking Redis to perform the transaction only if none of the WATCHed keys were modified.
-      ```redis
-      WATCH mykey
-      val = GET mykey
-      val = val + 1
+      * It is a command that will **make the EXEC conditional**: we are asking Redis to perform the transaction only if none of the WATCHed keys were modified.
+        * if there are race conditions and another client modifies the result of val in the time between our call to WATCH and our call to EXEC, the transaction will fail.
+        ```redis
+        WATCH mykey
+        val = GET mykey
+        val = val + 1
 
-      MULTI
-      SET mykey $val
-      EXEC
-      ```
+        MULTI
+        SET mykey $val
+        EXEC
+        ```
   * They allow the execution of a group of commands in a single step, with two important guarantees:
     * **Atomicity**
-      * Either **all of the commands or none are processed**, so a Redis transaction is also atomic.
+      * Either **all of the commands or none are processed**.
     * **Isolation**
       * All the commands in a transaction are serialized and executed sequentially.
-      * It can never happen that a request issued by another client is served in the middle of the execution of a Redis transaction. **This guarantees that the commands are executed as a single isolated operation**.
+      * It can never happen that a request issued by another client is served in the middle of the execution of a Redis transaction.
     * **Does not support roll back**
       * Redis commands can fail during a transaction, **but still Redis will execute the rest of the transaction instead of rolling back**.
 * [What are equivalent functions of MULTI and EXEC commands in redis-py?](https://stackoverflow.com/questions/31769163/what-are-equivalent-functions-of-multi-and-exec-commands-in-redis-py)
