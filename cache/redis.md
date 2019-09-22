@@ -36,10 +36,15 @@
 ## FAQ
  * [Memcached vs. Redis](https://stackoverflow.com/questions/10558465/memcached-vs-redis)
   - Redis is more powerful, more popular, and better supported than memcached. Memcached can only do a small fraction of the things Redis can do. Redis is better even where their features overlap. For anything new, use Redis
-  -
+ * How to evaluate redis hit rate?
+   * Overall:
+     * You can see keyspace_hits and keyspace_misses in redis [info]((https://redis.io/commands/info))
+   * Specific key:
+     * Write log and do some post process.
+     * Use redis cnt (INCR command)
 
 
-### Info
+### [Info](https://redis.io/commands/info)
   * Ref:
     * [AWS ElastiCache Metrics](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/CacheMetrics.Redis.html)
   * [Redis Info](https://redis.io/commands/info)
