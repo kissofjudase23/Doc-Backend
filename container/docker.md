@@ -1,40 +1,40 @@
 # Table of Contents
-- [Overview](#overview)
-- [FAQ](#faq)
-  - [How to minimize docker image size?](#how-to-minimize-docker-image-size)
-  - [CMD & ENTRYPOINT](#cmd--entrypoint)
-- [Image](#image)
-  - [Dockerfile](#dockerfile)
-- [Container](#container)
-  - [docker container CLI](#docker-container-cli)
-- [Networking](#networking)
-  - [Overview](#overview-1)
-  - [Bridge Network](#bridge-network)
-  - [Overlay](#overlay)
-  - [Host](#host)
-  - [Macvian](#macvian)
-  - [Summary](#summary)
-  - [docker network CLI](#docker-network-cli)
-- [Storage](#storage)
-  - [Overview](#overview-2)
-  - [Volumes](#volumes)
-  - [Bind Mounts](#bind-mounts)
-  - [tmpfs Mounts](#tmpfs-mounts)
-  - [docker volume CLI](#docker-volume-cli)
-- [Docker Compose](#docker-compose)
+- [Table of Contents](#table-of-contents)
+  - [FAQ](#faq)
+  - [Overview](#overview)
+  - [Image](#image)
+    - [Dockerfile](#dockerfile)
+  - [Container](#container)
+    - [docker container CLI](#docker-container-cli)
+  - [Networking](#networking)
+    - [Overview](#overview-1)
+    - [Bridge Network](#bridge-network)
+    - [Overlay](#overlay)
+    - [Host](#host)
+    - [Macvian](#macvian)
+    - [Summary](#summary)
+    - [docker network CLI](#docker-network-cli)
+  - [Storage](#storage)
+    - [Overview](#overview-2)
+    - [Volumes](#volumes)
+    - [Bind Mounts](#bind-mounts)
+    - [tmpfs Mounts](#tmpfs-mounts)
+    - [docker volume CLI](#docker-volume-cli)
+  - [Docker Compose](#docker-compose)
 
-## Overview
-![overview](https://docs.docker.com/engine/images/engine-components-flow.png)
 
 ## FAQ
-### How to minimize docker image size?
-  * Build Context
+* How to minimize docker image size?
+  * [Use multi-stage builds](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#use-multi-stage-builds)
+    * Where possible, use multi-stage builds, and only copy the artifacts you need into the final image.
+  * Filter out unused Build Context
     * [Understand build context](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#understand-build-context)
     * [Exclude with .dockerignore](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#exclude-with-dockerignore)
-  * [Use multi-stage builds](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#use-multi-stage-builds)
+
   * [Minimize the number of layers](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers)
-  * [Leverage build cache](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#leverage-build-cache)
-### [CMD](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#cmd) & [ENTRYPOINT](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#entrypoint)
+    * Only the instructions RUN, COPY, ADD create layers. Other instructions create temporary intermediate images, and do not increase the size of the build.
+
+* [CMD](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#cmd) & [ENTRYPOINT](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#entrypoint)
   * CMD should almost always be used in the form of CMD **["executable", "param1", "param2"…].**
       * Such as Apache and Rails, you would run something like CMD ["apache2","-DFOREGROUND"].
   * [CMD and ENTRYPOINT together](http://crosbymichael.com/dockerfile-best-practices.html)
@@ -78,6 +78,9 @@
           ```bash
           docker run crosbymichael/rethinkdb --bind all
           ```
+
+## Overview
+![overview](https://docs.docker.com/engine/images/engine-components-flow.png)
 
 ## Image
 * [docker image CLI](https://docs.docker.com/engine/reference/commandline/image/)
