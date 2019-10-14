@@ -2,7 +2,6 @@
 
  Table of Contents
 - [FAQ:](#faq)
-  - [Normalized vs. Denormalized Databases](#normalized-vs-denormalized-databases)
 - [Design](#design)
 - [Data Types](#data-types)
   - [Numeric Type](#numeric-type)
@@ -33,29 +32,18 @@
 
 
 ## FAQ:
-* [Find the second largetst value](https://stackoverflow.com/questions/32100/what-is-the-simplest-sql-query-to-find-the-second-largest-value)
-  ```sql
-  SELECT MAX( col )
-  FROM table
-  WHERE col < ( SELECT MAX( col )
-                FROM table )
-  ```
-* [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
-  * on MySQL you can do
-    ```sql
-    SELECT column FROM table ORDER BY column DESC LIMIT 7,10;
-    ```
-  * Updated as per comment request. WARNING completely untested!
-    ```sql
-    SELECT DOB FROM (SELECT DOB FROM USERS ORDER BY DOB DESC) WHERE ROWID = 6
-    ```
+  * [Normalized vs. Denormalized Databases](https://medium.com/@katedoesdev/normalized-vs-denormalized-databases-210e1d67927d)
+    * **Normalized databases** are designed to minimize **redundancy**, while **denomalized databases** are designed to optimized **read time**.
+    * For example:
+      * In a traditional normzlied database with data like Courses and Teachers, Courses might contain a column called TeachersID, which is a foreign key to Teacher.
+        * One Benefit of this is that information about the teacher is **only stored once in the databases**.
+        * The drawback is that many common queries will require expensive joins.
+  * Partition vs Sharding
+    * Partitioning is more a generic term for dividing data across tables or databases. **Sharding is one specific type of partitioning**, namely horizontal partitioning.
+    * Ref:
+      * https://www.quora.com/Whats-the-difference-between-sharding-DB-tables-and-partitioning-them
+  * How to find slow query
 
-### [Normalized vs. Denormalized Databases](https://medium.com/@katedoesdev/normalized-vs-denormalized-databases-210e1d67927d)
-  * **Normalized databases** are designed to minimize **redundancy**, while **denomalized databases** are designed to optimized **read time**.
-  * For example:
-    * In a traditional normzlied database with data like Courses and Teachers, Courses might contain a column called TeachersID, which is a foreign key to Teacher.
-      * One Benefit of this is that information about the teacher is **only stored once in the databases**.
-      * The drawback is that many common queries will require expensive joins.
 
 ## Design
   * Table
@@ -406,7 +394,8 @@
         ```
     * Implement a query to get a list of all teachers and how many students thery each teach.
       * Get a list of TeacherID and how many students are associated with each TeacherID
-      * count(StudentCourses.CourseID) is the student cnt for each teacher
+        * count(StudentCourses.CourseID) is the student cnt for each teacher
+          * Allow duplicated students (If a teacher teaches the same student in two courses, the count will be double) .
         ```sql
         SELECT TeacherID, count(Courses.CourseID) as [Number]
         FROM (Courses INNER JOIN StudentCourses on Courses.CourseID = StudentCourses.CourseID)
@@ -422,6 +411,22 @@
         on Teachers.TeacherID = StudentSize.TeacherID
         ORDER BY StudentSize.Number DSEC;
         ```
+    * [Find the second largetst value](https://stackoverflow.com/questions/32100/what-is-the-simplest-sql-query-to-find-the-second-largest-value)
+      ```sql
+      SELECT MAX( col )
+      FROM table
+      WHERE col < ( SELECT MAX( col )
+                    FROM table )
+    ```
+  * [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
+    * on MySQL you can do
+      ```sql
+      SELECT column FROM table ORDER BY column DESC LIMIT 7,10;
+      ```
+    * Updated as per comment request. WARNING completely untested!
+      ```sql
+      SELECT DOB FROM (SELECT DOB FROM USERS ORDER BY DOB DESC) WHERE ROWID = 6
+      ```
 
 
 
