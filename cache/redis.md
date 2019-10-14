@@ -41,7 +41,12 @@
      * You can see keyspace_hits and keyspace_misses in redis [info]((https://redis.io/commands/info))
    * Specific key:
      * Write log and do some post process.
-     * Use redis cnt (INCR command)
+     * Use redis cnt (INCR command) or HyperLogLog ?
+ * Performance enhancement
+   * [Mget](https://redis.io/commands/mget)
+      * Returns the values of **all specified keys**
+   * [Pipelining](https://redis.io/topics/pipelining)
+     * If you have many redis commands you want to execute you can use pipelining to send them to redis all-at-once instead of one-at-a-time.
 
 
 ### [Info](https://redis.io/commands/info)
@@ -73,6 +78,12 @@
 ### Geo
 ### Bitmap
 ### [HyperLoglog](https://thoughtbot.com/blog/hyperloglogs-in-redis)
+  * A HyperLogLog is a probabilistic data structure used to count unique values
+    * or as it’s referred to in mathematics: calculating the cardinality of a set.
+    * These values can be anything: for example, IP addresses for the visitors of a website, search terms, or email addresses.
+  * **Counting unique values with exact precision requires an amount of memory proportional to the number of unique values.**
+    * The reason for this is that there is no way of determining if a value has already been seen other than by comparing it to the previously seen values.
+  * A HyperLogLog solves this problem by allowing to trade memory consumption for precision **making it possible to estimate cardinalities larger than 10^9 with a standard error of 2% using only 1.5 kilobytes of memory**.
 
 
 ## [Transactions](https://redis.io/topics/transactions)
