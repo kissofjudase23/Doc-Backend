@@ -322,7 +322,7 @@
          *  **If the primary key is long, the secondary indexes use more space**, so it is advantageous to have a short primary key.
 
       * ![secondary_indexes](images/secondary_indexes.png)
-        * The data structure in the bottom is clustered indexes.
+        * **The data structure in the bottom is clustered indexes.**
         * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
         * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
   * Data Coverage:
