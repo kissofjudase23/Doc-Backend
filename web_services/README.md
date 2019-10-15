@@ -1,34 +1,192 @@
-## WebServices
-  * Auth
-    - Authentication vs Authorization
-      - Authentication is the process of ascertaining that somebody really is who they claim to be.
-      - Authorization refers to rules that determine who is allowed to do what. E.g. Adam may be authorized to create and delete databases, while Usama is only authorised to read.
-    * JWT
-    * OAuth2.0
-  * TLS
-    - [TLS handshake](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.1.0/com.ibm.mq.doc/sy10660_.htm)
-    - [Symmetric/Asymmetric/Hybrid Encryption](http://david50.pixnet.net/blog/post/28796015)
-    - [Cipher Suite](https://curl.haxx.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
+WebServices
+- [FAQ](#faq)
+- [Auth](#auth)
+- [TLS](#tls)
+- [RESTful](#restful)
+- [HTTP Methods](#http-methods)
+- [HTTP Status Code](#http-status-code)
+- [GRPC](#grpc)
+- [Profiling](#profiling)
+
+
+## FAQ
+  * Authentication vs Authorization:
+    * Authentication:
+      *  is the process of ascertaining that somebody really is who they claim to be.
+    * Authorization:
+      *  refers to rules that determine who is allowed to do what. E.g. Adam may be authorized to create and delete databases, while Usama is only authorised to read.
+  * Forward vs Redirect:
+    * Forward
+      * **Redirect sets the response status to 302, and the new url in a Location header, and sends the response to the browser.** Then the browser, according to the http specification, **makes another request** to the new url
+    * Redirect
+      * **Forward happens entirely on the server. The servlet container just forwards the same request to the target url, without the browser knowing about that.**
   * [HTTP/2](https://http2.github.io/faq/)
-    - Key differents to HTTP/1.x 
+    - Key differents to HTTP/1.x
       - is binary, instead of textual
-      - is fully multiplexed, instead of ordered and blocking can therefore use one connection for parallelism
-      - Header Compression
+      - is **fully multiplexed**, instead of ordered and blocking **can therefore use one connection for parallelism**
+      - **Header Compression**
       - Allows servers to “push” responses proactively into client caches
 
-  * Design Patterns
-    * RestAPI
-  * [Forward vs Redirect](https://stackoverflow.com/questions/6068891/difference-between-jsp-forward-and-redirect)
-    * Forward
-      - redirect sets the response status to 302, and the new url in a Location header, and sends the response to the browser. Then the browser, according to the http specification, makes another request to the new url
-    * Redirect
-      - forward happens entirely on the server. The servlet container just forwards the same request to the target url, without the browser knowing about that. Hence you can use the same request attributes and the same request parameters when handling the new url. And the browser won't know the url has changed (because it has happened entirely on the server)
-  * MicroServices
-    * Advantages:
-    * Drawbacks:
-      * Performance
-      * Lambda Limits
-        * Account Limits (e.g. aws lambda instance count)
-        * Cold Start Time
-  * Profiling
-    * wrk 
+
+
+## Auth
+ * JWT
+ * OAuth2.0
+
+
+## TLS
+  * Ref
+    * [Symmetric/Asymmetric/Hybrid Encryption](http://david50.pixnet.net/blog/post/28796015)
+    * [TLS handshake](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.1.0/com.ibm.mq.doc/sy10660_.htm)
+
+  * [Cipher Suite](https://docs.microsoft.com/zh-tw/windows/win32/secauthn/cipher-suites-in-schannel?redirectedfrom=MSDN)
+    *![Cipher Suite](./images/cipher_suite.png)
+      * TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+        * TLS:
+          * Indicate the protocol
+        * ECDHE:
+          * Signifies the **key exchang**e algorithm
+        * ECDSA:
+          * Signifies the **authentication** algorithm
+        * AES_256_CBC:
+          * Indicates the **bulk encryption** algorithm
+        * SHA384:
+          * Indicates the MAC algorithm (for **integrity**)
+
+  * TLS handshake overview
+    * ![TLS hand shake](./images/TLS_handshake.png)
+    * step1:
+      * The SSL or TLS client sends a client **hello message** that lists **cryptographic information** such as the SSL or **TLS version** and, in the client's order of preference, **the CipherSuites supported by the client**.
+        * The message also contains a random byte string that is used in subsequent computations. The protocol allows for the client hello to include the data compression methods supported by the client.
+    * step2:
+      * The SSL or TLS server responds with a server hello message that contains the **CipherSuite chosen by the server** from the list provided by the client, the session ID, and another random byte string. **The server also sends its digital certificate.**
+  			* If the server requires a digital certificate for client authentication, the server sends a client certificate request that includes a list of the types of certificates supported and the Distinguished Names of acceptable Certification Authorities (CAs).
+		* step3:
+  		* The SSL or TLS client verifies the server's digital certificate.
+		* step4:
+  		* The SSL or TLS client sends the **random byte string  that enables both the client and the server to compute the secret key** to be used for encrypting subsequent message data.
+    		* **The random byte string itself is encrypted with the server's public key**.
+		* step5:
+			* If the SSL or TLS server sent a client certificate request, the client sends a random byte string encrypted with the client's private key, together with the client's digital certificate, or a no digital certificate alert. This alert is only a warning, but with some implementations the handshake fails if client authentication is mandatory.
+  	* step6:
+			* The SSL or TLS server verifies the client's certificate.
+    * step7:
+      * The SSL or TLS client sends the server a finished message, which is encrypted with the secret key, indicating that the client part of the handshake is complete.
+    * step8:
+      * The SSL or TLS server sends the client a finished message, which is encrypted with the secret key, indicating that the server part of the handshake is complete.
+    * step9:
+      * For the duration of the SSL or TLS session, the server and client can now **exchange messages that are symmetrically encrypted with the shared secret key**.
+
+
+## RESTful
+  * Ref:
+    * [TritonHo](https://github.com/TritonHo/slides/blob/master/Taipei%202016-04%20talk/RESTful%20API%20Design-tw-2.1.pdf)
+    * [10 Best Practices for Better RESTful API](https://blog.mwaysolutions.com/2014/06/05/10-best-practices-for-better-restful-api/)
+    * [Best Practices for Designing a Pragmatic RESTful API](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api)
+  * Key Conecpt:
+    * The key principles of REST involve **separating your API into logical resources**. These resources are **manipulated using HTTP requests where the method** (GET, POST, PUT, PATCH, DELETE) has specific meaning.
+  * Practices:
+    * Use nouns or gerunds but no verbs
+      * gerunds(動名詞): MoneyTransfer
+    * GET method and query parameters should not alter the state 
+    * Use plural nouns
+      * Do not mix up singular and plural nouns. Keep it simple and use only plural nouns for all resources.
+      * /cars instead of /car
+    * Use sub-resources for relations
+      * GET /cars/711/drivers/4
+    * Provide filtering, sorting, field selection and paging for collections 
+      * Filtering
+        * GET /cars?**color=red**
+          * Returns a list of red cars
+        * GET /cars?**seats<=2**
+          * Returns a list of cars with a maximum of 2 seats
+      * Sorting
+        * GET /cars?**sort=-manufactorer,+model**
+          * This returns a list of cars sorted by descending manufacturers and ascending models.
+      * Field Selection
+        * GET /cars?**fields=manufacturer,model,id,color**
+      * Paging
+        * GET /cars?**offset=10&limit=5**
+        * Use **limit** and **offset**. It is flexible for the user and common in leading databases. The default should be limit=20 and offset=0
+        * To send the total entries back to the user use the custom HTTP header: **X-Total-Count.**
+    * Version your API
+    * Handle Errors with HTTP status codes
+    * Allow overriding HTTP method
+  * Example:
+    * | Resource  | GET                   | POST                     | PUT                    | DELETE                |
+      |-----------|-----------------------|--------------------------|------------------------|-----------------------|
+      | /car      | Return a list of cars | Create a new car         | Bulk Update            | Delete all cars       |
+      | /cars/711 | Return a specific car | Method not allowed (405) | Updates a specific car | Delete a specific car |
+
+## HTTP Methods
+  * Methods
+    * GET (safe & idempotent):
+      * read
+    * HEAD (safe & idempotent):
+      * read (header only)
+    * POST:
+      * create
+    * PATCH:
+      * update
+    * DELETE:
+      * delete the resource
+  * Property:
+    * Safe
+      * Safe methods are HTTP methods that do not modify resources.
+    * idempotent
+      * An idempotent HTTP method is a HTTP method that can be called many times without different outcomes. It would not matter if the method is called only once, or ten times over. The result should be the same.
+
+
+## HTTP Status Code
+  * Ref:
+    * https://httpstatuses.com/
+    * https://stackoverflow.com/questions/942951/rest-api-error-return-good-practices
+  * Flow:
+    * ![http return code flow](./images/http_return_code_flow.png)
+  * 2xx: Success
+    * 200 ok:
+      * The general code.
+    * 201 Created:
+      * Resource created successfully.
+    * 202 Accepted:
+      * Request accepted and still being processed.
+      * This request may take a lot of time.
+      * Async job
+    * 204 No Content:
+      * Request completed successfully but nothing to return.
+      * delete, put may use this return code.
+  * 3xx: Redirection
+      * 301 Moved Permanently:
+      * 303 See Other
+        * Response can be found elsewhere (e.g. after the client has sent a POST request)
+  * 4xx: Client Error (Client should not retry)
+    * 400 Bad Request:
+      * The general code (client side)
+    * 401 Unauthorized:
+      * Client not authenticated*
+    * 403 Forbidden:
+      * Client not allowed for the request
+    * 404 Not Found:
+      * Resource not found
+    * 405 Method Not Allowed:
+      * The HTTP verb not supported for this API endpoint
+    * 406 Not Acceptable:
+      * The **requested Content-Type** not supported (Accept header)
+    * 415 Unsupported Media Type:
+      * The Content-Type of the **request body** not supported (Content-Type header)
+    * 409 Conflict:
+      * This Resouce has been modified by other
+  * 5xx: Serverl Error (Client may reasonably retry)
+    * 500 Internal Server Error
+    * 502 Bad Gateway:
+      * Load balancing tier issue
+      * bad response from the upstream server (usually only a gateway or proxy server would return 502)
+    * 503 Service Unavailable:
+      * Service temporarily unavailable (i.e. may be available shortly)
+    * 504 Gateway Timeout:
+      * Upstream server timeout (usually only a gateway or proxy server would return 504)
+
+## GRPC
+
+## Profiling
+  * wrk
