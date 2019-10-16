@@ -187,6 +187,32 @@ WebServices
       * Upstream server timeout (usually only a gateway or proxy server would return 504)
 
 ## GRPC
+  * Ref:
+    * [grpc](https://grpc.io/)
+  * Why gRPC
+    * gRPC is a modern RPC protocol implemented on top of HTTP/2. HTTP/2 is a Layer 7 (Application layer) protocol, that runs on top of a TCP (Layer 4 - Transport layer) protocol, which runs on top of IP (Layer 3 - Network layer) protocol. gRPC has many advantages over traditional HTTP/REST/JSON mechanism such as
+      * Binary protocol (HTTP/2)
+      * Multiplexing many requests on one connection (HTTP/2)
+      * Header compression (HTTP/2)
+      * Strongly typed service and message definition (Protobuf)
+      * Idiomatic client/server library implementations in many languages
+  * Suggest using gRPC for the following cases
+    * When the microservices is only internal and when one server needs to talk to the other.
+    * When your internal services requires duplex streaming with high load of data.
+
+## Proto3
+  * Ref:
+    * [proto3](https://developers.google.com/protocol-buffers/docs/proto3)
+  * Advantages:
+    * Platform/language neutral
+    * Backward compatibility
+    * Performance (compared with JSON)
+    * Do not need accessor class for mapping
+    * Do not need Doc (.proto is the doc)
+
+  * Backward Compatibility:
+    * [Rule of Updating A Message Type](https://developers.google.com/protocol-buffers/docs/proto3#updating)
+
 
 ## Profiling
   * wrk
