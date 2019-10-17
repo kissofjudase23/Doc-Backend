@@ -6,6 +6,7 @@ WebServices
 - [HTTP Methods](#http-methods)
 - [HTTP Status Code](#http-status-code)
 - [GRPC](#grpc)
+- [Proto3](#proto3)
 - [Profiling](#profiling)
 
 
@@ -198,7 +199,7 @@ WebServices
       * Idiomatic client/server library implementations in many languages
   * Suggest using gRPC for the following cases
     * When the microservices is only internal and when one server needs to talk to the other.
-    * When your internal services requires duplex streaming with high load of data.
+    * When your internal services requires **duplex streaming** with high load of data.
 
 ## Proto3
   * Ref:
