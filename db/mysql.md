@@ -181,75 +181,93 @@
 
 
 ## [Partitions](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)
-  * [What is MySQL Partition](http://blog.kenyang.net/2017/06/11/whats-mysql-partition)
-  * Purpose:
-    * **Partition Pruning**
-      * Make your queries faster (select, insert, update, delete)
-    * **Purge Data**
-      * Drop partition is much fasterd
-    * Note:
-      * App does not aware the partition
-  * **Key**
-    * example:
-      ```sql
-      CREATE TABLE t (
-	            id INT,
-	            create_time DATETIME
-      )
-      PARTITION BY KEY(create_time)
-      PARTITIONS 10;
-      ```
-    * Note
-      * Deleted by partition does not work
-  * **Hash** (INT expression)
-    * example:
-      ```sql
-      CREATE TABLE t (
-              id INT,
-              create_time DATETIME
-      )
-      PARTITION BY HASH(MONTH(create_time))
-      PARTITIONS 12;
-      ```
-    * Note
-      * Deleted by partition does not work
-  * **List** (INT expression)
-    * example:
-      ```sql
-      CREATE TABLE t (
-              id INT,
-              create_time DATETIME
-      )
-      PARTITION BY LIST(DAYOFWEEK(create_time)) (
-        PARTITION pMon VALUES IN (1),
-        PARTITION pTue VALUES IN (2),
-        PARTITION pWed VALUES IN (3),
-        PARTITION pThu VALUES IN (4)
-      );
-      ```
-  * **Range** (INT expression)
-    * example:
-      ```sql
-      CREATE TABLE t (
-              id INT,
-              create_time DATETIME
-      )
-      PARTITION BY RANGE(YEAR(create_time)) (
-        PARTITION p2017 VALUES LESS THAN (2018),
-        PARTITION p2018 VALUES LESS THAN (2019),
-        PARTITION p2019 VALUES LESS THAN (2020)
-      );
-      ```
+  * FAQ
+    * [Partitions and UPDATE](https://stackoverflow.com/questions/12929624/partitions-and-update)
+      * If you UPDATE a row, will the row be moved to another partition automatically, if the partition conditions of another partition is met?
+      * It must move them on update. If it didn't it wouldn't work well. MySQL would have to basically scan all partitions on every query as it couldn't know where records where stored.
+    * [How to drop subpartition](https://dev.mysql.com/doc/refman/5.7/en/partitioning-subpartitions.html)
+    * [What is the difference between mysql drop partition and truncate partition](https://stackoverflow.com/questions/56244720/what-is-the-difference-between-mysql-drop-partition-and-truncate-partition)
+      * DROP PARTITION:
+        * also removes the partition from the list of partitions.
+      * TRUNCATE PARTITION:
+        * leaves the partition in place, but empty.
 
+  * [Partition](http://blog.kenyang.net/2017/06/11/whats-mysql-partition)
+    * Purpose:
+      * **Partition Pruning**
+        * Make your queries faster (select, insert, update, delete).
+      * **Purge Data**
+        * Drop partition is much faster.
+          * **Only Range based and List based partition support drop.**
+        * Truncate partition:
+          * TRUNCATE PARTITION merely deletes rows; it does not alter the definition of the table itself, or of any of its partitions.
+      * Note:
+        * App does not aware of the partitions.
+    * Type
+      * Key (column)
+        * Mysql would use **built-in hash function** to determine which partition the record will be stored.
+        * example:
+          ```sql
+          CREATE TABLE t (
+    	            id INT,
+    	            create_time DATETIME
+          )
+          PARTITION BY KEY(create_time)
+          PARTITIONS 10;
+          ```
+        * Note
+          * Deleted by partition does not work
+      * **Hash** (INT expression)
+        * example:
+          ```sql
+          CREATE TABLE t (
+                  id INT,
+                  create_time DATETIME
+          )
+          PARTITION BY HASH(MONTH(create_time))
+          PARTITIONS 12;
+          ```
+        * Note
+          * Deleted by partition does not work
+      * **List** (INT expression)
+        * example:
+          ```sql
+          CREATE TABLE t (
+                  id INT,
+                  create_time DATETIME
+          )
+          PARTITION BY LIST(DAYOFWEEK(create_time)) (
+            PARTITION pMon VALUES IN (1),
+            PARTITION pTue VALUES IN (2),
+            PARTITION pWed VALUES IN (3),
+            PARTITION pThu VALUES IN (4)
+          );
+          ```
+      * **Range** (INT expression)
+        * example:
+          ```sql
+          CREATE TABLE t (
+                  id INT,
+                  create_time DATETIME
+          )
+          PARTITION BY RANGE(YEAR(create_time)) (
+            PARTITION p2017 VALUES LESS THAN (2018),
+            PARTITION p2018 VALUES LESS THAN (2019),
+            PARTITION p2019 VALUES LESS THAN (2020)
+          );
+          ```
 
+  * [Subpartition](https://dev.mysql.com/doc/refman/5.7/en/partitioning-subpartitions.html)
 
 ## [Sharding](https://medium.com/system-design-blog/database-sharding-69f3f4bd96db)
-  * Approach 1 calculate shard key in the app layers
-  * Approach 2 use [mysql cluster](https://dev.mysql.com/doc/refman/8.0/en/mysql-cluster-overview.html)
+  * FAQ:
+    * [Differences Between the NDB and InnoDB Storage Engines](https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster-ndb-innodb-engines.html)
+  * Approach1: calculate shard key in the app layers
+  * Approach2: use [mysql cluster](https://dev.mysql.com/doc/refman/8.0/en/mysql-cluster-overview.html)
     * ![overview](https://dev.mysql.com/doc/refman/8.0/en/images/cluster-components-1.png)
   * Advantages:
     * Faster queries response.
-    * More write bacndwidth
+    * More write bandwidth
     * Scaling out
   * Drawbacks:
     * Adds complexity in the system.
