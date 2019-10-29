@@ -28,8 +28,6 @@ WebServices
       - **Header Compression**
       - Allows servers to “push” responses proactively into client caches
 
-
-
 ## Auth
  * JWT
    * Ref:
@@ -37,7 +35,7 @@ WebServices
    * About JWT
      * JWT is for authorization.
      * JWT defines the token format not the protocol.
-     * JWT is kepts on client side, and can be used to authorize many services as long as they can shared the smae secret key.
+     * JWT is kepts on client side, and can be used to authorize many services as long as they share the smae secret key.
    * Flow:
      * ![flow](./images/JWT.png)
    * JWT Token format:
@@ -59,9 +57,8 @@ WebServices
  * OAuth2.0
    * [What are the main differences between JWT and OAuth authentication?](https://stackoverflow.com/questions/39909419/what-are-the-main-differences-between-jwt-and-oauth-authentication)
      * JWT is just a token format, OAuth 2.0 is a protocol.
-     *
-
-
+     * OAuth 2.0 and "JWT authentication" have similar appearance when it comes to the (2nd) stage where the Client presents the token to the Resource Server: the token is passed in a header.
+     * But "JWT authentication" is not a standard and does not specify how the Client obtains the token in the first place (the 1st stage). That is where the perceived complexity of OAuth comes from: it also defines various ways in which the Client can obtain an access token from something that is called an Authorization Server.
 
 ## TLS
   * Ref
