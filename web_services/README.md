@@ -56,7 +56,7 @@ WebServices
 
  * OAuth2.0
    * [What are the main differences between JWT and OAuth authentication?](https://stackoverflow.com/questions/39909419/what-are-the-main-differences-between-jwt-and-oauth-authentication)
-     * JWT is just a token format, OAuth 2.0 is a protocol.
+     * **JWT is just a token format, OAuth 2.0 is a protocol**.
      * OAuth 2.0 and "JWT authentication" have similar appearance when it comes to the (2nd) stage where the Client presents the token to the Resource Server: the token is passed in a header.
      * But "JWT authentication" is not a standard and does not specify how the Client obtains the token in the first place (the 1st stage). That is where the perceived complexity of OAuth comes from: it also defines various ways in which the Client can obtain an access token from something that is called an Authorization Server.
 
@@ -121,17 +121,17 @@ WebServices
     * Use sub-resources for relations
       * GET /cars/711/drivers/4
     * Provide filtering, sorting, field selection and paging for collections 
-      * Filtering
+      * **Filtering**
         * GET /cars?**color=red**
           * Returns a list of red cars
         * GET /cars?**seats<=2**
           * Returns a list of cars with a maximum of 2 seats
-      * Sorting
+      * **Sorting**
         * GET /cars?**sort=-manufactorer,+model**
           * This returns a list of cars sorted by descending manufacturers and ascending models.
-      * Field Selection
+      * **Field Selection**
         * GET /cars?**fields=manufacturer,model,id,color**
-      * Paging
+      * **Paging**
         * GET /cars?**offset=10&limit=5**
         * Use **limit** and **offset**. It is flexible for the user and common in leading databases. The default should be limit=20 and offset=0
         * To send the total entries back to the user use the custom HTTP header: **X-Total-Count.**
@@ -169,7 +169,7 @@ WebServices
     * https://stackoverflow.com/questions/942951/rest-api-error-return-good-practices
   * Flow:
     * ![http return code flow](./images/http_return_code_flow.png)
-  * 2xx: Success
+  * 2xx: **Success**
     * 200 ok:
       * The general code.
     * 201 Created:
@@ -181,11 +181,12 @@ WebServices
     * 204 No Content:
       * Request completed successfully but nothing to return.
       * delete, put may use this return code.
-  * 3xx: Redirection
-      * 301 Moved Permanently:
+  * 3xx: **Redirection**
+      * 301 Moved Permanently
+      * 302 Found
       * 303 See Other
         * Response can be found elsewhere (e.g. after the client has sent a POST request)
-  * 4xx: Client Error (Client should not retry)
+  * 4xx: **Client Error** (Client should not retry)
     * 400 Bad Request:
       * The general code (client side)
     * 401 Unauthorized:
@@ -202,7 +203,7 @@ WebServices
       * The Content-Type of the **request body** not supported (Content-Type header)
     * 409 Conflict:
       * This Resouce has been modified by other
-  * 5xx: Serverl Error (Client may reasonably retry)
+  * 5xx: **Serverl Error** (Client may reasonably retry)
     * 500 Internal Server Error
     * 502 Bad Gateway:
       * Load balancing tier issue
@@ -231,7 +232,7 @@ WebServices
     * [proto3](https://developers.google.com/protocol-buffers/docs/proto3)
   * Advantages:
     * Platform/language neutral
-    * Backward compatibility
+    * **Backward compatibility**
     * Performance (compared with JSON)
     * Do not need accessor class for mapping
     * Do not need Doc (.proto is the doc)
@@ -239,6 +240,9 @@ WebServices
   * Backward Compatibility:
     * [Rule of Updating A Message Type](https://developers.google.com/protocol-buffers/docs/proto3#updating)
 
+## GraphQL
+  * Ref:
+    * https://www.howtographql.com/basics/0-introduction/
 
 ## Profiling
   * wrk

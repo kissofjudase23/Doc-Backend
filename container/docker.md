@@ -32,7 +32,7 @@
     * [Exclude with .dockerignore](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#exclude-with-dockerignore)
 
   * [Minimize the number of layers](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers)
-    * Only the instructions RUN, COPY, ADD create layers. Other instructions create temporary intermediate images, and do not increase the size of the build.
+    * Only the instructions **RUN, COPY, ADD** create layers. Other instructions create temporary intermediate images, and do not increase the size of the build.
 
 * [CMD](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#cmd) & [ENTRYPOINT](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#entrypoint)
   * CMD should almost always be used in the form of CMD **["executable", "param1", "param2"…].**
