@@ -1,34 +1,32 @@
  # MySQL
 
  Table of Contents
-- [FAQ:](#faq)
-- [Design](#design)
-- [Data Types](#data-types)
-  - [Numeric Type](#numeric-type)
-  - [Date and Time Type](#date-and-time-type)
-  - [String Type](#string-type)
-  - [JSON (from mysql 5.7)](#json-from-mysql-57)
-- [Charset](#charset)
-- [ACID Model](#acid-model)
-- [CAP](#cap)
-- [Security](#security)
-- [Normalization](#normalization)
-- [Denormalization](#denormalization)
-- [Partitions](#partitions)
-- [Sharding](#sharding)
-- [Stored Objects](#stored-objects)
-  - [Stored procedure](#stored-procedure)
-  - [Trigger](#trigger)
-  - [Event](#event)
-  - [View](#view)
-- [Optimization](#optimization)
+- [MySQL](#mysql)
+  - [FAQ:](#faq)
+  - [Design](#design)
+  - [Data Types](#data-types)
+    - [Numeric Type](#numeric-type)
+    - [Date and Time Type](#date-and-time-type)
+    - [String Type](#string-type)
+    - [JSON (from mysql 5.7)](#json-from-mysql-57)
+  - [Charset](#charset)
+  - [ACID Model](#acid-model)
+  - [CAP](#cap)
+  - [Security](#security)
+  - [Normalization](#normalization)
+  - [Denormalization](#denormalization)
+  - [Partitions](#partitions)
+  - [Sharding](#sharding)
+  - [Stored Objects](#stored-objects)
+    - [Stored procedure](#stored-procedure)
+    - [Trigger](#trigger)
+    - [Event](#event)
+    - [View](#view)
   - [Indexes](#indexes)
-  - [Clustered Indexes, Secondary Indexes (InnoDB)](#clustered-indexes-secondary-indexes-innodb)
-    - [Clustered Indexes](#clustered-indexes)
-    - [Secondary Indexes](#secondary-indexes)
-- [Profiling](#profiling)
-- [Join](#join)
-- [Example:](#example)
+  - [Locking and Transaction Model](#locking-and-transaction-model)
+  - [Profiling](#profiling)
+  - [Join](#join)
+  - [Example:](#example)
 
 
 ## FAQ:
@@ -79,9 +77,9 @@
   * [Never use “utf8”. Use “utf8mb4”](https://medium.com/@adamhooper/in-mysql-never-use-utf8-use-utf8mb4-11761243e434)
     * MySQL's **utf8mb4** means **UTF-8**.
     * MySQL's **utf8** means a proprietary character encoding. This encoding can’t encode many Unicode characters.
-
-
-## [ACID Model](https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html)
+## ACID Model
+  * Ref:
+    * https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html
   * **A**tomicity
     * **Transactions** are atomic units of work that can be committed or rolled back.
     * When a transaction makes multiple changes to the database, **either all the changes succeed when the transaction is committed, or all the changes are undone when the transaction is rolled back**.
@@ -98,7 +96,9 @@
   * **D**urability
     * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to.
 
-## [CAP](https://speakerdeck.com/shlominoach/mysql-and-the-cap-theorem-relevance-and-misconceptions)
+## CAP
+ * Ref:
+   * https://speakerdeck.com/shlominoach/mysql-and-the-cap-theorem-relevance-and-misconceptions
 * [Atomic] **C**onsistentency:
   * Once a write is successful on a node, any read on any node must reflect that write or any later write
 * [High] **A**vailability:
@@ -153,9 +153,12 @@
             ```python
             session.query(MyClass).filter("foo={}".format(getArgs['val']))
             ```
-## [Normalization](https://medium.com/@habibul.hasan.hira/database-normalization-8cdaddbb7715)
+
+## Normalization
+  * Ref:
+    * https://medium.com/@habibul.hasan.hira/database-normalization-8cdaddbb7715
   * Definition:
-    *  It is a database **design technique** which organizes tables in a manner that **reduces redundancy and dependency** of data.
+    * It is a database **design technique** which organizes tables in a manner that **reduces redundancy and dependency** of data.
     *  It divides larger tables to smaller tables and links them using relationships.
   * **1NF**
     * Every column of a table should be atomic. That means you **can not put multiple values in a database column**.
@@ -288,65 +291,99 @@
 ### View
   * An object created with CREATE VIEW that when referenced produces a result set. A view acts as a virtual table.
 
-## [Optimization](https://dev.mysql.com/doc/refman/8.0/en/optimization.html)
-### Indexes
-  * Use good indexes
-    * Columns that you are querying (**SELECT, GROUP BY, ORDER BY, JOIN**) could be faster with indices.
-    * Indices are usually represented as **self-balancing B-tree** that keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
-    * Writes could also be slower since the index also needs to be updated.
+## Indexes
+  * Ref:
+    * https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe
 
-  * Use good **composite indexes**:
-    * If certain fields tend to **appear together in queries**, then it’s a good idea to create a composite index on them.
-    * Similar to single indexes, the cardinality of the fields matters to the effectiveness composite indexes.
+  * Good Practices:
+    * Use good indexes
+      * Columns that you are querying (**SELECT, GROUP BY, ORDER BY, JOIN**) could be faster with indices.
+      * Indices are usually represented as **self-balancing B-tree** that keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
+      * Writes could also be slower since the index also needs to be updated.
+    * Use good **composite indexes**:
+      * If certain fields tend to **appear together in queries**, then it’s a good idea to create a composite index on them.
+      * Similar to single indexes, the cardinality of the fields matters to the effectiveness composite indexes.
+      * if a composite index is made on column1 , column2 , column3 ,…, columnN . Then queries like
+        ```sql
+        SELECT * FROM table
+        WHERE column1 = 'value';
 
-  * Avoid Unnecessary Indexes
-    * Do not use an index for **low-read** but **high-write** tables.
-    * Do not use an index if the field has **low cardinality**.
-      * Low-cardinality: refers to columns with few unique values.
-      * [Why low cardinality indexes negatively impact performance](https://www.ibm.com/developerworks/data/library/techarticle/dm-1309cardinal/index.html])
+        SELECT * FROM table
+        WHERE column1 = 'value1'
+        AND column2 = 'value2';
 
-### [Clustered Indexes, Secondary Indexes](https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e) (InnoDB)
+        SELECT * FROM table
+        WHERE column1 = 'value1'
+        AND column2 = 'value2'
+        AND column3 = 'value3'
 
-#### Clustered Indexes
-  * Every InnoDB table has a special index called the clustered index where the data for the rows is stored. **Typically, the clustered index is synonymous with the primary key**.
-    * When you define a PRIMARY KEY on your table, InnoDB uses it as the clustered index.
-    * If you do not define a PRIMARY KEY for your table, MySQL locates the first UNIQUE index where all the key columns are NOT NULL andInnoDB uses it as the clustered index.
-    * If the table has no PRIMARY KEY or suitable UNIQUE index, InnoDB internally generates a hidden clustered index named GEN_CLUST_INDEX on a synthetic column containing row ID values.
-  * Data Structure
-    * **B-Tree**
-        * The data in a Node is in the same page (physical unit).
-        * Non-Leaf Nodes
-           *  **Clustered Keys** and **Pointers to the Child Nodes**
-        * Leaf Nodes
-           *  **Clustered Keys**, **Raw Data** and **Pointers to the Sibling Nodes**
-        * ![cluster_indexes](images/cluster_indexes.png)
-  * Data Coverage:
-    * All, since list of leaf nodes is the table.
-  * Condition Coverage:
-    * Depended on the clustered key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
+        ...
 
-#### Secondary Indexes
-  * All indexes other than the clustered index are known as secondary indexes.
-  * In InnoDB, **each record in a secondary index contains the primary key columns for the row, as well as the columns specified for the secondary index. InnoDB uses this primary key value to search for the row in the clustered index**.
+        SELECT * FROM table
+        WHERE column1 = 'value1'
+        AND column2 = 'value2'
+        AND column3 = 'value3'
+          ...
+        AND columnN = 'valueN'
 
-  * Data Structure
-    * B-Tree
-      * The data in a Node is in the same page (physical unit).
-      * Non-Leaf Nodes
-         *  **Secondary Keys** and **Pointers to the Child Nodes**
-      * Leaf Nodes
-         *  **Secondary Keys** , **Clustered Keys** and and **Pointers to the Sibling Nodes**
-         *  The List of leaf nodes is the **sorted clustered keys**
-         *  **If the primary key is long, the secondary indexes use more space**, so it is advantageous to have a short primary key.
+        ```
+        will have performance gain.
+    * Avoid Unnecessary Indexes
+      * Do not use an index for **low-read** but **high-write** tables.
+      * Do not use an index if the field has **low cardinality**.
+        * Low-cardinality: refers to columns with few unique values.
+        * [Why low cardinality indexes negatively impact performance](https://www.ibm.com/developerworks/data/library/techarticle/dm-1309cardinal/index.html])
 
-      * ![secondary_indexes](images/secondary_indexes.png)
-        * **The data structure in the bottom is clustered indexes.**
-        * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
-        * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
-  * Data Coverage:
-    * Fields in **secondary key and clustered key** (permutation)
-  * Condition Coverage:
-    * Depended on the secondary key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
+  * Clustered Indexes vsSecondary Indexes (InnoDB)
+    * Ref:
+      * https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e
+
+    * Clustered Indexes
+      * Every InnoDB table has a special index called the clustered index where the data for the rows is stored. **Typically, the clustered index is synonymous with the primary key**.
+        * When you define a PRIMARY KEY on your table, InnoDB uses it as the clustered index.
+        * If you do not define a PRIMARY KEY for your table, MySQL locates the first UNIQUE index where all the key columns are NOT NULL andInnoDB uses it as the clustered index.
+        * If the table has no PRIMARY KEY or suitable UNIQUE index, InnoDB internally generates a hidden clustered index named GEN_CLUST_INDEX on a synthetic column containing row ID values.
+      * Data Structure
+        * **B-Tree**
+            * The data in a Node is in the same page (physical unit).
+            * Non-Leaf Nodes
+               *  **Clustered Keys** and **Pointers to the Child Nodes**
+            * Leaf Nodes
+               *  **Clustered Keys**, **Raw Data** and **Pointers to the Sibling Nodes**
+            * ![cluster_indexes](images/cluster_indexes.png)
+      * Data Coverage:
+        * All, since list of leaf nodes is the table.
+      * Condition Coverage:
+        * Depended on the clustered key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
+
+    * Secondary Indexes
+      * All indexes other than the clustered index are known as secondary indexes.
+      * In InnoDB, each record in a secondary index contains the **primary key columns** for the row, as well as the **columns specified for the secondary index**. InnoDB uses this primary key value to search for the row in the clustered index.
+
+      * Data Structure
+        * B-Tree
+          * The data in a Node is in the same page (physical unit).
+          * Non-Leaf Nodes
+             *  **Secondary Keys** and **Pointers to the Child Nodes**
+          * Leaf Nodes
+             *  **Secondary Keys** , **Clustered Keys** and and **Pointers to the Sibling Nodes**
+             *  The List of leaf nodes is the **sorted clustered keys**
+             *  **If the primary key is long, the secondary indexes use more space**, so it is advantageous to have a short primary key.
+          * ![secondary_indexes](images/secondary_indexes.png)
+            * **The data structure in the bottom is clustered indexes (the table).**
+            * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
+            * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
+      * Data Coverage:
+        * Fields in **secondary key and clustered key** (permutation)
+      * Condition Coverage:
+        * Depended on the secondary key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
+
+
+## Locking and Transaction Model
+  * Ref:
+    * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-transaction-model.html
+    * https://dev.mysql.com/doc/refman/8.0/en/locking-issues.html
+
 
 
 ## Profiling
@@ -435,7 +472,7 @@
       FROM table
       WHERE col < ( SELECT MAX( col )
                     FROM table )
-    ```
+      ```
   * [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
     * on MySQL you can do
       ```sql
@@ -445,6 +482,21 @@
       ```sql
       SELECT DOB FROM (SELECT DOB FROM USERS ORDER BY DOB DESC) WHERE ROWID = 6
       ```
+  * [Filter Table Before Applying Left Join](https://stackoverflow.com/questions/15077053/filter-table-before-applying-left-join)
+    * Solution1:
+      ```sql
+      SELECT c.Customer, c.State, e.Entry
+      FROM Customer c LEFT JOIN Entry e
+        ON c.Customer=e.Customer
+        AND e.Category='D'
+      ``
+  * Solution2:
+      ```sql
+      SELECT c.Customer, c.State, e.Entry
+      FROM Customer AS c LEFT JOIN (SELECT * FROM Entry WHERE Category='D') AS e ON c.Customer=e.Customer
+      ```
+
+
 
 
 
