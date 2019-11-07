@@ -1,8 +1,9 @@
 
 ## Table of Contents
+- [Table of Contents](#table-of-contents)
 - [Reference](#reference)
 - [FAQ](#faq)
-  - [Info](#info)
+- [Info](#info)
 - [Persistence](#persistence)
 - [Eviction Policies](#eviction-policies)
 - [Data Types](#data-types)
@@ -35,7 +36,7 @@
 
 ## FAQ
  * [Memcached vs. Redis](https://stackoverflow.com/questions/10558465/memcached-vs-redis)
-  - Redis is more powerful, more popular, and better supported than memcached. Memcached can only do a small fraction of the things Redis can do. Redis is better even where their features overlap. For anything new, use Redis
+   * Redis is more powerful, more popular, and better supported than memcached. Memcached can only do a small fraction of the things Redis can do. Redis is better even where their features overlap. For anything new, use Redis
  * How to evaluate redis hit rate?
    * Overall:
      * You can see keyspace_hits and keyspace_misses in redis [info]((https://redis.io/commands/info))
@@ -49,7 +50,7 @@
      * If you have many redis commands you want to execute you can use pipelining to send them to redis all-at-once instead of one-at-a-time.
 
 
-### [Info](https://redis.io/commands/info)
+## [Info](https://redis.io/commands/info)
   * Ref:
     * [AWS ElastiCache Metrics](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/CacheMetrics.Redis.html)
   * [Redis Info](https://redis.io/commands/info)
