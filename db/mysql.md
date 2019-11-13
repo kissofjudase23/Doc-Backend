@@ -2,21 +2,17 @@
 
  Table of Contents
 - [MySQL](#mysql)
-  - [FAQ:](#faq)
+  - [FAQ](#faq)
   - [Design](#design)
+  - [Tuning](#tuning)
   - [Data Types](#data-types)
-    - [Numeric Type](#numeric-type)
-    - [Date and Time Type](#date-and-time-type)
-    - [String Type](#string-type)
-    - [JSON (from mysql 5.7)](#json-from-mysql-57)
   - [Charset](#charset)
-  - [ACID Model](#acid-model)
   - [CAP](#cap)
   - [Security](#security)
-  - [Normalization](#normalization)
-  - [Denormalization](#denormalization)
+  - [Normalization and Denormalization](#normalization-and-denormalization)
   - [Partitions](#partitions)
   - [Sharding](#sharding)
+  - [Federation (functional partitioning)](#federation-functional-partitioning)
   - [Stored Objects](#stored-objects)
     - [Stored procedure](#stored-procedure)
     - [Trigger](#trigger)
@@ -24,13 +20,14 @@
     - [View](#view)
   - [Indexes](#indexes)
   - [Locking and Transaction Model](#locking-and-transaction-model)
-  - [Profiling](#profiling)
   - [Join](#join)
   - [Example:](#example)
 
 
-## FAQ:
-  * [Normalized vs. Denormalized Databases](https://medium.com/@katedoesdev/normalized-vs-denormalized-databases-210e1d67927d)
+## FAQ
+  * Normalized vs. Denormalized Databases
+    * Ref:
+      * https://medium.com/@katedoesdev/normalized-vs-denormalized-databases-210e1d67927d
     * **Normalized databases** are designed to minimize **redundancy**, while **denomalized databases** are designed to optimized **read time**.
     * For example:
       * In a traditional normzlied database with data like Courses and Teachers, Courses might contain a column called TeachersID, which is a foreign key to Teacher.
@@ -41,61 +38,129 @@
     * Ref:
       * https://www.quora.com/Whats-the-difference-between-sharding-DB-tables-and-partitioning-them
   * How to find slow query
-
-
+    * before
+      * explain
+    * after
+      * Enable slow query log
+      * Use SHOW PROCESS LIST
+  * SQL vs NoSQL
+    * Ref:
+      * https://www.infoq.com/articles/Transition-RDBMS-NoSQL/
+    * SQL
+      * Relation data model
+        * Highly-Structured table organization with rigidly-defined data forrmats and record structure.
+      * Reasons for SQL
+        * Structured data
+        * Strict schema
+        * Relational data
+        * Need for complex joins
+        * Transactions (Mongo 4.0 supports transaction now)
+    * NoSQL
+      * Document data model
+        * Collection of complex documents with arbitrary, nested data formats and varying record format.
+      * Reasons for NoSQL
+        * Semi-structured data
+        * Dynamic or flexible schema
+        * Non-relational data
+        * No need for complex joins
+        * Store many TB (or PB) of data
+        * Very data intensive workload
+        * Very high throughput for IOPS
 ## Design
-  * Table
-    * [Normalization](#normalization)
-    * [Clustered Indexes](#clustered-indexes)
-      * Unsigned big int incremental
-        * Faster when insert
-        * Duplicated issue
-      * User defined (unique or composite fields)
-    * [Secondary Indexes](#secondary-indexes)
-    * [Profiling](#profiling)
-    * [Partitions](#partitions)
   * APP
-    * Connection Pool
+    * Connection Pool setting
       * Depend on your processes, threads in your app and capability of your mysql server.
+## Tuning
+  * Ref:
+    * [10 Tips for Optimizing MySQL Queries](https://aiddroid.com/10-tips-optimizing-mysql-queries-dont-suck/)
+  * **Profiling**:
+    * mtop: monitoring tool
+    * Slow query log
+    * EXPLAIN
+      * EXPLAIN is used to obtain a query execution plan (that is, an explanation of how MySQL would execute a query).
+    * [SHOW PROCESSLIST](https://dev.mysql.com/doc/refman/8.0/en/show-processlist.html)
+      * SHOW PROCESSLIST shows which threads are running. If you have the PROCESS privilege, you can see all threads.
+      * The SHOW PROCESSLIST statement is very useful if you get the “too many connections” error message and want to find out what is going on.
+    * [SHOW STATUS](https://dev.mysql.com/doc/refman/8.0/en/show-status.html)
+      * SHOW STATUS provides server status information (see Section 5.1.10, “Server Status Variables”). This statement does not require any privilege. It requires only the ability to connect to the server.
+  * **Benchmark**:
+    * Simulate high load situations
+      * [ab](http://httpd.apache.org/docs/2.2/programs/ab.html)
+      * supersmack
+      * SysBench
+  * Tighten up schema
+    * MySQL dumps to disk in contiguous blocks for fast access.
+    * **Use CHAR instead of VARCHAR** for **fixed-length** fields.
+      * CHAR effectively allows for fast, random access, whereas with VARCHAR, you must find the end of a string before moving onto the next one.
+    * Use **TEXT** for large blocks of text such as blog posts. **TEXT also allows for boolean searches**. Using a TEXT field results in storing a pointer on disk that is used to locate the text block.
+    * Use **INT** for larger numbers up to 2^32 or 4 billion.
+    * Use **DECIMAL** for **currency** to avoid floating point representation errors.
+    * **Avoid storing large BLOBS**, store the location of where to get the object instead.
+    * VARCHAR(255) is the largest number of characters that can be counted in an 8 bit number, often maximizing the use of a byte in some RDBMS.
+    * Set the **NOT NULL** constraint where applicable to improve search performance.
+  * Use good indices
+    * Basic
+      * Columns that you are querying (**SELECT, GROUP BY, ORDER BY, JOIN**) could be faster with indices.
+      * Indices are usually represented as **self-balancing B-tree** that keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
+      * Writes could also be slower since the index also needs to be updated.
+    * Use **composite indexes**:
+      * If certain fields tend to **appear together in queries**, then it’s a good idea to create a composite index on them.
+      * Similar to single indexes, the cardinality of the fields matters to the effectiveness composite indexes.
+      * if a composite index is made on column1 , column2 , column3 ,…, columnN . Then queries like
+        ```sql
+        SELECT * FROM table
+        WHERE column1 = 'value';
 
+        SELECT * FROM table
+        WHERE column1 = 'value1'
+        AND column2 = 'value2';
+
+        SELECT * FROM table
+        WHERE column1 = 'value1'
+        AND column2 = 'value2'
+        AND column3 = 'value3'
+
+        ...
+
+        SELECT * FROM table
+        WHERE column1 = 'value1'
+        AND column2 = 'value2'
+        AND column3 = 'value3'
+          ...
+        AND columnN = 'valueN'
+
+        ```
+        will have performance gain.
+    * Avoid Unnecessary Indexes
+      * Do not use an index for **low-read** but **high-write** tables.
+      * Do not use an index if the field has **low cardinality**.
+        * Low-cardinality: refers to columns with few unique values.
+        * [Why low cardinality indexes negatively impact performance](https://www.ibm.com/developerworks/data/library/techarticle/dm-1309cardinal/index.html])
+  * Avoid expensive joins
+    * Denormalize where performance demands it.
+  * Partition tables
+    * Break up a table by putting hot spots in a separate table to help keep it in memory.
+  * Tune the query cache
+    * The query cache can be useful in an environment where you have tables that do not change very often and for which the server receives many identical queries.
 ## [Data Types](https://dev.mysql.com/doc/refman/8.0/en/data-type-overview.html)
-### [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
-### [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
-### [String Type](https://dev.mysql.com/doc/refman/8.0/en/string-type-overview.html)
-### [JSON](https://dev.mysql.com/doc/refman/8.0/en/json.html) (from mysql 5.7)
-  * [How to create index on JSON](https://blog.gslin.org/archives/2016/03/09/6406/mysql-5-7-%E7%9A%84-json%E3%80%81virtual-column-%E4%BB%A5%E5%8F%8A-index/)
-    * Use [Virtual Column](https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html)
-      * create **virtual column** on the key street
-          ```sql
-          ALTER TABLE test_features ADD COLUMN street VARCHAR(30) GENERATED ALWAYS AS (json_unquote(json_extract(`feature`,'$.properties.STREET'))) VIRTUAL;
-          ```
-      * create an index on it- [MySQL](#mysql)
-          ```sql
-          ALTER TABLE test_features ADD KEY `street` (`street`);
-          ```
+  * [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
+  * [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
+  * [String Type](https://dev.mysql.com/doc/refman/8.0/en/string-type-overview.html)
+  * [JSON](https://dev.mysql.com/doc/refman/8.0/en/json.html) (from mysql 5.7)
+    * [How to create index on JSON](https://blog.gslin.org/archives/2016/03/09/6406/mysql-5-7-%E7%9A%84-json%E3%80%81virtual-column-%E4%BB%A5%E5%8F%8A-index/)
+      * Use [Virtual Column](https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html)
+        * create **virtual column** on the key street
+            ```sql
+            ALTER TABLE test_features ADD COLUMN street VARCHAR(30) GENERATED ALWAYS AS (json_unquote(json_extract(`feature`,'$.properties.STREET'))) VIRTUAL;
+            ```
+        * create an index on it- [MySQL](#mysql)
+            ```sql
+            ALTER TABLE test_features ADD KEY `street` (`street`);
+            ```
 ## Charset
   * [Never use “utf8”. Use “utf8mb4”](https://medium.com/@adamhooper/in-mysql-never-use-utf8-use-utf8mb4-11761243e434)
     * MySQL's **utf8mb4** means **UTF-8**.
     * MySQL's **utf8** means a proprietary character encoding. This encoding can’t encode many Unicode characters.
-## ACID Model
-  * Ref:
-    * https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html
-  * **A**tomicity
-    * **Transactions** are atomic units of work that can be committed or rolled back.
-    * When a transaction makes multiple changes to the database, **either all the changes succeed when the transaction is committed, or all the changes are undone when the transaction is rolled back**.
-  * **C**onsistency
-    * The database remains in a **consistent state** at all times.
-    * If related data is being updated across multiple tables, **queries see either all old values or all new values, not a mix of old and new values**.
-  * **I**solation
-    * Transactions are protected (isolated) from each other while they are in progress; they cannot interfere with each other or see each other's uncommitted data.
-    * [Isolation Level](https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html)
-      - READ UNCOMMITTED
-      - READ COMMITTED
-      - REPEATABLE READ
-      - SERIALIZABLE
-  * **D**urability
-    * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to.
-
 ## CAP
  * Ref:
    * https://speakerdeck.com/shlominoach/mysql-and-the-cap-theorem-relevance-and-misconceptions
@@ -106,13 +171,11 @@
 * **P**artition Tolerant:
   * The system is able to operate on network partitioning.
     * **Partition tolerance is considered as a given condition**, since network partitioning can and does take place regardless of a system’s design
-
-* A distributed data store [web service] **cannot provide more than two** out of the three properties. Better illustrated as:
+  * A distributed data store [web service] **cannot provide more than two** out of the three properties. Better illustrated as:
   * If the network is good:
     * You may achieve both **A**vailability and **C**onsisteny (AC)
   * If the network is **P**artitioned
     * You must choose between **A**valibility and **C**onsisteny (AP) or (CP)
-
 ## Security
   * [SQL Injection](https://en.wikipedia.org/wiki/SQL_injection)
       * SQL injection is a code injection technique, used to attack data-driven applications, in which malicious SQL statements are inserted into an entry field for execution.
@@ -153,36 +216,33 @@
             ```python
             session.query(MyClass).filter("foo={}".format(getArgs['val']))
             ```
-
-## Normalization
-  * Ref:
-    * https://medium.com/@habibul.hasan.hira/database-normalization-8cdaddbb7715
-  * Definition:
-    * It is a database **design technique** which organizes tables in a manner that **reduces redundancy and dependency** of data.
-    *  It divides larger tables to smaller tables and links them using relationships.
-  * **1NF**
-    * Every column of a table should be atomic. That means you **can not put multiple values in a database column**.
-  * **2NF**
-    * If we have **composite primary key**! every non key field should be fully **depended on both key**. 
-  * **3NF**
-    * When a database table is in second normal form, there should be no transitive functional dependency. That means **any non primary key field should not be depend on other** on primary key field.
-  * **BCNF**
-  * **4NF**
-  * **5NF**
-
-## Denormalization
-  * Definition:
-    * A database optimization technique in which we **add redundant data to one or more tables**, this can help us avoid costly joins in a relational database.
-  * Pros
-    * **Retrieving data is faster since we do fewer joins.**
-    * Queries to retireve can be simpler, since we need to look at fewer tables.
-  * Cons
-    * Updates and Inserts are more expensive.
-    * Making Update and Insert Code harder to write.
-    * **Data may be inconsistent.**
-    * **Data redundancy necessitates more storage.**
-
-
+## Normalization and Denormalization
+  * Normalization
+    * Ref:
+      * https://medium.com/@habibul.hasan.hira/database-normalization-8cdaddbb7715
+    * Definition:
+      * It is a database **design technique** which organizes tables in a manner that **reduces redundancy and dependency** of data.
+      *  It divides larger tables to smaller tables and links them using relationships.
+    * **1NF**
+      * Every column of a table should be atomic. That means you **can not put multiple values in a database column**.
+    * **2NF**
+      * If we have **composite primary key**! every non key field should be fully **depended on both key**. 
+    * **3NF**
+      * When a database table is in second normal form, there should be no transitive functional dependency. That means **any non primary key field should not be depend on other** on primary key field.
+    * **BCNF**
+    * **4NF**
+    * **5NF**
+  * Denormalization
+    * Definition:
+      * A database optimization technique in which we **add redundant data to one or more tables**, this can help us avoid costly joins in a relational database.
+    * Pros
+      * **Retrieving data is faster since we do fewer joins.**
+      * Queries to retireve can be simpler, since we need to look at fewer tables.
+    * Cons
+      * Updates and Inserts are more expensive.
+      * Making Update and Insert Code harder to write.
+      * **Data may be inconsistent.**
+      * **Data redundancy necessitates more storage.**
 ## [Partitions](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)
   * FAQ
     * [Partitions and UPDATE](https://stackoverflow.com/questions/12929624/partitions-and-update)
@@ -261,13 +321,16 @@
           ```
 
   * [Subpartition](https://dev.mysql.com/doc/refman/5.7/en/partitioning-subpartitions.html)
-
 ## [Sharding](https://medium.com/system-design-blog/database-sharding-69f3f4bd96db)
   * FAQ:
     * [Differences Between the NDB and InnoDB Storage Engines](https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster-ndb-innodb-engines.html)
   * Approach1: calculate shard key in the app layers
   * Approach2: use [mysql cluster](https://dev.mysql.com/doc/refman/8.0/en/mysql-cluster-overview.html)
     * ![overview](https://dev.mysql.com/doc/refman/8.0/en/images/cluster-components-1.png)
+  * Sharding Architecture:
+    * Hash Based
+    * Range Based
+    * Directory Based
   * Advantages:
     * Faster queries response.
     * More write bandwidth
@@ -275,12 +338,13 @@
   * Drawbacks:
     * Adds complexity in the system.
     * Rebalancing data.
-    * Joining data from multiple shards.
-  * Sharding Architecture:
-    * Hash Based
-    * Range Based
-    * Directory Based
-
+    * Joining data from multiple shards is more complex.
+## Federation (functional partitioning)
+  * Federation (or functional partitioning) splits up databases by function. For example, instead of a single, monolithic database
+  * Drawbacks:
+    * Federation is not effective if your schema requires huge functions or tables.
+    * You'll need to update your application logic to determine which database to read and write.
+    * Joining data from two databases is more complex with a server link.
 ## [Stored Objects](https://dev.mysql.com/doc/refman/8.0/en/stored-objects.html)
 ### Stored procedure
   * An object created with CREATE FUNCTION and used much **like a built-in function**. You invoke it in an expression and it returns a value during expression evaluation.
@@ -290,50 +354,10 @@
   * An object created with CREATE EVENT and invoked by the server according to **schedule**.
 ### View
   * An object created with CREATE VIEW that when referenced produces a result set. A view acts as a virtual table.
-
 ## Indexes
   * Ref:
     * https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe
-
-  * Good Practices:
-    * Use good indexes
-      * Columns that you are querying (**SELECT, GROUP BY, ORDER BY, JOIN**) could be faster with indices.
-      * Indices are usually represented as **self-balancing B-tree** that keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
-      * Writes could also be slower since the index also needs to be updated.
-    * Use good **composite indexes**:
-      * If certain fields tend to **appear together in queries**, then it’s a good idea to create a composite index on them.
-      * Similar to single indexes, the cardinality of the fields matters to the effectiveness composite indexes.
-      * if a composite index is made on column1 , column2 , column3 ,…, columnN . Then queries like
-        ```sql
-        SELECT * FROM table
-        WHERE column1 = 'value';
-
-        SELECT * FROM table
-        WHERE column1 = 'value1'
-        AND column2 = 'value2';
-
-        SELECT * FROM table
-        WHERE column1 = 'value1'
-        AND column2 = 'value2'
-        AND column3 = 'value3'
-
-        ...
-
-        SELECT * FROM table
-        WHERE column1 = 'value1'
-        AND column2 = 'value2'
-        AND column3 = 'value3'
-          ...
-        AND columnN = 'valueN'
-
-        ```
-        will have performance gain.
-    * Avoid Unnecessary Indexes
-      * Do not use an index for **low-read** but **high-write** tables.
-      * Do not use an index if the field has **low cardinality**.
-        * Low-cardinality: refers to columns with few unique values.
-        * [Why low cardinality indexes negatively impact performance](https://www.ibm.com/developerworks/data/library/techarticle/dm-1309cardinal/index.html])
-
+    *
   * Clustered Indexes vsSecondary Indexes (InnoDB)
     * Ref:
       * https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e
@@ -377,20 +401,29 @@
         * Fields in **secondary key and clustered key** (permutation)
       * Condition Coverage:
         * Depended on the secondary key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
-
-
 ## Locking and Transaction Model
   * Ref:
+    * https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html
     * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-transaction-model.html
     * https://dev.mysql.com/doc/refman/8.0/en/locking-issues.html
 
-
-
-## Profiling
-  * [explain](https://medium.com/@sj82516/mysql-explain%E5%88%86%E6%9E%90%E8%88%87index%E8%A8%AD%E5%AE%9A%E6%9F%A5%E8%A9%A2%E5%84%AA%E5%8C%96-3e0708206ebf)
-  * How to find slow query
-
-
+  * ACID model:
+    * ACID is a set of properties of relational database transactions.
+    * **A**tomicity
+      * **Transactions** are atomic units of work that can be committed or rolled back.
+      * When a transaction makes multiple changes to the database, **either all the changes succeed when the transaction is committed, or all the changes are undone when the transaction is rolled back**.
+    * **C**onsistency
+      * The database remains in a **consistent state** at all times.
+      * If related data is being updated across multiple tables, **queries see either all old values or all new values, not a mix of old and new values**.
+    * **I**solation
+      * Transactions are protected (isolated) from each other while they are in progress; they cannot interfere with each other or see each other's uncommitted data.
+      * [Isolation Level](https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html)
+        - READ UNCOMMITTED
+        - READ COMMITTED
+        - REPEATABLE READ
+        - SERIALIZABLE
+    * **D**urability
+      * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to.
 ## Join
   * Ref
     * https://katiekodes.com/sql-every-join/
@@ -415,7 +448,6 @@
   * Self Join
   * Left Anti Join
   * Right Anti Join
-
 ## Example:
   * Tables
     * Courses:
