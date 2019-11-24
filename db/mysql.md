@@ -14,10 +14,6 @@
   - [Sharding](#sharding)
   - [Federation (functional partitioning)](#federation-functional-partitioning)
   - [Stored Objects](#stored-objects)
-    - [Stored procedure](#stored-procedure)
-    - [Trigger](#trigger)
-    - [Event](#event)
-    - [View](#view)
   - [Indexes](#indexes)
   - [Locking and Transaction Model](#locking-and-transaction-model)
   - [Join](#join)
@@ -51,25 +47,27 @@
         * Highly-Structured table organization with rigidly-defined data forrmats and record structure.
       * Reasons for SQL
         * Structured data
-        * Strict schema
+        * **Strict schema**
         * Relational data
         * Need for complex joins
-        * Transactions (Mongo 4.0 supports transaction now)
+        * **Transactions** (Mongo 4.0 supports transaction now)
     * NoSQL
       * Document data model
         * Collection of complex documents with arbitrary, nested data formats and varying record format.
       * Reasons for NoSQL
         * Semi-structured data
-        * Dynamic or flexible schema
+        * **Dynamic or flexible schema**
         * Non-relational data
         * No need for complex joins
         * Store many TB (or PB) of data
         * Very data intensive workload
-        * Very high throughput for IOPS
+        * **Very high throughput for IOPS** (auto sharding)
+
 ## Design
   * APP
     * Connection Pool setting
       * Depend on your processes, threads in your app and capability of your mysql server.
+
 ## Tuning
   * Ref:
     * [10 Tips for Optimizing MySQL Queries](https://aiddroid.com/10-tips-optimizing-mysql-queries-dont-suck/)
@@ -82,7 +80,7 @@
       * SHOW PROCESSLIST shows which threads are running. If you have the PROCESS privilege, you can see all threads.
       * The SHOW PROCESSLIST statement is very useful if you get the “too many connections” error message and want to find out what is going on.
     * [SHOW STATUS](https://dev.mysql.com/doc/refman/8.0/en/show-status.html)
-      * SHOW STATUS provides server status information (see Section 5.1.10, “Server Status Variables”). This statement does not require any privilege. It requires only the ability to connect to the server.
+      * SHOW STATUS provides server status information. This statement does not require any privilege. It requires only the ability to connect to the server.
   * **Benchmark**:
     * Simulate high load situations
       * [ab](http://httpd.apache.org/docs/2.2/programs/ab.html)
@@ -142,6 +140,7 @@
     * Break up a table by putting hot spots in a separate table to help keep it in memory.
   * Tune the query cache
     * The query cache can be useful in an environment where you have tables that do not change very often and for which the server receives many identical queries.
+
 ## [Data Types](https://dev.mysql.com/doc/refman/8.0/en/data-type-overview.html)
   * [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
   * [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
@@ -157,10 +156,12 @@
             ```sql
             ALTER TABLE test_features ADD KEY `street` (`street`);
             ```
+
 ## Charset
   * [Never use “utf8”. Use “utf8mb4”](https://medium.com/@adamhooper/in-mysql-never-use-utf8-use-utf8mb4-11761243e434)
     * MySQL's **utf8mb4** means **UTF-8**.
     * MySQL's **utf8** means a proprietary character encoding. This encoding can’t encode many Unicode characters.
+
 ## CAP
  * Ref:
    * https://speakerdeck.com/shlominoach/mysql-and-the-cap-theorem-relevance-and-misconceptions
@@ -176,6 +177,7 @@
     * You may achieve both **A**vailability and **C**onsisteny (AC)
   * If the network is **P**artitioned
     * You must choose between **A**valibility and **C**onsisteny (AP) or (CP)
+
 ## Security
   * [SQL Injection](https://en.wikipedia.org/wiki/SQL_injection)
       * SQL injection is a code injection technique, used to attack data-driven applications, in which malicious SQL statements are inserted into an entry field for execution.
@@ -216,6 +218,7 @@
             ```python
             session.query(MyClass).filter("foo={}".format(getArgs['val']))
             ```
+
 ## Normalization and Denormalization
   * Normalization
     * Ref:
@@ -226,7 +229,7 @@
     * **1NF**
       * Every column of a table should be atomic. That means you **can not put multiple values in a database column**.
     * **2NF**
-      * If we have **composite primary key**! every non key field should be fully **depended on both key**. 
+      * If we have **composite primary key! every non key field should be fully **depended on both key**. 
     * **3NF**
       * When a database table is in second normal form, there should be no transitive functional dependency. That means **any non primary key field should not be depend on other** on primary key field.
     * **BCNF**
@@ -243,6 +246,7 @@
       * Making Update and Insert Code harder to write.
       * **Data may be inconsistent.**
       * **Data redundancy necessitates more storage.**
+
 ## [Partitions](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)
   * FAQ
     * [Partitions and UPDATE](https://stackoverflow.com/questions/12929624/partitions-and-update)
@@ -321,6 +325,7 @@
           ```
 
   * [Subpartition](https://dev.mysql.com/doc/refman/5.7/en/partitioning-subpartitions.html)
+
 ## [Sharding](https://medium.com/system-design-blog/database-sharding-69f3f4bd96db)
   * FAQ:
     * [Differences Between the NDB and InnoDB Storage Engines](https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster-ndb-innodb-engines.html)
@@ -339,21 +344,24 @@
     * Adds complexity in the system.
     * Rebalancing data.
     * Joining data from multiple shards is more complex.
+
 ## Federation (functional partitioning)
   * Federation (or functional partitioning) splits up databases by function. For example, instead of a single, monolithic database
   * Drawbacks:
     * Federation is not effective if your schema requires huge functions or tables.
     * You'll need to update your application logic to determine which database to read and write.
     * Joining data from two databases is more complex with a server link.
+
 ## [Stored Objects](https://dev.mysql.com/doc/refman/8.0/en/stored-objects.html)
-### Stored procedure
-  * An object created with CREATE FUNCTION and used much **like a built-in function**. You invoke it in an expression and it returns a value during expression evaluation.
-### Trigger
-  * An object created with CREATE TRIGGER that is associated with a table. **A trigger is activated when a particular event occurs for the table**, such as an insert or update.
-### Event
-  * An object created with CREATE EVENT and invoked by the server according to **schedule**.
-### View
-  * An object created with CREATE VIEW that when referenced produces a result set. A view acts as a virtual table.
+  * Stored procedure
+    * An object created with CREATE FUNCTION and used much **like a built-in function**. You invoke it in an expression and it returns a value during expression evaluation.
+  * Trigger
+    * An object created with CREATE TRIGGER that is associated with a table. **A trigger is activated when a particular event occurs for the table**, such as an insert or update.
+  * Event
+    * An object created with CREATE EVENT and invoked by the server according to **schedule**.
+  * View
+    * An object created with CREATE VIEW that when referenced produces a result set. A view acts as a virtual table.
+
 ## Indexes
   * Ref:
     * https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe
@@ -401,6 +409,8 @@
         * Fields in **secondary key and clustered key** (permutation)
       * Condition Coverage:
         * Depended on the secondary key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
+
+
 ## Locking and Transaction Model
   * Ref:
     * https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html
@@ -424,10 +434,10 @@
         - SERIALIZABLE
     * **D**urability
       * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to.
+
 ## Join
   * Ref
     * https://katiekodes.com/sql-every-join/
-
   * Cross Join
     * CROSS JOIN returns the **Cartesian product of rows** from tables in the join. In other words, it will produce rows which combine each row from the first table with each row from the second table
 
@@ -443,28 +453,32 @@
     * A LEFT JOIN B is equivalent to B RIGHT JOIN A
 
   * FULL (outer)
-    * The type of join **combines the results of LEFT and RIGHT JOINS**. All records from both tables will be included in the result set. If no matching record was found, then the corresponding result fields will have a NULL value.
+    * The type of join **combines the results of LEFT and RIGHT JOINS**.
+    * All records from both tables will be included in the result set. If no matching record was found, then the corresponding result fields will have a NULL value.
 
   * Self Join
   * Left Anti Join
   * Right Anti Join
-## Example:
-  * Tables
-    * Courses:
-      * CourseID*
-      * CourseName
-      * TeacherID
-    * Teachers:
-      * TeacherID*
-      * TeacherName
-    * Students:
-      * StudentID*
-      * StudentName
-    * StudentCourses:
-      * CourseID
-      * StudentID
 
-  * Questions
+## Example:
+  * Q1:
+    * Giving the following tables:
+      * Courses:
+        * CourseID*
+        * CourseName
+        * TeacherID
+
+      * Teachers:
+        * TeacherID*
+        * TeacherName
+
+      * Students:
+        * StudentID*
+        * StudentName
+
+      * StudentCourses:
+        * CourseID
+        * StudentID
     * Implement a query to get a list of all students and how many course each student is enrolled in.
       * **We can only select values that are in aggregate function or in the GROUP BY clause.**
       * Approach1: group by multiple keys
@@ -498,35 +512,55 @@
         on Teachers.TeacherID = StudentSize.TeacherID
         ORDER BY StudentSize.Number DSEC;
         ```
-    * [Find the second largetst value](https://stackoverflow.com/questions/32100/what-is-the-simplest-sql-query-to-find-the-second-largest-value)
-      ```sql
-      SELECT MAX( col )
-      FROM table
-      WHERE col < ( SELECT MAX( col )
-                    FROM table )
-      ```
-  * [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
-    * on MySQL you can do
-      ```sql
-      SELECT column FROM table ORDER BY column DESC LIMIT 7,10;
-      ```
-    * Updated as per comment request. WARNING completely untested!
-      ```sql
-      SELECT DOB FROM (SELECT DOB FROM USERS ORDER BY DOB DESC) WHERE ROWID = 6
-      ```
-  * [Filter Table Before Applying Left Join](https://stackoverflow.com/questions/15077053/filter-table-before-applying-left-join)
-    * Solution1:
-      ```sql
-      SELECT c.Customer, c.State, e.Entry
-      FROM Customer c LEFT JOIN Entry e
-        ON c.Customer=e.Customer
-        AND e.Category='D'
-      ``
-  * Solution2:
-      ```sql
-      SELECT c.Customer, c.State, e.Entry
-      FROM Customer AS c LEFT JOIN (SELECT * FROM Entry WHERE Category='D') AS e ON c.Customer=e.Customer
-      ```
+  * Q2:
+    * Giving the following tables:
+      * Employee
+        * Id*
+        * Salary
+    * Get the second highest salary
+    * Ref:
+      * https://stackoverflow.com/questions/32100/what-is-the-simplest-sql-query-to-find-the-second-largest-value
+      * https://leetcode.com/problems/second-highest-salary/solution/
+    * Approach1: two max functions
+        ```sql
+        SELECT Max( Salary ) AS SecondHighestSalary
+        FROM Employee
+        WHERE Salary < ( SELECT MAX( Salary ) FROM Employee )
+        ```
+    * Approach2: orderby + Offset
+       ```sql
+       SELECT
+        IFNULL(
+          (SELECT DISTINCT Salary
+           FROM Employee
+           ORDER BY Salary DESC
+           LIMIT 1 OFFSET 1),
+           NULL) AS SecondHighestSalary
+       ```
+  * Q3
+    * [Query to find nth max value of a column](https://stackoverflow.com/questions/80706/query-to-find-nth-max-value-of-a-column)
+      * on MySQL you can do
+        ```sql
+        SELECT column FROM table ORDER BY column DESC LIMIT 7,10;
+        ```
+      * Updated as per comment request. WARNING completely untested!
+        ```sql
+        SELECT DOB FROM (SELECT DOB FROM USERS ORDER BY DOB DESC) WHERE ROWID = 6
+        ```
+  * Q4
+    * [Filter Table Before Applying Left Join](https://stackoverflow.com/questions/15077053/filter-table-before-applying-left-join)
+      * Solution1:
+        ```sql
+        SELECT c.Customer, c.State, e.Entry
+        FROM Customer c LEFT JOIN Entry e
+          ON c.Customer=e.Customer
+          AND e.Category='D'
+        ``
+    * Solution2:
+        ```sql
+        SELECT c.Customer, c.State, e.Entry
+        FROM Customer AS c LEFT JOIN (SELECT * FROM Entry WHERE Category='D') AS e ON c.Customer=e.Customer
+        ```
 
 
 
