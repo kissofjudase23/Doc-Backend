@@ -37,7 +37,7 @@ WebServices
    * About JWT
      * JWT is for authorization.
      * JWT defines the token format not the protocol.
-     * JWT is kepts on client side, and can be used to authorize many services as long as they share the smae secret key.
+     * JWT is kept on client side, and can be used to authorize many services as long as they share the smae secret key.
    * Flow:
      * ![flow](./images/JWT.png)
    * JWT Token format:
@@ -86,22 +86,30 @@ WebServices
     * step1:
       * The SSL or TLS client sends a client **hello message** that lists **cryptographic information** such as the SSL or **TLS version** and, in the client's order of preference, **the CipherSuites supported by the client**.
         * The message also contains a random byte string that is used in subsequent computations. The protocol allows for the client hello to include the data compression methods supported by the client.
+
     * step2:
       * The SSL or TLS server responds with a server hello message that contains the **CipherSuite chosen by the server** from the list provided by the client, the session ID, and another random byte string. **The server also sends its digital certificate.**
-  			* If the server requires a digital certificate for client authentication, the server sends a client certificate request that includes a list of the types of certificates supported and the Distinguished Names of acceptable Certification Authorities (CAs).
-		* step3:
-  		* The SSL or TLS client verifies the server's digital certificate.
-		* step4:
+  		* If the server requires a digital certificate for client authentication, the server sends a client certificate request that includes a list of the types of certificates supported and the Distinguished Names of acceptable Certification Authorities (CAs).
+
+    * step3:
+    	* The SSL or TLS client verifies the server's digital certificate.
+
+    * step4:
   		* The SSL or TLS client sends the **random byte string  that enables both the client and the server to compute the secret key** to be used for encrypting subsequent message data.
     		* **The random byte string itself is encrypted with the server's public key**.
-		* step5:
-			* If the SSL or TLS server sent a client certificate request, the client sends a random byte string encrypted with the client's private key, together with the client's digital certificate, or a no digital certificate alert. This alert is only a warning, but with some implementations the handshake fails if client authentication is mandatory.
+
+    * step5:
+      * If the SSL or TLS server sent a client certificate request, the client sends a random byte string encrypted with the client's private key, together with the client's digital certificate, or a no digital certificate alert. This alert is only a warning, but with some implementations the handshake fails if client authentication is mandatory.
+
   	* step6:
-			* The SSL or TLS server verifies the client's certificate.
+    	* The SSL or TLS server verifies the client's certificate.
+
     * step7:
       * The SSL or TLS client sends the server a finished message, which is encrypted with the secret key, indicating that the client part of the handshake is complete.
+
     * step8:
       * The SSL or TLS server sends the client a finished message, which is encrypted with the secret key, indicating that the server part of the handshake is complete.
+
     * step9:
       * For the duration of the SSL or TLS session, the server and client can now **exchange messages that are symmetrically encrypted with the shared secret key**.
 
@@ -246,9 +254,11 @@ WebServices
   * Ref:
     * https://www.howtographql.com/basics/0-introduction/
   * GraphQL is a new API standard that provides a more efficient, powerful and flexible alternative to REST.
-  * **At its core, GraphQL enables declarative data fetching where a client can specify exactly what data it needs from an API.** Instead of multiple endpoints that return fixed data structures, a GraphQL server only exposes a single endpoint and responds with precisely the data a client asked for.
-  * example:
-    * https://www.howtographql.com/basics/1-graphql-is-the-better-rest/
+  * **At its core, GraphQL enables declarative data fetching where a client can specify exactly what data it needs from an API. Instead of multiple endpoints that return fixed data structures, a GraphQL server only exposes a single endpoint and responds with precisely the data a client asked for**.
+  * GraphQL is the better REST
+    * Over the past decade, REST has become the standard (yet a fuzzy one) for designing web APIs. It offers some great ideas, such as stateless servers and structured access to resources. However, REST APIs have shown to be too inflexible to keep up with the rapidly changing requirements of the clients that access them.
+    * example:
+      * https://www.howtographql.com/basics/1-graphql-is-the-better-rest/
 
 
 ## CDN
