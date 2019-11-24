@@ -3,6 +3,7 @@
 - [Table of Contents](#table-of-contents)
 - [Reference](#reference)
 - [FAQ](#faq)
+- [Performance enhancement](#performance-enhancement)
 - [Info](#info)
 - [Persistence](#persistence)
 - [Eviction Policies](#eviction-policies)
@@ -43,7 +44,9 @@
    * Specific key:
      * Write log and do some post process.
      * Use redis cnt (INCR command) or HyperLogLog ?
- * Performance enhancement
+
+
+## Performance enhancement
    * [Mget](https://redis.io/commands/mget)
       * Returns the values of **all specified keys**
    * [Pipelining](https://redis.io/topics/pipelining)
