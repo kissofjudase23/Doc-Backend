@@ -40,10 +40,11 @@
    * Redis is more powerful, more popular, and better supported than memcached. Memcached can only do a small fraction of the things Redis can do. Redis is better even where their features overlap. For anything new, use Redis
  * How to evaluate redis hit rate?
    * Overall:
-     * You can see keyspace_hits and keyspace_misses in redis [info]((https://redis.io/commands/info))
+     * You can see **keyspace_hits** and **keyspace_misses** in redis [info]((https://redis.io/commands/info))
    * Specific key:
      * Write log and do some post process.
      * Use redis cnt (INCR command) or HyperLogLog ?
+     * Use monitor
 
 
 ## Performance enhancement
@@ -51,6 +52,7 @@
       * Returns the values of **all specified keys**
    * [Pipelining](https://redis.io/topics/pipelining)
      * If you have many redis commands you want to execute you can use pipelining to send them to redis all-at-once instead of one-at-a-time.
+     * Only one round trip time
 
 
 ## [Info](https://redis.io/commands/info)
@@ -91,6 +93,15 @@
 
 
 ## [Transactions](https://redis.io/topics/transactions)
+  * They allow the execution of a group of commands in a single step, with two important guarantees:
+    * **Atomicity**
+      * Either **all of the commands or none are processed**.
+    * **Isolation**
+      * All the commands in a transaction are serialized and executed sequentially.
+      * **It can never happen that a request issued by another client is served in the middle of the execution** of a Redis transaction.
+    * **Does not support roll back**
+      * Redis commands can fail during a transaction, **but still Redis will execute the rest of the transaction instead of rolling back**.
+
   * **MULTI**, **EXEC**, **DISCARD** and **WATCH** are the foundation of transactions in Redis.
     * MULTI and EXEC
         ```redis
@@ -105,7 +116,7 @@
     * DISCARD
       * Used to abort a transaction.
     * WATCH
-      * It is a command that will **make the EXEC conditional**: we are asking Redis to perform the transaction only if none of the WATCHed keys were modified.
+      * It is a command that will **make the EXEC conditional**: **we are asking Redis to perform the transaction only if none of the WATCHed keys were modified.**
         * if there are race conditions and another client modifies the result of val in the time between our call to WATCH and our call to EXEC, the transaction will fail.
         ```redis
         WATCH mykey
@@ -116,14 +127,6 @@
         SET mykey $val
         EXEC
         ```
-  * They allow the execution of a group of commands in a single step, with two important guarantees:
-    * **Atomicity**
-      * Either **all of the commands or none are processed**.
-    * **Isolation**
-      * All the commands in a transaction are serialized and executed sequentially.
-      * It can never happen that a request issued by another client is served in the middle of the execution of a Redis transaction.
-    * **Does not support roll back**
-      * Redis commands can fail during a transaction, **but still Redis will execute the rest of the transaction instead of rolling back**.
 * [What are equivalent functions of MULTI and EXEC commands in redis-py?](https://stackoverflow.com/questions/31769163/what-are-equivalent-functions-of-multi-and-exec-commands-in-redis-py)
   * In redis-py MULTI and EXEC can only be used through a [Pipeline](https://redis-py.readthedocs.io/en/latest/index.html?redis.Redis.pipeline#redis.Redis.pipeline) object.
     * ```python
@@ -169,8 +172,34 @@
 ### [Reliable queue](https://redis.io/commands/rpoplpush)
   * [Circular list](https://redis.io/commands/rpoplpush)
 ### [Pub/Sub](https://redis.io/topics/pubsub)
-  * [example](https://github.com/andymccurdy/redis-py/#publish--subscribe)
-  * [Only one client can get the message.](https://stackoverflow.com/questions/7196306/competing-consumer-on-redis-pub-sub-supported) (not one to many)
+  * example
+    * [redis-py](https://github.com/andymccurdy/redis-py/#publish--subscribe)
+      * Subscribe channel
+         ```python
+         r = redis.Redis(...)
+         p = r.pubsub()
+
+         # subscribe by channel
+         p.subscribe('my-first-channel', 'my-second-channel', ...)
+
+         # subscribe by pattern
+         p.psubscribe('my-*', ...)
+         ```
+      * Publish message
+          ```python
+          # delivery_cnt would be 2
+          # my-firs-channel matches 'my-first-channel' and 'my-*'
+
+          delivery_cnt =  r.publish('my-first-channel', 'some data')
+          ```
+      * note:
+        * [p]unsubscribe doesn't remove channels/patterns from the dictionary because messages on those channels could still be in flight from the server to the client when the unsubscribe command is sent. Instead retrieving messages from a pubsub object (either via pubsub.listen() or pubsub.get_message()) will find the [p]unsubscribe confirmations and only then remove the channels/patterns. This is the only safe time to remove them.
+        * **Alternatively, consider using pubsub.close()**. That will shut down everything, including disconnecting and cleaning out the channels/patterns dicts.
+
+Alternatively, consider using pubsub.close(). That will shut down everything, including disconnecting and cleaning out the channels/patterns dicts.
+  * [Only one client can get the message](https://stackoverflow.com/questions/7196306/competing-consumer-on-redis-pub-sub-supported) (not one to many).
+    * But you can publish to multiple channel once.
+
 ### [Distributed lock](https://redis.io/topics/distlock) (Redlock algorithm)
   * Distributed locks are a very useful primitive in many environments where different processes must operate with shared resources in a mutually exclusive way.
 * Safety and Liveness guarantees:
