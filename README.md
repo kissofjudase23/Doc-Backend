@@ -15,7 +15,8 @@
 
  ## Reference
   * [awsesome-interview-questions](https://github.com/MaximAbramchuck/awesome-interview-questions)
-  *
+  * [The 2019 DevOps RoadMap](https://medium.com/hackernoon/the-2018-devops-roadmap-31588d8670cb)
+  * [DevOps RoadMap](https://github.com/kamranahmedse/developer-roadmap)
 
 
 
