@@ -86,17 +86,19 @@
       * [ab](http://httpd.apache.org/docs/2.2/programs/ab.html)
       * supersmack
       * SysBench
-  * Tighten up schema
+  * Tighten up **schema**
     * MySQL dumps to disk in contiguous blocks for fast access.
     * **Use CHAR instead of VARCHAR** for **fixed-length** fields.
       * CHAR effectively allows for fast, random access, whereas with VARCHAR, you must find the end of a string before moving onto the next one.
-    * Use **TEXT** for large blocks of text such as blog posts. **TEXT also allows for boolean searches**. Using a TEXT field results in storing a pointer on disk that is used to locate the text block.
+    * Use **TEXT** for large blocks of text such as blog posts.
+      * **TEXT also allows for boolean searches**.
+      * Using a TEXT field results in storing a pointer on disk that is used to locate the text block.
     * Use **INT** for larger numbers up to 2^32 or 4 billion.
     * Use **DECIMAL** for **currency** to avoid floating point representation errors.
     * **Avoid storing large BLOBS**, store the location of where to get the object instead.
     * VARCHAR(255) is the largest number of characters that can be counted in an 8 bit number, often maximizing the use of a byte in some RDBMS.
     * Set the **NOT NULL** constraint where applicable to improve search performance.
-  * Use good indices
+  * Use good **indexes**
     * Basic
       * Columns that you are querying (**SELECT, GROUP BY, ORDER BY, JOIN**) could be faster with indices.
       * Indices are usually represented as **self-balancing B-tree** that keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time.
@@ -330,6 +332,8 @@
   * FAQ:
     * [Differences Between the NDB and InnoDB Storage Engines](https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster-ndb-innodb-engines.html)
   * Approach1: calculate shard key in the app layers
+    * [consistent hash](https://medium.com/@sent0hil/consistent-hashing-a-guide-go-implementation-fe3421ac3e8f#.d67hxnv1l)
+    * [jump consisten hash](https://blog.gslin.org/archives/2016/07/26/6688/google-%E6%8F%90%E5%87%BA%E7%9A%84-jump-consistent-hash/)
   * Approach2: use [mysql cluster](https://dev.mysql.com/doc/refman/8.0/en/mysql-cluster-overview.html)
     * ![overview](https://dev.mysql.com/doc/refman/8.0/en/images/cluster-components-1.png)
   * Sharding Architecture:
@@ -416,6 +420,8 @@
     * https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html
     * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-transaction-model.html
     * https://dev.mysql.com/doc/refman/8.0/en/locking-issues.html
+    * [How does a database server handle thousands of concurrent requests](https://medium.com/how-the-web-works/how-does-a-database-server-handle-thousands-of-concurrent-requests-d54352310183)
+    * [TritonHo](https://github.com/TritonHo/slides/tree/master/Taipei%202015-01%20talk)
 
   * ACID model:
     * ACID is a set of properties of relational database transactions.
@@ -426,14 +432,101 @@
       * The database remains in a **consistent state** at all times.
       * If related data is being updated across multiple tables, **queries see either all old values or all new values, not a mix of old and new values**.
     * **I**solation
-      * Transactions are protected (isolated) from each other while they are in progress; they cannot interfere with each other or see each other's uncommitted data.
-      * [Isolation Level](https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html)
-        - READ UNCOMMITTED
-        - READ COMMITTED
-        - REPEATABLE READ
-        - SERIALIZABLE
+      * Transactions are protected (isolated) from each other while they are in progress; **they cannot interfere with each other or see each other's uncommitted data** (In fact, read uncommitted is not islolated from other transaction).
+      * Depend on isolation level. (see below)
+        * The default isolation level of mysql is "Repeatable Read".
     * **D**urability
       * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to.
+
+  * Isolation Level:
+    * Ref:
+      *
+    * Read Uncommitted (dirty read)
+      * **One transaction may read not yet commited changes made by other transaction**, thereby **allowing dirty reads**.
+    * Read Committed (Non Repetable Read)
+      * This isolation level **guarantees that any data read is committed at the moment it is read (but do not guarantee Repeatable read). Thus it does not allows dirty read**.
+      * In this isolation level the transaction level holds a read lock till the end of the statement and a write lock till the transaction commits/rollbacks.
+    * Repeatable Read
+      *  The transaction **holds read locks on all rows it references and write locks on all rows it inserts, updates, or deletes till the transaction commits.**
+      *  Since **other transaction cannot read, update or delete these rows**, consequently it avoids non repeatable read.
+    * Serialisable
+      * **A serialisable execution is guaranteed to be serialisable.** Serialisable execution is defined to be an execution of operations in which concurrently executing transactions appears to be serially executing.
+
+
+  * Locks:
+    * Ref:
+      * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking.html#innodb-auto-inc-locks
+    * **Shared** Lock (Read Lock, S-Lock)
+      * A kind of lock that **allows other transactions to read the locked object, and to also acquire other shared locks on it, but not to write to it**.
+    * **Exclusive** Lock (Write Lock, X-Lock)
+      * **A kind of lock that prevents any other transaction from locking the same row. Depending on the transaction isolation level**.
+      * This kind of lock might block other transactions from writing to the same row, or might also block other transactions from reading the same row.
+      * The default InnoDB isolation level, REPEATABLE READ, enables higher concurrency by allowing transactions to read rows that have exclusive locks, a technique known as consistent read.
+
+  * Read Policies:
+    * **locking** read
+      * Ref:
+        * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html
+      * If you query data and then insert or update related data within the same transaction, the regular SELECT statement does not give enough protection (write skew).  Other transactions can update or delete the same rows you just queried. InnoDB supports two types of locking reads that offer extra safety.
+    * **consistent** read
+      * Ref:
+        * https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read
+        * https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html
+      * **A read operation that uses snapshot information to present query results based on a point in time, regardless of changes performed by other transactions running at the same time.** If queried data has been changed by another transaction, the original data is reconstructed based on the contents of the undo log. This technique avoids some of the locking issues that can reduce concurrency by forcing transactions to wait for other transactions to finish.
+        * With **REPEATABLE READ** isolation level, the snapshot is based on the time when the first read operation is performed.
+        * With **READ COMMITTED** isolation level, the snapshot is reset to the time of each consistent read operation.
+        * Consistent read is the default mode in which InnoDB processes SELECT statements in READ COMMITTED and REPEATABLE READ isolation levels. Because **a consistent read does not set any locks on the tables it accesses**, other sessions are free to modify those tables while a consistent read is being performed on the table.
+
+  * Phenomenon that describe a particular isolation.
+    * Dirty Read
+      * Dirty read is **the situation when a transaction reads a data that has not yet been commited.**
+      * For example, Let’s say transaction 1 updates a row and leaves it uncommited, meanwhile Transaction 2 reads the updated row. If transaction 1 rolls back the change, transaction 2 will have read data that is considered never to have existed.
+    * Non Repetable Read (different val in the same row)
+      * **Non Repeatable read occurs when a transaction reads same row twice, and get a different value each time.**
+      * For example, suppose transaction T1 reads a data. Due to concurrency, another transaction T2 updates the same data and commit, Now if transaction T1 rereads the same data, it will retrieve a different value.
+    * Phantom Read (get different row sets)
+      * **Phantom Read occurs when two same queries are executed, but the rows retrieved by the two, are different.** For example, suppose transaction T1 retrieves a set of rows that satisfy some search criteria. Now, Transaction T2 generates some new rows that matches the search criteria for transaction T1. If transaction T1 re-executes the statement that reads the rows, it gets a different set of rows this time
+    * **Write Skew**
+      * Two transactions (T1 and T2) concurrently read an overlapping data set (e.g. values V1 and V2), concurrently make disjoint updates (e.g. T1 updates V1, T2 updates V2), and finally concurrently commit, **neither having seen the update performed by the other**.
+      * for example: qnantity of A is 2.
+        * T1:
+          ```sql
+          SELECT qnantity FROM inventory Where item = A
+          ```
+        * T2:
+          ```sql
+          SELECT qnantity FROM inventory Where item = A
+          ```
+        * T1:
+          ```sql
+          UPDATE inventory SET qnantity=quantity - 2 Where item = A
+          ```
+        * T2:
+          ```sql
+          UPDATE inventory SET qnantity=quantity - 2 Where item = A
+          ```
+      * And we got error qnantity -2
+      * Solutions:
+        * 1:
+          * Use Serialisable isolation level
+        * 2:
+          * Use atomic check and set
+            ```sql
+            update user set balance = balance - $amount where user_id = $user_id and balance >= $amount
+            ```
+
+  * Strategy to handle concurrency conflicts
+    * Pessimistic concurrency control
+      * A system of locks prevents users from modifying data in a way that affects other users.
+      * After a user performs an action that causes a lock to be applied, other users cannot perform actions that would conflict with the lock until the owner releases it.
+      * This is called pessimistic control because it is mainly used in environments where there is high contention for data, where the cost of protecting data with locks is less than the cost of rolling back transactions if concurrency conflicts occur.
+
+    * Optimistic concurrency control
+      * In optimistic concurrency control, users do not lock data when they read it. When a user updates data, the system checks to see if another user changed the data after it was read.
+      * If another user updated the data, an error is raised. Typically, the user receiving the error rolls back the transaction and starts over.
+      * This is called optimistic because it is mainly used in environments where there is low contention for data, and where the cost of occasionally rolling back a transaction is lower than the cost of locking data when read.
+
+    * Thus basically since the retry of a particular transaction can be offloaded to the client side thus we prefer optimistic concurrency control.
 
 ## Join
   * Ref
@@ -549,14 +642,15 @@
         ```
   * Q4
     * [Filter Table Before Applying Left Join](https://stackoverflow.com/questions/15077053/filter-table-before-applying-left-join)
-      * Solution1:
+      * Approach1: move where filter to the join condition
         ```sql
         SELECT c.Customer, c.State, e.Entry
-        FROM Customer c LEFT JOIN Entry e
+        FROM Customer AS c LEFT JOIN Entry AS e
           ON c.Customer=e.Customer
           AND e.Category='D'
         ``
-    * Solution2:
+
+     * Approach2: Use subquery
         ```sql
         SELECT c.Customer, c.State, e.Entry
         FROM Customer AS c LEFT JOIN (SELECT * FROM Entry WHERE Category='D') AS e ON c.Customer=e.Customer
