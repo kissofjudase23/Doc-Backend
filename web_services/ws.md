@@ -68,6 +68,7 @@ WebServices
   * Ref
     * [Symmetric/Asymmetric/Hybrid Encryption](http://david50.pixnet.net/blog/post/28796015)
     * [TLS handshake](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.1.0/com.ibm.mq.doc/sy10660_.htm)
+    * [How SSL and TLS provide authentication](https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.1.0/com.ibm.mq.doc/sy10670_.htm)
 
   * [Cipher Suite](https://docs.microsoft.com/zh-tw/windows/win32/secauthn/cipher-suites-in-schannel?redirectedfrom=MSDN)
     *![Cipher Suite](./images/cipher_suite.png)
@@ -115,12 +116,42 @@ WebServices
     * step9:
       * For the duration of the SSL or TLS session, the server and client can now **exchange messages that are symmetrically encrypted with the shared secret key**.
 
+  * What happens during certificate verification
+    * The **digital signature** is checked
+      * The signature verifies a certificate, not a server.
+    * The **certificate chain** is checked you should have intermediate CA certificates
+    * The expiry and activation dates and the validity period are checked.
+    * The revocation status of the certificate is checked
+
+  * Certificate Chain checking
+    * ![certificate chain](./images/certificate_chain.png)
+      * blue arrows are "is identical" 
+      * green arrows means "generates" (i.e. by signing, which is not encrypting and you shouldn't call it encrypting)
+    * step1:
+      * If the certificate is identical to **something in the preset list of "trusted certificates"** (e.g. a trusted root CA cert, or if you've manually added a trusted root certificate), then accept the certificate.
+      * If it's not and this is the last certificate in the chain, reject it (you don't trust whoever verified it).
+
+    * step2:
+      * Check Expire time, Domain matching
+
+    * step3:
+      * Check the **Issuer**, the **signature algorithm**, and the **signature** on the certificate.
+        * If there's a next cert in the list of certs you received, verify that that certificate's Subject DN is this one's Issuer DN.
+        * Using the public key from the next certificate and the signature algorithm from this certificate, verify the signature on this certificate.
+
+    * step4:
+      * Verify that the next certificate has the CA attribute. (certificate authority)
+
+    * step5:
+      * Validate the next certificate down the line using this same process.
+
+
+    * Ref:
+      * https://support.dnsimple.com/articles/what-is-ssl-certificate-chain/
+      * https://crypto.stackexchange.com/questions/24968/
+
 
 ## RESTful
-  * Ref:
-    * [TritonHo](https://github.com/TritonHo/slides/blob/master/Taipei%202016-04%20talk/RESTful%20API%20Design-tw-2.1.pdf)
-    * [10 Best Practices for Better RESTful API](https://blog.mwaysolutions.com/2014/06/05/10-best-practices-for-better-restful-api/)
-    * [Best Practices for Designing a Pragmatic RESTful API](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api)
   * Key Conecpt:
     * The key principles of REST involve **separating your API into logical resources**. These resources are **manipulated using HTTP requests where the method** (GET, POST, PUT, PATCH, DELETE) has specific meaning.
   * Practices:
@@ -150,12 +181,17 @@ WebServices
     * Version your API
     * Handle Errors with HTTP status codes
     * Allow overriding HTTP method
+
   * Example:
     * | Resource  | GET                   | POST                     | PUT                    | DELETE                |
       |-----------|-----------------------|--------------------------|------------------------|-----------------------|
       | /car      | Return a list of cars | Create a new car         | Bulk Update            | Delete all cars       |
       | /cars/711 | Return a specific car | Method not allowed (405) | Updates a specific car | Delete a specific car |
 
+  * Ref:
+    * [TritonHo](https://github.com/TritonHo/slides/blob/master/Taipei%202016-04%20talk/RESTful%20API%20Design-tw-2.1.pdf)
+    * [10 Best Practices for Better RESTful API](https://blog.mwaysolutions.com/2014/06/05/10-best-practices-for-better-restful-api/)
+    * [Best Practices for Designing a Pragmatic RESTful API](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api)
 ## HTTP Methods
   * Methods
     * GET (safe & idempotent):
