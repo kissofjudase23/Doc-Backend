@@ -24,6 +24,12 @@
 
 
 ## FAQ
+* How is Docker different from a virtual machine?
+  * ![docker vs VM](https://i.stack.imgur.com/exIhw.png)
+  * ![docker](https://i.stack.imgur.com/vIBgw.png)
+  * Ref:
+    * https://stackoverflow.com/questions/16047306/how-is-docker-different-from-a-virtual-machine
+
 * How to minimize docker image size?
   * [Use multi-stage builds](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#use-multi-stage-builds)
     * Where possible, use multi-stage builds, and only copy the artifacts you need into the final image.
