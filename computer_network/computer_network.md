@@ -21,7 +21,7 @@ ComputerNetwork
 
 ## IPv6
  * Prefix, Subnet ID, Interface ID, CIDR
- * Global Unitcast Address, Link Local Address (fe80::/10)
+ * Global Unitcast Address, Link Local Address (fe80::interfaice-ID/10)
  * EUI-64
    * This feature is a key benefit over IPv4 as it eliminates the need of manual configuration or DHCP as in the world of IPv4.
    * The IPv6 EUI-64 format address is obtained through the 48-bit MAC address. .
@@ -34,6 +34,8 @@ ComputerNetwork
 
 ## DNS
   * Domain Name System
+  * ![Hierarchy](./images/hierarchy.png)
+    * For maps.google.com, first, the DNS recursor will contact the root name server. The root name server will redirect it to .com domain name server. .com name server will redirect it to google.com name server. google.com name server will find the matching IP address for maps.google.com in its’ DNS records and return it to your DNS recursor which will send it back to your browser.
   * Resource Record:
     * SOA:
       * Start of authorith
