@@ -7,7 +7,6 @@ ComputerNetwork
   * [OSI Model](https://en.wikipedia.org/wiki/OSI_model)
   * [TCP vs UDP](https://stackoverflow.com/questions/5970383/difference-between-tcp-and-udp)
 
-
 ## IPv4
   * Net_ID, Host_ID, CIDR(netmask)
   * ClassA-E:
@@ -79,6 +78,9 @@ ComputerNetwork
 ## TCP three way handshake
   * Ref:
     * https://notfalse.net/7/three-way-handshake
+    * 1. Client machine sends a SYN packet to the server over the internet asking if it is open for new connections.
+    * 2. If the server has open ports that can accept and initiate new connections, it’ll respond with an ACKnowledgment of the SYN packet using a SYN/ACK packet.
+    * 3. The client will receive the SYN/ACK packet from the server and will acknowledge it by sending an ACK packet.
 
 
 
