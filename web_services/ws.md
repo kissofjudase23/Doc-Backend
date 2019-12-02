@@ -34,9 +34,17 @@ WebServices
 
   * [What happens when you type an URL in the brower and press enter](https://medium.com/@maneesha.wijesinghe1/what-happens-when-you-type-an-url-in-the-browser-and-press-enter-bb0aa2449c1a)
     * DNS look up
-    * TCP
-    * TLS
-
+      * check brower cache
+      * check OS cache
+      * check router cache
+      * DNS query
+    * TCP/IP three-way handshake
+      * 1. Client machine sends a SYN packet to the server over the internet asking if it is open for new connections.
+      * 2. If the server has open ports that can accept and initiate new connections, it’ll respond with an ACKnowledgment of the SYN packet using a SYN/ACK packet.
+      * 3. The client will receive the SYN/ACK packet from the server and will acknowledge it by sending an ACK packet.
+    * TLS handshake
+    * Send HTTP request
+    * Render the page and display content
 
 
 ## Auth
