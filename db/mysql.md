@@ -502,17 +502,43 @@
     * Ref:
       * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking.html
 
-  * Read Policies:
-  * **locking** read
+  * Locking Reads
+    * If you query data and then insert or update related data within the same transaction, the regular SELECT statement does not give enough protection. **Other transactions can update or delete the same rows you just queried**.
+    * InnoDB supports two types of locking reads that offer extra safety.
+      * SELECT ... FOR **SHARE**
+        * Sets a **shared mode lock** on any rows that are read. Other sessions can read the rows, but cannot modify them until your transaction commits. 
+        * Use cases:
+          * Suppose that you want to insert a new row into a table child, and make sure that the child row has a parent row in table parent.
+          * Prevent other transaction delete the parent record.
+            ```sql
+            SELECT * FROM parent WHERE NAME = 'Jones' FOR SHARE;
+            ```
+      * SELECT ... FOR **UPDATE**
+        * For index records the search encounters, locks the rows and any associated index entries, the same as if you issued an UPDATE statement for those rows. Other transactions are blocked from updating those rows, from doing SELECT ... FOR SHARE, or from reading the data in certain transaction isolation levels.
+        * Use cases:
+          * An integer counter
+            ```sql
+            SELECT counter_field FROM child_codes FOR UPDATE;
+            UPDATE child_codes SET counter_field = counter_field + 1;
+            ``` 
+          * Use LAST_INSERT_ID
+            * The currently executing statement does not affect the value of LAST_INSERT_ID(). 
+            ```sql
+            UPDATE child_codes SET counter_field = LAST_INSERT_ID(counter_field + 1);
+            SELECT LAST_INSERT_ID();
+            ```
+
+    * Locking Read Concurrency with NOWAIT and SKIP LOCKED
+      * NOWAIT
+        * A locking read that uses NOWAIT never waits to acquire a row lock. The query executes immediately, **failing with an error if a requested row is locked.**
+      * SKIP LOCKED
+        * A locking read that uses SKIP LOCKED never waits to acquire a row lock. The query executes immediately, **removing locked rows from the result set.**
+        * skip the locked rows.
     * Ref:
       * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html
-    * If you query data and then insert or update related data within the same transaction, the regular SELECT statement does not give enough protection .  Other transactions can update or delete the same rows you just queried. InnoDB supports two types of locking reads that offer extra safety.
-    * SELECT ... FOR SHARE
-      * **Sets a shared mode lock** on any rows that are read. Other sessions can read the rows, but cannot modify them until your transaction commits.
-      * If any of these rows were changed by another transaction that has not yet committed, your query waits until that transaction ends and then uses the latest values.
-    * SELECT ... FOR UPDATE
-    *
-  * **consistent** read
+
+
+  * Consistent Nonlocking Reads
     * Ref:
       * https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read
       * https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html
@@ -577,17 +603,6 @@
     * Ref:
       * https://medium.com/@thisisananth/acid-transactions-69b9af755e4c
 
-  * Strategy to handle concurrency conflicts
-    * Pessimistic concurrency control
-      * A system of locks prevents users from modifying data in a way that affects other users.
-      * After a user performs an action that causes a lock to be applied, other users cannot perform actions that would conflict with the lock until the owner releases it.
-      * This is called pessimistic control because it is mainly used in environments where there is high contention for data, where the cost of protecting data with locks is less than the cost of rolling back transactions if concurrency conflicts occur.
-    * Optimistic concurrency control
-      * In optimistic concurrency control, users do not lock data when they read it. When a user updates data, the system checks to see if another user changed the data after it was read.
-      * If another user updated the data, an error is raised. Typically, the user receiving the error rolls back the transaction and starts over.
-      * This is called optimistic because it is mainly used in environments where there is low contention for data, and where the cost of occasionally rolling back a transaction is lower than the cost of locking data when read.
-
-    * Thus basically since the retry of a particular transaction can be offloaded to the client side thus we prefer optimistic concurrency control.
 
 ## Join
   * Ref
