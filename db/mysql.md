@@ -438,116 +438,12 @@
     * Ref:
       * https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html
 
-  * Isolation Level:
-    * Read Uncommitted (dirty read)
-      * **One transaction may read not yet commited changes made by other transaction**, thereby **allowing dirty reads**.
-    * Read Committed (Non Repetable Read)
-      * This isolation level **guarantees that any data read is committed at the moment it is read (but do not guarantee Repeatable read). Thus it does not allows dirty read**.
-      * In this isolation level the transaction level holds a read lock till the end of the statement and a write lock till the transaction commits/rollbacks.
-    * Repeatable Read
-      *  The transaction **holds read locks on all rows it references and write locks on all rows it inserts, updates, or deletes till the transaction commits.**
-      *  Since **other transaction cannot read, update or delete these rows**, consequently it avoids non repeatable read.
-    * Serialisable
-      * **A serialisable execution is guaranteed to be serialisable.** Serialisable execution is defined to be an execution of operations in which concurrently executing transactions appears to be serially executing.
-    * Ref:
-      * https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html
 
 
-  * Lock Types:
-    * **Shared** Locks (S)
-      * A kind of lock that **allows other transactions to read the locked object, and to also acquire other shared locks on it, but not to write to it**.
-      * example:
-        * If transaction T1 holds a shared (S) lock on row r, then requests from some distinct transaction T2 for a lock on row r are handled as follows:
-          * A request by T2 for an **S lock can be granted immediately**. As a result, both T1 and T2 hold an S lock on r.
-          * A request by T2 for an **X lock cannot be granted immediately**.
-    * **Exclusive** Locks (X)
-      * A kind of lock that **prevents any other transaction from locking the same row**.
-      * example:
-        * If a transaction T1 holds an exclusive (X) lock on row r, a request **from some distinct transaction T2 for a lock of either type on r cannot be granted immediately**. Instead, transaction T2 has to wait for transaction T1 to release its lock on row r.
-      * Ref:
-        * https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_exclusive_lock
-    * Intention Locks (IS, IX)
-      * A kind of lock that applies to the table, used to indicate the kind of lock the transaction intends to acquire on rows in the table. 
-      * Intention locks do not block anything except full table requests (for example, LOCK TABLES ... WRITE).
-      * **The main purpose of intention locks is to show that someone is locking a row, or going to lock a row in the table**.
-      * 2 types of intention lock
-        * **IS**
-          * An intention shared lock (IS) indicates that a transaction intends to set a shared lock on individual rows in a table.
-            ```sql
-            SELECT ... FOR SHARE sets an IS lock
-            ```
-        * **IX**
-          * An intention exclusive lock (IX) indicates that a transaction intends to set an exclusive lock on individual rows in a table.
-            ```sql
-            SELECT ... FOR UPDATE sets an IX lock
-            ```
-    * **Record** Locks
-      * A record lock is a lock on an index record. 
-      * example:
-        * Prevents any other transaction from **inserting, updating, or deleting** rows where the value of t.c1 is 10.
-        ```sql
-        SELECT c1 FROM t WHERE c1 = 10 FOR UPDATE;
-        ```
-    * Gap Lock
-      * A gap lock is a lock on a gap between index records, or a lock on the gap before the first or after the last index record. 
-      * Gap locks in InnoDB are “purely inhibitive”, which means that their only purpose is to prevent other transactions from inserting to the gap
-    * Next-Key Locks
-      * A next-key lock is a combination of a record lock on the index record and a gap lock on the gap before the index record.
-    * Insert Intention Locks
-      * A type of gap lock that is set by INSERT operations prior to row insertion.
-      * This type of lock signals the intent to insert in such a way that multiple transactions inserting into the same index gap need not wait for each other if they are not inserting at the same position within the gap. 
-    * AUTO-INC Locks
-      * An AUTO-INC lock is a special table-level lock taken by transactions inserting into tables **with AUTO_INCREMENT** columns.
-      * In the simplest case, if one transaction is inserting values into the table, any other transactions must wait to do their own inserts into that table, so that rows inserted by the first transaction receive consecutive primary key values.
-    * Ref:
-      * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking.html
-
-  * Locking Reads
-    * If you query data and then insert or update related data within the same transaction, the regular SELECT statement does not give enough protection. **Other transactions can update or delete the same rows you just queried**.
-    * InnoDB supports two types of locking reads that offer extra safety.
-      * SELECT ... FOR **SHARE**
-        * Sets a **shared mode lock** on any rows that are read. Other sessions can read the rows, but cannot modify them until your transaction commits. 
-        * Use cases:
-          * Suppose that you want to insert a new row into a table child, and make sure that the child row has a parent row in table parent.
-          * Prevent other transaction delete the parent record.
-            ```sql
-            SELECT * FROM parent WHERE NAME = 'Jones' FOR SHARE;
-            ```
-      * SELECT ... FOR **UPDATE**
-        * For index records the search encounters, locks the rows and any associated index entries, the same as if you issued an UPDATE statement for those rows. Other transactions are blocked from updating those rows, from doing SELECT ... FOR SHARE, or from reading the data in certain transaction isolation levels.
-        * Use cases:
-          * An integer counter
-            ```sql
-            SELECT counter_field FROM child_codes FOR UPDATE;
-            UPDATE child_codes SET counter_field = counter_field + 1;
-            ``` 
-          * Use LAST_INSERT_ID
-            * The currently executing statement does not affect the value of LAST_INSERT_ID(). 
-            ```sql
-            UPDATE child_codes SET counter_field = LAST_INSERT_ID(counter_field + 1);
-            SELECT LAST_INSERT_ID();
-            ```
-
-    * Locking Read Concurrency with NOWAIT and SKIP LOCKED
-      * NOWAIT
-        * A locking read that uses NOWAIT never waits to acquire a row lock. The query executes immediately, **failing with an error if a requested row is locked.**
-      * SKIP LOCKED
-        * A locking read that uses SKIP LOCKED never waits to acquire a row lock. The query executes immediately, **removing locked rows from the result set.**
-        * skip the locked rows.
-    * Ref:
-      * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html
 
 
-  * Consistent Nonlocking Reads
-    * Ref:
-      * https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read
-      * https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html
-    * **A read operation that uses snapshot information to present query results based on a point in time, regardless of changes performed by other transactions running at the same time.** If queried data has been changed by another transaction, the original data is reconstructed based on the contents of the undo log. This technique avoids some of the locking issues that can reduce concurrency by forcing transactions to wait for other transactions to finish.
-      * With **REPEATABLE READ** isolation level, the snapshot is based on the time when the first read operation is performed.
-      * With **READ COMMITTED** isolation level, the snapshot is reset to the time of each consistent read operation.
-      * Consistent read is the default mode in which InnoDB processes SELECT statements in READ COMMITTED and REPEATABLE READ isolation levels. Because **a consistent read does not set any locks on the tables it accesses**, other sessions are free to modify those tables while a consistent read is being performed on the table.
 
-  * Phantom caused by concurrent transaction.
+  * Phenomenon caused by concurrent transactions
     * Dirty Read
       * Dirty read is **the situation when a transaction reads a data that has not yet been commited.**
     * Non Repetable Read (different val in the same field)
@@ -602,6 +498,155 @@
     * Write Skew
     * Ref:
       * https://medium.com/@thisisananth/acid-transactions-69b9af755e4c
+
+  * Isolation Level:
+    * General Guideline:
+      * READ COMMITTED or even READ UNCOMMITTED
+			  * you can relax the consistency rules with READ COMMITTED or even READ UNCOMMITTED, in situations such as bulk reporting where precise consistency and repeatable results are less important than minimizing the amount of overhead for locking.
+		  * REPEATABLE READ (default)
+  		  * InnoDB supports each of the transaction isolation levels described here using different locking strategies. You can enforce a high degree of consistency with the default REPEATABLE READ level, for operations on crucial data where ACID compliance is important.
+      * SERIALIZABLE 
+        * SERIALIZABLE enforces even stricter rules than REPEATABLE READ, and is used mainly in specialized situations, such as with XA transactions and for troubleshooting issues with concurrency and deadlocks.
+    * Read Uncommitted (dirty read)
+      * **One transaction may read not yet commited changes made by other transaction**, thereby allowing dirty reads.
+    * Read Committed (MVCC)
+      * This isolation level **guarantees that any data read is committed at the moment it is read (but do not guarantee Repeatable read).**
+      * For **nonlocking read**
+        * even within the same transaction, sets and reads its own fresh snapshot.
+        * The snapshot is reset to the time of each consistent read operation.
+      * For **locking reads** (SELECT with FOR UPDATE or FOR SHARE), UPDATE statements, and DELETE statements
+        * InnoDB locks only index records, not the gaps before them, and thus permits the free insertion of new records next to locked records. Gap locking is only used for foreign-key constraint checking and duplicate-key checking.
+        * Using READ COMMITTED has additional effects
+          * For UPDATE or DELETE statements
+            * InnoDB holds locks only for rows that it updates or deletes. **Record locks for nonmatching rows are released after MySQL has evaluated the WHERE condition.** This greatly reduces the probability of deadlocks, but they can still happen.
+      	  * For UPDATE statements, if a row is already locked, **InnoDB performs a "semi-consistent" read returning the latest committed version to MySQL so that MySQL can determine whether the row matches the WHERE condition of the UPDATE.** If the row matches (must be updated), MySQL reads the row again and this time InnoDB either locks it or waits for a lock on it.
+
+    * Repeatable Read (MVCC)
+      * This is the default isolation level for InnoDB. 
+      * For **nonlocking reads**
+        * This means that if you issue several plain (nonlocking) SELECT statements within the same transaction,these SELECT statements are consistent also with respect to each other.
+        * **Consistent reads within the same transaction read the snapshot established by the first read.**
+          * The snapshot is based on the time when the first read operation is performed.
+      * For **locking reads** (SELECT with FOR UPDATE or FOR SHARE), UPDATE, and DELETE statements
+        * locking depends on whether the statement uses a unique index with a unique search condition, or a range-type search condition.
+          * For a unique index with a unique search condition, InnoDB locks only the index record found, not the gap before it.
+          * For other search conditions, InnoDB locks the index range scanned, using gap locks or next-key locks to block insertions by other sessions into the gaps covered by the range.
+    * Serialisable
+      * **A serialisable execution is guaranteed to be serialisable.** Serialisable execution is defined to be an execution of operations in which concurrently executing transactions appears to be serially executing.
+      * This level is like REPEATABLE READ, but InnoDB implicitly converts all plain SELECT statements to SELECT ... FOR SHARE if autocommit is disabled.
+    * Ref:
+      * https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html
+
+  * Lock Types:
+    * **Shared** Locks (S)
+      * A kind of lock that **allows other transactions to read the locked object, and to also acquire other shared locks on it, but not to write to it**.
+      * example:
+        * If transaction T1 holds a shared (S) lock on row r, then requests from some distinct transaction T2 for a lock on row r are handled as follows:
+          * A request by T2 for an **S lock can be granted immediately**. As a result, both T1 and T2 hold an S lock on r.
+          * A request by T2 for an **X lock cannot be granted immediately**.
+    * **Exclusive** Locks (X)
+      * A kind of lock that **prevents any other transaction from locking the same row**.
+      * example:
+        * If a transaction T1 holds an exclusive (X) lock on row r, a request **from some distinct transaction T2 for a lock of either type on r cannot be granted immediately**. Instead, transaction T2 has to wait for transaction T1 to release its lock on row r.
+      * Ref:
+        * https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_exclusive_lock
+    * Intention Locks (IS, IX)
+      * A kind of lock that applies to the table, used to indicate the kind of lock the transaction intends to acquire on rows in the table. 
+      * Intention locks do not block anything except full table requests (for example, LOCK TABLES ... WRITE).
+      * **The main purpose of intention locks is to show that someone is locking a row, or going to lock a row in the table**.
+      * 2 types of intention lock
+        * **IS**
+          * An intention shared lock (IS) indicates that a transaction intends to set a shared lock on individual rows in a table.
+            ```sql
+            SELECT ... FOR SHARE sets an IS lock
+            ```
+        * **IX**
+          * An intention exclusive lock (IX) indicates that a transaction intends to set an exclusive lock on individual rows in a table.
+            ```sql
+            SELECT ... FOR UPDATE sets an IX lock
+            ```
+    * **Record** Locks
+      * A record lock is a lock on an index record. 
+      * example:
+        * Prevents any other transaction from **inserting, updating, or deleting** rows where the value of t.c1 is 10.
+        ```sql
+        SELECT c1 FROM t WHERE c1 = 10 FOR UPDATE;
+        ```
+    * Gap Lock
+      * A gap lock is a lock on a gap between index records, or a lock on the gap before the first or after the last index record. 
+      * Gap locks in InnoDB are “purely inhibitive”, which means that their only purpose is to prevent other transactions from inserting to the gap
+    * Next-Key Locks
+      * A next-key lock is a combination of a record lock on the index record and a gap lock on the gap before the index record.
+    * Insert Intention Locks
+      * A type of gap lock that is set by INSERT operations prior to row insertion.
+      * This type of lock signals the intent to insert in such a way that multiple transactions inserting into the same index gap need not wait for each other if they are not inserting at the same position within the gap. 
+    * AUTO-INC Locks
+      * An AUTO-INC lock is a special table-level lock taken by transactions inserting into tables **with AUTO_INCREMENT** columns.
+      * In the simplest case, if one transaction is inserting values into the table, any other transactions must wait to do their own inserts into that table, so that rows inserted by the first transaction receive consecutive primary key values.
+    * Ref:
+      * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking.html
+
+  * Read Policies
+    * **Locking** Reads
+      * If you query data and then insert or update related data within the same transaction, the regular SELECT statement does not give enough protection. **Other transactions can update or delete the same rows you just queried**.
+      * InnoDB supports two types of locking reads that offer extra safety.
+        * SELECT ... FOR **SHARE**
+          * Sets a **shared mode lock** on any rows that are read. Other sessions can read the rows, but cannot modify them until your transaction commits. 
+          * Use cases:
+            * Suppose that you want to insert a new row into a table child, and make sure that the child row has a parent row in table parent.
+            * Prevent other transaction delete the parent record.
+              ```sql
+              SELECT * FROM parent WHERE NAME = 'Jones' FOR SHARE;
+              ```
+        * SELECT ... FOR **UPDATE**
+          * For index records the search encounters, locks the rows and any associated index entries, the same as if you issued an UPDATE statement for those rows. Other transactions are blocked from updating those rows, from doing SELECT ... FOR SHARE, or from reading the data in certain transaction isolation levels.
+          * Use cases:
+            * An integer counter
+              ```sql
+              SELECT counter_field FROM child_codes FOR UPDATE;
+              UPDATE child_codes SET counter_field = counter_field + 1;
+              ``` 
+            * Use LAST_INSERT_ID
+              * The currently executing statement does not affect the value of LAST_INSERT_ID(). 
+              ```sql
+              UPDATE child_codes SET counter_field = LAST_INSERT_ID(counter_field + 1);
+              SELECT LAST_INSERT_ID();
+              ```
+      * Locking Read Concurrency with NOWAIT and SKIP LOCKED
+        * NOWAIT
+          * A locking read that uses NOWAIT never waits to acquire a row lock. The query executes immediately, **failing with an error if a requested row is locked.**
+        * SKIP LOCKED
+          * A locking read that uses SKIP LOCKED never waits to acquire a row lock. The query executes immediately, **removing locked rows from the result set.**
+          * skip the locked rows.
+      * Ref:
+        * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html
+    * Consistent **Nonlocking** Reads
+      * **A read operation that uses snapshot information to present query results based on a point in time, regardless of changes performed by other transactions running at the same time.** If queried data has been changed by another transaction, the original data is reconstructed based on the contents of the undo log. This technique avoids some of the locking issues that can reduce concurrency by forcing transactions to wait for other transactions to finish.
+      * With **REPEATABLE READ** isolation level
+        * The snapshot is based on the time when the first read operation is performed.
+      * With **READ COMMITTED** isolation level
+        * The snapshot is reset to the time of each consistent read operation.
+      * Consistent read is the default mode in which InnoDB processes SELECT statements in READ COMMITTED and REPEATABLE READ isolation levels. Because **a consistent read does not set any locks on the tables it accesses**, other sessions are free to modify those tables while a consistent read is being performed on the table.
+      * Ref:
+        * https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read
+        * https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html
+
+
+
+  * Concurrency Control Policies
+    * In Concurrency Control theory, there are two ways you can deal with conflicts:
+      * You can avoid them, by employing a pessimistic locking mechanism (e.g. Read/Write locks, Two-Phase Locking)
+      * You can allow conflicts to occur, but you need to detect them using an optimistic locking mechanism (e.g. logical clock, MVCC)
+    * 2 Phase Locking
+      * Locks alone are not sufficient for preventing conflicts. A concurrency control strategy must define how locks are being acquired and released because this also has an impact on transaction interleaving.
+      * For this purpose, the 2PL protocol defines a lock management strategy for ensuring strict serializability.
+        * **expanding** phase (locks are acquired, and no lock is allowed to be released)
+        * **shrinking** phase (all locks are released, and no other lock can be further acquired).
+      * Initially, all database systems employed 2PL for implementing Serializable transactions, but, with time, many vendors have moved towards MVCC (Multi-Version Concurrency Control) concurrency control mechanisms.
+      * Ref:
+        * https://vladmihalcea.com/2pl-two-phase-locking/
+    * MVCC (multi version concurrency control)
+
 
 
 ## Join
