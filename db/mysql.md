@@ -502,8 +502,8 @@
   * Isolation Level:
     * General Guideline:
       * READ COMMITTED or even READ UNCOMMITTED
-			  * you can relax the consistency rules with READ COMMITTED or even READ UNCOMMITTED, in situations such as bulk reporting where precise consistency and repeatable results are less important than minimizing the amount of overhead for locking.
-		  * REPEATABLE READ (default)
+        * you can relax the consistency rules with READ COMMITTED or even READ UNCOMMITTED, in situations such as bulk reporting where precise consistency and repeatable results are less important than minimizing the amount of overhead for locking.
+  	  * REPEATABLE READ (default isolation)
   		  * InnoDB supports each of the transaction isolation levels described here using different locking strategies. You can enforce a high degree of consistency with the default REPEATABLE READ level, for operations on crucial data where ACID compliance is important.
       * SERIALIZABLE 
         * SERIALIZABLE enforces even stricter rules than REPEATABLE READ, and is used mainly in specialized situations, such as with XA transactions and for troubleshooting issues with concurrency and deadlocks.
