@@ -369,7 +369,7 @@
 ## Indexes
   * Ref:
     * https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe
-    *
+
   * Clustered Indexes vsSecondary Indexes (InnoDB)
     * Ref:
       * https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e
@@ -431,28 +431,47 @@
       * If related data is being updated across multiple tables, **queries see either all old values or all new values, not a mix of old and new values**.
     * **I**solation
       * Transactions are protected (isolated) from each other while they are in progress; **they cannot interfere with each other or see each other's uncommitted data**.
+      * In InnoDB, The default isolation level of mysql is "Repeatable Read".
       * In fact, isolation level of "read uncommitted" is not islolated from other transaction.
-        * The default isolation level of mysql is "Repeatable Read".
     * **D**urability
       * The results of transactions are durable: once a commit operation succeeds, the changes made by that transaction are safe from power failures, system crashes, race conditions, or other potential dangers that many non-database applications are vulnerable to.
     * Ref:
       * https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html
 
-
-
-
-
+  * Concurrency Control Policies
+    * Introduction:
+      * In Concurrency Control theory, there are two ways you can deal with conflicts:
+        * **You can avoid them**, by employing a pessimistic locking mechanism
+          * e.g. Read/Write locks, Two-Phase Locking
+        * **You can allow conflicts to occur**, but you need to detect them using an optimistic locking mechanism
+          * e.g. logical clock, MVCC
+    * **2PL** (2 Phase Locking)
+      * Locks alone are not sufficient for preventing conflicts. A concurrency control strategy must define how locks are being acquired and released because this also has an impact on transaction interleaving.
+      * For this purpose, the 2PL protocol defines a lock management strategy for ensuring strict serializability.
+        * **expanding** phase (locks are acquired, and no lock is allowed to be released)
+        * **shrinking** phase (all locks are released, and no other lock can be further acquired).
+      * Initially, all database systems employed 2PL for implementing Serializable transactions, but, with time, many vendors have moved towards MVCC (Multi-Version Concurrency Control) concurrency control mechanisms.
+      * Ref:
+        * https://vladmihalcea.com/2pl-two-phase-locking/
+    * **MVCC** (multi version concurrency control)
+      * When using 2PL, every read requires a shared lock acquisition, while a write operation requires taking an exclusive lock.
+        * a shared lock blocks Writers, but it allows other Readers to acquire the same shared lock
+        * an exclusive lock blocks both Readers and Writers concurring for the same lock
+      * However, **locking incurs contention, and contention affects scalability**.
+      * For this reason, database researchers have come up with a different Concurrency Control model which tries to reduce locking to a bare minimum so that:
+        * **Readers don’t block Writers**
+        * **Writers don’t block Readers** (but still block Writers)
 
   * Phenomenon caused by concurrent transactions
     * Dirty Read
       * Dirty read is **the situation when a transaction reads a data that has not yet been commited.**
-    * Non Repetable Read (different val in the same field)
+    * **Non Repetable Read** (different val in the same field)
       * **Non Repeatable read occurs when a transaction reads same row twice, and get a different value each time.**
       * For example, suppose transaction T1 reads a data. Due to concurrency, another transaction T2 updates the same data and commit, Now if transaction T1 rereads the same data, it will retrieve a different value.
     * Phantom Read (get different data sets)
       * **Phantom Read occurs when two same queries are executed, but the rows retrieved by the two are different.**
       * For example, suppose transaction T1 retrieves a set of rows that satisfy some search criteria. Now, Transaction T2 generates some new rows that matches the search criteria for transaction T1. If transaction T1 re-executes the statement that reads the rows, it gets a different set of rows this time
-    * Lost Update
+    * **Lost Update**
       * If two transactions read a value and update the same value, then the first update is lost.
       * example:
         * quantity os A is 4
@@ -509,19 +528,21 @@
         * SERIALIZABLE enforces even stricter rules than REPEATABLE READ, and is used mainly in specialized situations, such as with XA transactions and for troubleshooting issues with concurrency and deadlocks.
     * Read Uncommitted (dirty read)
       * **One transaction may read not yet commited changes made by other transaction**, thereby allowing dirty reads.
-    * Read Committed (MVCC)
+    * **Read Committed** (MVCC)
       * This isolation level **guarantees that any data read is committed at the moment it is read (but do not guarantee Repeatable read).**
       * For **nonlocking read**
         * even within the same transaction, sets and reads its own fresh snapshot.
         * The snapshot is reset to the time of each consistent read operation.
       * For **locking reads** (SELECT with FOR UPDATE or FOR SHARE), UPDATE statements, and DELETE statements
-        * InnoDB locks only index records, not the gaps before them, and thus permits the free insertion of new records next to locked records. Gap locking is only used for foreign-key constraint checking and duplicate-key checking.
+        * InnoDB locks only index records, not the gaps before them, and thus permits the free insertion of new records next to locked records.
+        * Gap locking is only used for foreign-key constraint checking and duplicate-key checking.
         * Using READ COMMITTED has additional effects
           * For UPDATE or DELETE statements
             * InnoDB holds locks only for rows that it updates or deletes. **Record locks for nonmatching rows are released after MySQL has evaluated the WHERE condition.** This greatly reduces the probability of deadlocks, but they can still happen.
-      	  * For UPDATE statements, if a row is already locked, **InnoDB performs a "semi-consistent" read returning the latest committed version to MySQL so that MySQL can determine whether the row matches the WHERE condition of the UPDATE.** If the row matches (must be updated), MySQL reads the row again and this time InnoDB either locks it or waits for a lock on it.
-
-    * Repeatable Read (MVCC)
+      	  * For UPDATE statements
+        	  * if a row is **already locked**, **InnoDB performs a "semi-consistent" read returning the latest committed version to MySQL so that MySQL can determine whether the row matches the WHERE condition of the UPDATE.**
+          	  * If the row matches (must be updated), MySQL reads the row again and this time InnoDB either locks it or waits for a lock on it.
+    * **Repeatable Read** (MVCC)
       * This is the default isolation level for InnoDB. 
       * For **nonlocking reads**
         * This means that if you issue several plain (nonlocking) SELECT statements within the same transaction,these SELECT statements are consistent also with respect to each other.
@@ -529,11 +550,13 @@
           * The snapshot is based on the time when the first read operation is performed.
       * For **locking reads** (SELECT with FOR UPDATE or FOR SHARE), UPDATE, and DELETE statements
         * locking depends on whether the statement uses a unique index with a unique search condition, or a range-type search condition.
-          * For a unique index with a unique search condition, InnoDB locks only the index record found, not the gap before it.
-          * For other search conditions, InnoDB locks the index range scanned, using gap locks or next-key locks to block insertions by other sessions into the gaps covered by the range.
+          * For a unique index with a unique search condition
+            * InnoDB locks only the index record found, not the gap before it.
+          * For other search conditions
+            * InnoDB locks the index range scanned, using gap locks or next-key locks to block insertions by other sessions into the gaps covered by the range.
     * Serialisable
       * **A serialisable execution is guaranteed to be serialisable.** Serialisable execution is defined to be an execution of operations in which concurrently executing transactions appears to be serially executing.
-      * This level is like REPEATABLE READ, but InnoDB implicitly converts all plain SELECT statements to SELECT ... FOR SHARE if autocommit is disabled.
+      * This level is like REPEATABLE READ, but InnoDB implicitly converts all plain SELECT statements to SELECT ... **FOR SHARE if** autocommit is disabled.
     * Ref:
       * https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html
 
@@ -620,7 +643,10 @@
           * skip the locked rows.
       * Ref:
         * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html
-    * Consistent **Nonlocking** Reads
+    * **Consistent Nonlocking** Reads
+      * Whit is Nonlocking ?
+        * **Readers don’t block Writers**
+        * **Writers don’t block Readers** (but still block Writers)
       * **A read operation that uses snapshot information to present query results based on a point in time, regardless of changes performed by other transactions running at the same time.** If queried data has been changed by another transaction, the original data is reconstructed based on the contents of the undo log. This technique avoids some of the locking issues that can reduce concurrency by forcing transactions to wait for other transactions to finish.
       * With **REPEATABLE READ** isolation level
         * The snapshot is based on the time when the first read operation is performed.
@@ -630,23 +656,6 @@
       * Ref:
         * https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read
         * https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html
-
-
-
-  * Concurrency Control Policies
-    * In Concurrency Control theory, there are two ways you can deal with conflicts:
-      * You can avoid them, by employing a pessimistic locking mechanism (e.g. Read/Write locks, Two-Phase Locking)
-      * You can allow conflicts to occur, but you need to detect them using an optimistic locking mechanism (e.g. logical clock, MVCC)
-    * 2 Phase Locking
-      * Locks alone are not sufficient for preventing conflicts. A concurrency control strategy must define how locks are being acquired and released because this also has an impact on transaction interleaving.
-      * For this purpose, the 2PL protocol defines a lock management strategy for ensuring strict serializability.
-        * **expanding** phase (locks are acquired, and no lock is allowed to be released)
-        * **shrinking** phase (all locks are released, and no other lock can be further acquired).
-      * Initially, all database systems employed 2PL for implementing Serializable transactions, but, with time, many vendors have moved towards MVCC (Multi-Version Concurrency Control) concurrency control mechanisms.
-      * Ref:
-        * https://vladmihalcea.com/2pl-two-phase-locking/
-    * MVCC (multi version concurrency control)
-
 
 
 ## Join
