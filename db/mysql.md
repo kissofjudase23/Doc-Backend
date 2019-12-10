@@ -22,35 +22,39 @@
 
 ## FAQ
   * Normalized vs. Denormalized Databases
-    * Ref:
-      * https://medium.com/@katedoesdev/normalized-vs-denormalized-databases-210e1d67927d
-    * **Normalized databases** are designed to minimize **redundancy**, while **denomalized databases** are designed to optimized **read time**.
+    * **Normalized databases** are designed to minimize **redundancy**
+    * While **denomalized databases** are designed to optimized **read time**.
     * For example:
       * In a traditional normzlied database with data like Courses and Teachers, Courses might contain a column called TeachersID, which is a foreign key to Teacher.
         * One Benefit of this is that information about the teacher is **only stored once in the databases**.
         * The drawback is that many common queries will require expensive joins.
+    * Ref:
+      * https://medium.com/@katedoesdev/normalized-vs-denormalized-databases-210e1d67927d
   * Partition vs Sharding
-    * Partitioning is more a generic term for dividing data across tables or databases. **Sharding is one specific type of partitioning**, namely horizontal partitioning.
+    * Partitioning is more a generic term for **dividing data across tables or databases**.
+    * **Sharding is one specific type of partitioning**, namely horizontal partitioning.
     * Ref:
       * https://www.quora.com/Whats-the-difference-between-sharding-DB-tables-and-partitioning-them
   * How to find slow query
     * before
       * explain
+      * ...
     * after
       * Enable slow query log
       * Use SHOW PROCESS LIST
+      * ...
   * SQL vs NoSQL
-    * Ref:
-      * https://www.infoq.com/articles/Transition-RDBMS-NoSQL/
     * SQL
       * Relation data model
-        * Highly-Structured table organization with rigidly-defined data forrmats and record structure.
+        * **Highly-Structured** table organization with rigidly-defined data forrmats and record structure.
       * Reasons for SQL
         * Structured data
         * **Strict schema**
         * Relational data
+        * **Transactions** (Mongo 4.0 also supports transaction)
+      * Drawbacks:
         * Need for complex joins
-        * **Transactions** (Mongo 4.0 supports transaction now)
+
     * NoSQL
       * Document data model
         * Collection of complex documents with arbitrary, nested data formats and varying record format.
@@ -58,10 +62,13 @@
         * Semi-structured data
         * **Dynamic or flexible schema**
         * Non-relational data
-        * No need for complex joins
         * Store many TB (or PB) of data
         * Very data intensive workload
         * **Very high throughput for IOPS** (auto sharding)
+      * Drawbacks:
+        * No transactions (before mongo4.0)
+    * Ref:
+      * https://www.infoq.com/articles/Transition-RDBMS-NoSQL/
 
 ## Design
   * APP
@@ -69,8 +76,6 @@
       * Depend on your processes, threads in your app and capability of your mysql server.
 
 ## Tuning
-  * Ref:
-    * [10 Tips for Optimizing MySQL Queries](https://aiddroid.com/10-tips-optimizing-mysql-queries-dont-suck/)
   * **Profiling**:
     * mtop: monitoring tool
     * Slow query log
@@ -88,16 +93,28 @@
       * SysBench
   * Tighten up **schema**
     * MySQL dumps to disk in contiguous blocks for fast access.
-    * **Use CHAR instead of VARCHAR** for **fixed-length** fields.
+    * CHAR vs VARCHAR
+      * **Use CHAR instead of VARCHAR** for **fixed-length** fields.
       * CHAR effectively allows for fast, random access, whereas with VARCHAR, you must find the end of a string before moving onto the next one.
-    * Use **TEXT** for large blocks of text such as blog posts.
+      * VARCHAR(255) is the largest number of characters that can be counted in an 8 bit number, often maximizing the use of a byte in some RDBMS.
+    * TEXT
+      * Use **TEXT** for large blocks of text such as blog posts.
       * **TEXT also allows for boolean searches**.
       * Using a TEXT field results in storing a pointer on disk that is used to locate the text block.
-    * Use **INT** for larger numbers up to 2^32 or 4 billion.
-    * Use **DECIMAL** for **currency** to avoid floating point representation errors.
-    * **Avoid storing large BLOBS**, store the location of where to get the object instead.
-    * VARCHAR(255) is the largest number of characters that can be counted in an 8 bit number, often maximizing the use of a byte in some RDBMS.
-    * Set the **NOT NULL** constraint where applicable to improve search performance.
+    * INT
+      * TINYINT (1 byte)
+      * SMALLINT (2 bytes)
+      * MEDIUMINT (3 bytes)
+      * INT (4 bytes)
+      * BIGINT (8 bytes) = (maximum value unsigned 2^64-1)
+      * Use **INT** for larger numbers up to 2^32 or 4 billion.
+    * DECIMAL
+      * Use **DECIMAL** for **currency** to avoid floating point representation errors.
+    * BLOB
+      * Avoid storing large BLOBS, store the location of where to get the object instead.
+    * Constraints
+      * Set the **NOT NULL** constraint where applicable to improve search performance.
+      * Declare columns to be NOT NULL if possible. It makes SQL operations faster, by enabling better use of indexes and eliminating overhead for testing whether each value is NULL. You also save some storage space, one bit per column. If you really need NULL values in your tables, use them. Just avoid the default setting that allows NULL values in every column.
   * Use good **indexes**
     * Basic
       * Columns that you are querying (**SELECT, GROUP BY, ORDER BY, JOIN**) could be faster with indices.
@@ -126,7 +143,7 @@
         WHERE column1 = 'value1'
         AND column2 = 'value2'
         AND column3 = 'value3'
-          ...
+        ...
         AND columnN = 'valueN'
 
         ```
@@ -142,7 +159,9 @@
     * Break up a table by putting hot spots in a separate table to help keep it in memory.
   * Tune the query cache
     * The query cache can be useful in an environment where you have tables that do not change very often and for which the server receives many identical queries.
-
+  * Ref:
+    * [10 Tips for Optimizing MySQL Queries](https://aiddroid.com/10-tips-optimizing-mysql-queries-dont-suck/)
+    * https://dev.mysql.com/doc/refman/8.0/en/optimization.html
 ## [Data Types](https://dev.mysql.com/doc/refman/8.0/en/data-type-overview.html)
   * [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
   * [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
@@ -252,7 +271,7 @@
 ## [Partitions](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)
   * FAQ
     * [Partitions and UPDATE](https://stackoverflow.com/questions/12929624/partitions-and-update)
-      * If you UPDATE a row, will the row be moved to another partition automatically, if the partition conditions of another partition is met?
+      * **If you UPDATE a row, will the row be moved to another partition automatically**, if the partition conditions of another partition is met?
       * It must move them on update. If it didn't it wouldn't work well. MySQL would have to basically scan all partitions on every query as it couldn't know where records where stored.
     * [How to drop subpartition](https://dev.mysql.com/doc/refman/5.7/en/partitioning-subpartitions.html)
     * [What is the difference between mysql drop partition and truncate partition](https://stackoverflow.com/questions/56244720/what-is-the-difference-between-mysql-drop-partition-and-truncate-partition)
@@ -367,13 +386,7 @@
     * An object created with CREATE VIEW that when referenced produces a result set. A view acts as a virtual table.
 
 ## Indexes
-  * Ref:
-    * https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe
-
-  * Clustered Indexes vsSecondary Indexes (InnoDB)
-    * Ref:
-      * https://medium.com/@genchilu/%E6%B7%BA%E8%AB%87-innodb-%E7%9A%84-cluster-index-%E5%92%8C-secondary-index-f75da308352e
-
+  * Clustered Indexes vs Secondary Indexes (InnoDB)
     * Clustered Indexes
       * Every InnoDB table has a special index called the clustered index where the data for the rows is stored. **Typically, the clustered index is synonymous with the primary key**.
         * When you define a PRIMARY KEY on your table, InnoDB uses it as the clustered index.
@@ -381,47 +394,42 @@
         * If the table has no PRIMARY KEY or suitable UNIQUE index, InnoDB internally generates a hidden clustered index named GEN_CLUST_INDEX on a synthetic column containing row ID values.
       * Data Structure
         * **B-Tree**
-            * The data in a Node is in the same page (physical unit).
+            * Every node is a page which is the minimum unit InnoDB stores records.
             * Non-Leaf Nodes
-               *  **Clustered Keys** and **Pointers to the Child Nodes**
+               *  **The val of Clustered Keys** and **Pointers to the Child Nodes**
             * Leaf Nodes
-               *  **Clustered Keys**, **Raw Data** and **Pointers to the Sibling Nodes**
+               *  **Records** and **Pointers to other leaf nodes**
             * ![cluster_indexes](images/cluster_indexes.png)
       * Data Coverage:
         * All, since list of leaf nodes is the table.
       * Condition Coverage:
         * Depended on the clustered key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
-
     * Secondary Indexes
-      * All indexes other than the clustered index are known as secondary indexes.
       * In InnoDB, each record in a secondary index contains the **primary key columns** for the row, as well as the **columns specified for the secondary index**. InnoDB uses this primary key value to search for the row in the clustered index.
-
       * Data Structure
         * B-Tree
-          * The data in a Node is in the same page (physical unit).
+          * Every node is a page which is the minimum unit InnoDB stores records.
           * Non-Leaf Nodes
-             *  **Secondary Keys** and **Pointers to the Child Nodes**
+             *  **Values of Secondary Keys** and **Pointers to the Child Nodes**
           * Leaf Nodes
-             *  **Secondary Keys** , **Clustered Keys** and and **Pointers to the Sibling Nodes**
-             *  The List of leaf nodes is the **sorted clustered keys**
-             *  **If the primary key is long, the secondary indexes use more space**, so it is advantageous to have a short primary key.
+             *  **Values of Secondary Keys** , **Values Clustered Keys** and and **Pointers to the Leaf Nodes**
+             *  Clustered Kye points to the table (records)
           * ![secondary_indexes](images/secondary_indexes.png)
-            * **The data structure in the bottom is clustered indexes (the table).**
+            * **The data structure in the bottom are the table (records).**
+            * *  **If the primary key is long, the secondary indexes use more space**.
             * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
             * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
       * Data Coverage:
         * Fields in **secondary key and clustered key** (permutation)
       * Condition Coverage:
         * Depended on the secondary key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
+  * Ref:
+    * https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe
+    * https://medium.com/@genchilu/a-brief-introduction-to-cluster-index-and-secondary-index-in-innodb-9b8874d4da6a
 
 
 ## Locking and Transaction Model
-  * Ref:
-    * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-transaction-model.html
-    * [How does a database server handle thousands of concurrent requests](https://medium.com/how-the-web-works/how-does-a-database-server-handle-thousands-of-concurrent-requests-d54352310183)
-    * [TritonHo](https://github.com/TritonHo/slides/tree/master/Taipei%202015-01%20talk)
-
-  * ACID model:
+  * ACID:
     * ACID is a set of properties of relational database transactions.
     * **A**tomicity
       * **Transactions** are atomic units of work that can be committed or rolled back.
@@ -451,16 +459,19 @@
         * **expanding** phase (locks are acquired, and no lock is allowed to be released)
         * **shrinking** phase (all locks are released, and no other lock can be further acquired).
       * Initially, all database systems employed 2PL for implementing Serializable transactions, but, with time, many vendors have moved towards MVCC (Multi-Version Concurrency Control) concurrency control mechanisms.
-      * Ref:
-        * https://vladmihalcea.com/2pl-two-phase-locking/
     * **MVCC** (multi version concurrency control)
       * When using 2PL, every read requires a shared lock acquisition, while a write operation requires taking an exclusive lock.
         * a shared lock blocks Writers, but it allows other Readers to acquire the same shared lock
         * an exclusive lock blocks both Readers and Writers concurring for the same lock
-      * However, **locking incurs contention, and contention affects scalability**.
-      * For this reason, database researchers have come up with a different Concurrency Control model which tries to reduce locking to a bare minimum so that:
-        * **Readers don’t block Writers**
-        * **Writers don’t block Readers** (but still block Writers)
+      * Goal
+        * **locking incurs contention, and contention affects scalability**.
+        * For this reason, database researchers have come up with a different Concurrency Control model which tries to reduce locking to a bare minimum so that:
+          * **Readers don’t block Writers**
+          * **Writers don’t block Readers** (but still block Writers)
+          * (The readers means non-blocking reads)
+    * Ref:
+      * https://vladmihalcea.com/2pl-two-phase-locking/
+      * https://vladmihalcea.com/how-does-mvcc-multi-version-concurrency-control-work/
 
   * Phenomenon caused by concurrent transactions
     * Dirty Read
@@ -531,7 +542,7 @@
     * **Read Committed** (MVCC)
       * This isolation level **guarantees that any data read is committed at the moment it is read (but do not guarantee Repeatable read).**
       * For **nonlocking read**
-        * even within the same transaction, sets and reads its own fresh snapshot.
+        * Even within the same transaction, sets and reads its own fresh snapshot.
         * The snapshot is reset to the time of each consistent read operation.
       * For **locking reads** (SELECT with FOR UPDATE or FOR SHARE), UPDATE statements, and DELETE statements
         * InnoDB locks only index records, not the gaps before them, and thus permits the free insertion of new records next to locked records.
@@ -656,6 +667,10 @@
       * Ref:
         * https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read
         * https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html
+    * Ref:
+      * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-transaction-model.html
+      * [How does a database server handle thousands of concurrent requests](https://medium.com/how-the-web-works/how-does-a-database-server-handle-thousands-of-concurrent-requests-d54352310183)
+      * [TritonHo](https://github.com/TritonHo/slides/tree/master/Taipei%202015-01%20talk)
 
 
 ## Join
