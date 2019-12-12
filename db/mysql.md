@@ -347,6 +347,13 @@
 
   * [Subpartition](https://dev.mysql.com/doc/refman/5.7/en/partitioning-subpartitions.html)
 
+  * Restrictions and Limitations on Partitioning
+  * every unique key on the table must use every column in the table's partitioning expression
+      * All columns used in the partitioning expression for a partitioned table must be part of every unique key that the table may have.
+      * In other words, **every unique key on the table must use every column in the table's partitioning expression. (This also includes the table's primary key**, since it is by definition a unique key. 
+    * Ref:
+      * https://dev.mysql.com/doc/refman/8.0/en/partitioning-limitations.html
+
 ## [Sharding](https://medium.com/system-design-blog/database-sharding-69f3f4bd96db)
   * FAQ:
     * [Differences Between the NDB and InnoDB Storage Engines](https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster-ndb-innodb-engines.html)
