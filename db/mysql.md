@@ -43,6 +43,10 @@
       * Enable slow query log
       * Use SHOW PROCESS LIST
       * ...
+    * Ref:
+      * Examining Thread Information
+        * https://dev.mysql.com/doc/refman/8.0/en/thread-information.html
+
   * SQL vs NoSQL
     * SQL
       * Relation data model
@@ -86,11 +90,17 @@
       * The SHOW PROCESSLIST statement is very useful if you get the “too many connections” error message and want to find out what is going on.
     * [SHOW STATUS](https://dev.mysql.com/doc/refman/8.0/en/show-status.html)
       * SHOW STATUS provides server status information. This statement does not require any privilege. It requires only the ability to connect to the server.
+    * Ref:
+      * Examining Thread Information
+        * https://dev.mysql.com/doc/refman/8.0/en/thread-information.html
   * **Benchmark**:
     * Simulate high load situations
       * [ab](http://httpd.apache.org/docs/2.2/programs/ab.html)
       * supersmack
       * SysBench
+      * Ref:
+        * Measuring Performance (Benchmarking)
+          * https://dev.mysql.com/doc/refman/8.0/en/optimize-benchmarking.html
   * Tighten up **schema**
     * MySQL dumps to disk in contiguous blocks for fast access.
     * CHAR vs VARCHAR
