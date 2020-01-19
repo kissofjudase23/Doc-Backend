@@ -10,7 +10,8 @@
    - [Docker](./container/docker.md)
  - [ComputerNetwork](./computer_network/README.md)
  - [WebServices](./web_services/ws.md)
- - [System Design](./system_design/sys_design.md)
+ - [System Design](./system_design/system_design.md)
+ - [System Management](./system_management/system_mgr.md)
 
 
  ## Reference
