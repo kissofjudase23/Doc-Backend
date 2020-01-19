@@ -1,4 +1,6 @@
- # MySQL
+###### tags: `db` `mysql` 
+
+# MySQL
 
  Table of Contents
 - [MySQL](#mysql)
