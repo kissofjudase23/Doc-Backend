@@ -99,15 +99,35 @@
       * ```$ netstat -tulnp```
     * list all services
       * ```$ netstat -atunp```
-  * options:
+  * Options:
     * -a: all
-    * -l: list listen service
+    * -l: list listen services
     * -p: list pid and program
     * -t: tcp
     * -u: udp
+    * -n: don't resolve hostname
     * -c: -c 5 update every 5 second
     * -n: use IP and port number
       * default is hostname and service
+## ss
+  * ss is included in iproute2 package and is the substitute of the netstat. ss is used to dump socket statistics. It shows information similar to netstat. It can display more TCP and state information than other tools. It is a new, incredibly useful and faster (compared to netstat) tool for tracking TCP connections and sockets.
+  * Usage:
+    * list all services
+      * ```$ ss -atup```
+    * list all tcp socket with port 3306 (mysql)
+      * ```$ ss -atnp | grep 3306```
+      * ```$ ss -atrp | grep 3306```  (resolve hostname)
+
+  * Options
+    * -a: all
+    * -l: list listen services
+    * -t: tcp
+    * -u: udp
+    * -n: don't resolve service name
+    * -r: resolve hostname
+    * -p: show processes using socket
+    * -4: ipv4
+    * -6: ipv6
 ## iptables
 ## airmon
 ## airodump
@@ -186,6 +206,8 @@
      * ```$ systemctl list-jobs```
    * List units currently in memory
      * ```$ systemctl list-units```
+   * Check the config
+     * ```$ systemctl cat ${service_name}.service```
    * start the service
      * ```$ systemctl start ${service_name}.service```
    * stop the service
