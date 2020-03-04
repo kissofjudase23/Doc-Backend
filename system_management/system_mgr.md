@@ -88,11 +88,33 @@
       * ```$dig A hashsrv.ers.trendmicro.com```
     * AAAA (IPv6)
       * ```$dig AAAA hashsrv.ers.trendmicro.com```
+    * Reverse DNS lookup
+      * `$dig -x 8.8.8.8` 
+    * Specify DNS server
+      * `@{ip_or_hostname}`
+     
   * Ref:
     * http://dns-learning.twnic.net.tw/bind/intro6.html
+## nslookup
+  * query Internet name servers interactively
+    * `$nslookup google.com.tw`
 ## tcpdump
+## route
+  * show / manipulate the IP routing table
 ## traceroute
   * each endpoint tests 3 times.
+  * Options:
+    * -4: ipv4
+    * -6: ipv6
+    * -w (--wait)
+    * -n: do not resolve IP addresses to their domain names 
+    * -T (--tcp): use TCP SYN to tracerouting
+    * -I (--icmp) use ICMP echo for tracerouting
+  * UDP
+    * `$ traceroute google.com.tw`
+  * TCP, wait 1 sec, do not resolve host name
+    * `$ traceroute -T -n -w 1 google.com.tw`
+## iptables
 ## netstat
   * Usage
     * list listening services
@@ -128,7 +150,44 @@
     * -p: show processes using socket
     * -4: ipv4
     * -6: ipv6
-## iptables
+## tcpdump
+  * options:
+    * -i: 
+      * interface
+    * -n: 
+      * Don't convert addresses (i.e., host addresses, port numbers, etc.) to names.
+    * -q:
+      * quick output
+    * -X:
+      * In addition to printing the headers of each packet, print the data of each packet (minus its link level  header)  in  hex
+      and ASCII.
+    * -XX:
+      * In addition to printing the headers of each packet, print the data of each packet, including its link level header, in hex and ASCII.
+    * -w file:
+      * Write  the raw packets to file rather than parsing and printing them out.  
+      * They can later be printed with the -r option.
+    * -r file:
+      * Read packets from file
+    * -c: 
+      * count, exit after receiving count packets
+    * protocol :
+      * tcp, udp, ip, arp, rarp, fddi, icmp
+    * src ${condition}
+    * dst ${condition}
+    * host
+      * hostname
+    * net
+      * IP range  
+    * port ${port_number}:
+      * specify port number
+    * portrange
+      * portrange 21-23
+    * logical operator:
+      * not(!), and(&&), or(||)
+    * Example:
+      * https://danielmiessler.com/study/tcpdump/#protocol
+      * https://colobu.com/2019/07/16/a-tcpdump-tutorial-with-examples/#%E6%A0%B9%E6%8D%AE%E7%BD%91%E6%AE%B5%E8%BF%9B%E8%A1%8C%E6%9F%A5%E6%89%BE
+
 ## airmon
 ## airodump
 
@@ -199,32 +258,39 @@
   * config
    * path
      * /usr/lib/systemd
+  * Type:
+    * service, socket, target
   * Usage:
    * List installed unit files
-     * ```$ systemctl list-unit-files```
+     * `$ systemctl list-unit-files`
    * List jobs
-     * ```$ systemctl list-jobs```
+     * `$ systemctl list-jobs`
    * List units currently in memory
-     * ```$ systemctl list-units```
+     * `$ systemctl list-units`
+   * List services currently in memory
+     * `$ systemctl list-units --type=service --state=active`
+     * `$ systemctl list-units --type=service --state=running`
+     * `$ systemctl list-units --type=service --state=active,failed`
    * Check the config
-     * ```$ systemctl cat ${service_name}.service```
+     * `$ systemctl cat ${service_name}.service`
    * start the service
-     * ```$ systemctl start ${service_name}.service```
+     * `$ systemctl start ${service_name}.service`
    * stop the service
-     * ```$ systemctl stop ${service_name}.service```
+     * `$ systemctl stop ${service_name}.service`
    * reload the service
-     * ```$ systemctl reload ${service_name}.service```
+     * `$ systemctl reload ${service_name}.service`
    * restart the service
-     * ```$ systemctl restart ${service_name}.service```
-     * ```$ systemctl condrestart  ${service_name}.service```
+     * `$ systemctl restart ${service_name}.service`
+     * `$ systemctl condrestart  ${service_name}.service`
        * restart the service if it is running.
    * enable the service when start up
-     * ```$ systemctl enable  ${service_name}.service```
+     * `$ systemctl enable  ${service_name}.service`
    * disable the service when start up
-     * ```$ systemctl disable  ${service_name}.service```
+     * `$ systemctl disable  ${service_name}.service`
   * Ref:
     * https://www.ibm.com/developerworks/cn/linux/1407_liuming_init3/index.html?ca=drs-
     * https://blog.gtwang.org/linux/linux-basic-systemctl-systemd-service-unit-tutorial-examples/
+    * http://linux.vbird.org/linux_basic/0560daemons.php#systemctl_cmd
 ## Systemd Journal
   * Usage:
     * Show the newest entries first
