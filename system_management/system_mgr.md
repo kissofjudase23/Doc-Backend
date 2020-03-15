@@ -1,3 +1,5 @@
+- [kernel:](#kernel)
+  - [sysctl](#sysctl)
 - [Text Manipulation](#text-manipulation)
   - [find:](#find)
   - [ag:](#ag)
@@ -15,10 +17,13 @@
 - [Network](#network)
   - [ping](#ping)
   - [dig](#dig)
-  - [tcpdump](#tcpdump)
+  - [nslookup](#nslookup)
+  - [route](#route)
   - [traceroute](#traceroute)
-  - [netstat](#netstat)
   - [iptables](#iptables)
+  - [netstat](#netstat)
+  - [ss](#ss)
+  - [tcpdump](#tcpdump)
   - [airmon](#airmon)
   - [airodump](#airodump)
 - [Process Monitoring](#process-monitoring)
@@ -34,10 +39,15 @@
   - [Systemd](#systemd)
   - [Systemd Journal](#systemd-journal)
 
+# kernel:
+## sysctl
+  * Configure kernel parameters at runtime
+  * -p [FILE], --load
+    * Load in sysctl settings from the file specified or /etc/sysctl.conf if none given.
 # Text Manipulation
 ## find:
   * usage:
-    * ```$ find -name "*.sh" -type f maxdepth 5| xargs rm -f```
+    * `$ find -name "*.sh" -type f maxdepth 5| xargs rm -f`
   * options:
     * -type:
       * file type
@@ -53,8 +63,8 @@
       * -1 is unlimited
 ## grep (egrep)
   * Usage
-    * ```$grep -inrH ".*darwin" *.sh ```
-    * ```$grep ```
+    * `$grep -inrH ".*darwin" *.sh `
+    * `$grep `
   * options:
     * r:
       * recursive
@@ -62,12 +72,12 @@
       * case insensitive
     * -n:
       * line number
-    * -h:
-      * print filename headers
+    * -H:
+      * print filename for each match
     * --include
       * specify file pattern
 ## fgrep
-## aws
+## awk
 ## sed
 ## sort
 ## uniq
@@ -78,16 +88,53 @@
 ## echo
 
 # Network
+## ifconfig
+  * Usage:
+    * Show all network interfaces
+      * `$ifconfig `
+    * Shoe the specific network interface
+      * `$ifconfig ${interface}`
+## ifup, ifdown, ifquery
+  * up
+    * Bring a network interface up
+  * down
+    * Take a network interface up
+  * query
+    * Parse interface configuration
+  * Usage:
+    * `ifup -i ${interface_file}`
+    * `ifup -a`
+    * `ifup eth0`
+    * `ifquery -l`
+    * `ifquery eth0`
+  * Options:
+    * -a: --all 
+      * If given to ifup
+        * affect all interfaces marked auto. Interfaces are brought up in the order in which they are defined in /etc/network/interfaces. 
+      * If given to ifdown, 
+        * affect all defined interfaces. Interfaces are brought down in the order in which they are currently listed in the state file. Only  interfaces  defined  in /etc/network/interfaces will be brought down.
+    * -i FILE:
+      * Read interface definitions from FILE instead of from /etc/network/interfaces.
+
+
 ## ping
+  * Usage:
+    * `$ping -c 2${domain}`
+    * `$ping -c 2${ip}`
+    *  
+  * Options:
+    * -c: count
+    * -W: timeout
+    * 
 ## dig
   * Usage:
     * NS
       * find Name server of the from.ers.trendmicro.com
-      * ```$dig NS from.ers.trendmicro.com```
+      * `$dig NS from.ers.trendmicro.com`
     * A (IPv4)
-      * ```$dig A hashsrv.ers.trendmicro.com```
+      * `$dig A hashsrv.ers.trendmicro.com`
     * AAAA (IPv6)
-      * ```$dig AAAA hashsrv.ers.trendmicro.com```
+      * `$dig AAAA hashsrv.ers.trendmicro.com`
     * Reverse DNS lookup
       * `$dig -x 8.8.8.8` 
     * Specify DNS server
@@ -98,18 +145,32 @@
 ## nslookup
   * query Internet name servers interactively
     * `$nslookup google.com.tw`
-## tcpdump
 ## route
+  * Usage:
+    * `$route -n`
+    * `$netstat -nr` can show routing table as well.
   * show / manipulate the IP routing table
+ 
 ## traceroute
   * each endpoint tests 3 times.
   * Options:
-    * -4: ipv4
-    * -6: ipv6
-    * -w (--wait)
-    * -n: do not resolve IP addresses to their domain names 
-    * -T (--tcp): use TCP SYN to tracerouting
-    * -I (--icmp) use ICMP echo for tracerouting
+    * -4: 
+      * ipv4
+    * -6: 
+      * ipv6
+    * -w 
+      * (--wait)
+    * -n: 
+      * do not resolve IP addresses to their domain names 
+    * -U (--udp): 
+      * default
+      * use UDP with port 53
+    * -T (--tcp): 
+      * use TCP SYN to tracerouting
+    * -I (--icmp) 
+      * use ICMP echo for tracerouting
+    * -p:
+      * port
   * UDP
     * `$ traceroute google.com.tw`
   * TCP, wait 1 sec, do not resolve host name
@@ -118,9 +179,11 @@
 ## netstat
   * Usage
     * list listening services
-      * ```$ netstat -tulnp```
+      * `$ netstat -tulnp`
     * list all services
-      * ```$ netstat -atunp```
+      * `$ netstat -atunp`
+    * show routing table
+      * `$ netstat -nr`
   * Options:
     * -a: all
     * -l: list listen services
@@ -131,14 +194,16 @@
     * -c: -c 5 update every 5 second
     * -n: use IP and port number
       * default is hostname and service
+    * -r: --route
+      * Display the routing table
 ## ss
   * ss is included in iproute2 package and is the substitute of the netstat. ss is used to dump socket statistics. It shows information similar to netstat. It can display more TCP and state information than other tools. It is a new, incredibly useful and faster (compared to netstat) tool for tracking TCP connections and sockets.
   * Usage:
     * list all services
-      * ```$ ss -atup```
+      * `$ ss -atup`
     * list all tcp socket with port 3306 (mysql)
-      * ```$ ss -atnp | grep 3306```
-      * ```$ ss -atrp | grep 3306```  (resolve hostname)
+      * `$ ss -atnp | grep 3306`
+      * `$ ss -atrp | grep 3306`  (resolve hostname)
 
   * Options
     * -a: all
@@ -194,7 +259,7 @@
 # Process Monitoring
 ## ps
   * Usage:
-  * ```$ps aux|grep ${pattern}```
+  * `$ps aux|grep ${pattern}`
 ## top
 ## htop
 ## atop
@@ -206,26 +271,26 @@
 ## Sysvinit
   * config:
     * Path
-      * ```/etc/init.d```
+      * `/etc/init.d`
   * Usage:
     * start the service
-    * ```$ service ${service_name} start```
+    * `$ service ${service_name} start`
     * stop the service
-      * ```$ service ${service_name} stop```
+      * `$ service ${service_name} stop`
     * reload the service
-      * ```$ service ${service_name} reload ```
+      * `$ service ${service_name} reload `
     * restart the service
-      * ```$ service ${service_name} restart```
-      * ```$ service ${service_name} condrestart```
+      * `$ service ${service_name} restart`
+      * `$ service ${service_name} condrestart`
         * restart the service if it is running.
   * Ref:
     * https://www.ibm.com/developerworks/cn/linux/1407_liuming_init1/index.html?ca=drs-
 ## Upstart
   * config:
     * path
-      * ```/etc/init```
+      * `/etc/init`
     * example:
-        ```sh
+        `sh
         start on started network-services
         stop on stopping network-services
         respawn
@@ -234,22 +299,22 @@
             OPTIONS="--ini /etc/uwsgi.d/uwsgi_postman.ini"
             exec $PROGRAM $OPTIONS
         end script
-        ```
+        `
   * Usage:
     * list
-      * ```$ initctl list```
+      * `$ initctl list`
     * start the service
-      * ```$ initctl start ${service_name}```
-      * ```$ start ${service_name}```
+      * `$ initctl start ${service_name}`
+      * `$ start ${service_name}`
     * stop the service (SIGTEM)
-      * ```$ initctl stop ${service_name}```
-      * ```$ stop ${service_name}```
+      * `$ initctl stop ${service_name}`
+      * `$ stop ${service_name}`
     * reload (SIGHUP)
-      * ```$ initctl reload ${service_name}```
-      * ```$ reload ${service_name}```
+      * `$ initctl reload ${service_name}`
+      * `$ reload ${service_name}`
     * reload
-      * ```$ initctl reload ${service_name}```
-      * ```$ reload ${service_name}```
+      * `$ initctl reload ${service_name}`
+      * `$ reload ${service_name}`
   * Ref:
     * http://upstart.ubuntu.com/cookbook/
     * https://www.ibm.com/developerworks/cn/linux/1407_liuming_init2/index.html?ca=drs-
@@ -263,6 +328,8 @@
   * Usage:
    * List installed unit files
      * `$ systemctl list-unit-files`
+   * List socket units currently in memory.
+     * `$ systemctl list-sockets`
    * List jobs
      * `$ systemctl list-jobs`
    * List units currently in memory
@@ -294,20 +361,20 @@
 ## Systemd Journal
   * Usage:
     * Show the newest entries first
-      * ```$ journalctl -r -n 20 prometheus.service```
+      * `$ journalctl -r -n 20 prometheus.service`
         * -r : reverse, show the latest
         * -n : lines
     * List all values that a specified field takes
-      * ```$ journalctl -F=field```
+      * `$ journalctl -F=field`
     * Show log of the specific unit
-      * ```$ journalctl -f -u prometheus.service```
+      * `$ journalctl -f -u prometheus.service`
         * -f: follow mode
         * -u: unit
     * Output to pretty json format
-      * ```journalctl -u cron.service -n 1 --no-pager -o json-pretty```
+      * `journalctl -u cron.service -n 1 --no-pager -o json-pretty`
     * Show entries with the specified priority
-      * ```journalctl -p 3```
-      * ```journalctl -p err```
+      * `journalctl -p 3`
+      * `journalctl -p err`
       * -p --priority=RANGE
       * 0: emerg
       * 1: alert
