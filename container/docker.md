@@ -25,6 +25,10 @@
 
 ## FAQ
 * How is Docker different from a virtual machine?
+  * Containers
+    * Multiple containers can run on the same machine and share the OS kernel with other containers.
+  * VMs
+    * Each VM includes a full copy of an oerating system.
   * ![docker vs VM](https://i.stack.imgur.com/exIhw.png)
   * ![docker](https://i.stack.imgur.com/vIBgw.png)
   * Ref:
@@ -41,14 +45,11 @@
     * Only the instructions **RUN, COPY, ADD** create layers. Other instructions create temporary intermediate images, and do not increase the size of the build.
 
 * [CMD](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#cmd) & [ENTRYPOINT](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#entrypoint)
-  * CMD should almost always be used in the form of CMD **["executable", "param1", "param2"…].**
-      * Such as Apache and Rails, you would run something like CMD ["apache2","-DFOREGROUND"].
-  * [CMD and ENTRYPOINT together](http://crosbymichael.com/dockerfile-best-practices.html)
-    * CMD should rarely be used in the manner of CMD **["param", "param"]** in conjunction with ENTRYPOINT
-    * ENTRYPONT:
-      * Provide executable for the container
-    * CMD:
-      * Provide default param for the container
+  * CMD
+    * CMD defines default commands and/or parameters for a container.
+    * **CMD is an instruction that is best to use if you need a default command which users can easily override.** If a Dockerfile has multiple CMDs, it only applies the instructions from the last one.
+  * ENTRYPOINT
+    * **ENTRYPOINT is preferred when you want to define a container with a specific executable.** You cannot override an ENTRYPOINT when starting a container unless you add the --entrypoint flag.
     * [Rethinkdb](https://rethinkdb.com/) Dockerfile
       ```Dockerfile
       FROM ubuntu
@@ -100,7 +101,7 @@
   * [Understand build context](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#understand-build-context)
   * [Exlucde with .dockerignore](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#exclude-with-dockerignore)
   * [Use multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build/)
-    ```Dockerfile
+    ```dockerfile
     FROM golang:alpine AS build-env
     ADD . /src
     RUN cd /src && go build -o app
@@ -120,9 +121,8 @@
 
 ## Container
 ### [docker container CLI](https://docs.docker.com/engine/reference/commandline/container/)
-```bash
-$ docker container --help
-```
+`$ docker container --help`
+
 
 
 ## [Networking](https://docs.docker.com/network/)
@@ -175,10 +175,10 @@ $ docker container --help
 * Define and run multi-container applications with Docker.
 * [version3 reference](https://docs.docker.com/compose/compose-file/)
 * [docker-compose CLI](https://docs.docker.com/compose/reference/)
-    ```bash
-    docker-compose --help
-    ```
+    * `docker-compose --help`
+* [environemnt-variables](https://docs.docker.com/compose/environment-variables/)
 * example:
+  * bridge network example
     ```yaml
     version: "3.7"
 
@@ -223,10 +223,44 @@ $ docker container --help
             target: /tmp/common
         tty: true
 
-
     networks:
     common_net:
         driver: bridge
         name: "common_net"
     ```
+  * The image is built from dockerfile
+    ```yaml
+    version: "3.7"
 
+    # This compose file is for upgrade deploy docker image
+    services:
+      everest-deploy:
+        build:
+          context: ./
+          dockerfile: dockerfile
+        container_name: dev-syno-deploy-env
+        image: ${registry}:${image}:${tag}
+        volumes:
+          -  ./:${work_space}
+        working_dir: ${work_space}
+        env_file:
+          - ./.env
+        restart: "no"
+        tty: true
+    ```
+  * The image is pull from the docker registry.
+    ```yaml
+      version: "3.7"
+      services:
+        everest-deploy:
+          image: ${registry}:${image}:${tag}
+          container_name: syno-deploy-env
+          privileged: true
+          volumes:
+            -  ./:${work_space}
+          restart: "no"
+          working_dir: ${work_space}
+          env_file:
+            - ./.env
+          tty: true
+    ```
