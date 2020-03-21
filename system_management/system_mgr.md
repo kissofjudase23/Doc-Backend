@@ -14,9 +14,13 @@
   - [wc](#wc)
   - [fmt](#fmt)
   - [echo](#echo)
+- [File System](#file-system)
+  - [du](#du)
+  - [df](#df)
 - [Network](#network)
   - [ifconfig](#ifconfig)
   - [ifup, ifdown, ifquery](#ifup-ifdown-ifquery)
+  - [/etc/networks/interfaces](#etcnetworksinterfaces)
   - [ping](#ping)
   - [dig](#dig)
   - [nslookup](#nslookup)
@@ -101,6 +105,26 @@
 ## wc
 ## fmt
 ## echo
+
+# File System
+## du
+  * dispaly disk usage statistics
+  * Use cases:
+    * $ `$ du -sh`
+  * Optinons:
+    * -h: human readable
+    * -s: Display an entry for each specified file.
+    * -x: File system mount points are not traversed.
+    * 
+## df
+  * display free space
+  * Use cases:
+    * $ `df -h`
+  * options:
+    * -h: (using base 2 or sizes)
+      * human readable output
+    * -H:  (using base 10 or sizes)
+      * * human readable output
 
 # Network
 ## ifconfig
