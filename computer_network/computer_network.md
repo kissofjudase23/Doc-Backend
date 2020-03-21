@@ -1,7 +1,10 @@
 ComputerNetwork
 - [FAQ](#faq)
+- [IPv4](#ipv4)
+- [IPv6](#ipv6)
+- [CDN](#cdn)
+- [DNS](#dns)
 - [TCP three way handshake](#tcp-three-way-handshake)
-- [Domain Name System](#domain-name-system)
 
 ## FAQ
   * [OSI Model](https://en.wikipedia.org/wiki/OSI_model)
@@ -29,6 +32,8 @@ ComputerNetwork
    * https://www.jannet.hk/zh-Hant/post/IP-Address-Version-6-IPv6/
    * https://docs.oracle.com/cd/E18752_01/html/816-4554/ipv6-overview-10.html
    * https://community.cisco.com/t5/networking-documents/understanding-ipv6-eui-64-bit-address/ta-p/3116953
+
+## CDN
 
 
 ## DNS
@@ -75,12 +80,37 @@ ComputerNetwork
     * http://dns-learning.twnic.net.tw/bind/intro6.html
 
 
-## TCP three way handshake
+## TCP
+  * TCP Header
+    * ![TCP Header](./images/TCP_header.png)
+    * Sequence number
+      * Sequence number of TCP packet
+    * Acknowledge number 
+    * TCP Code (control flags)
+      * URG
+        * urgent
+      * ACK
+        * Acknowledge
+      * PSH
+        * Push function (flush buffer)
+      * RST
+        * Reset Connection
+      * SYN
+        * Sync
+      * FIN
+        * Finish
+  
+  * Standard:
+    * ![TCP standard](./images/TCP_flow.png)
+    * Connection Set-up
+    * Data Transfer
+    * Connection Close
+      
+  * TCP half Close
+    * ![TCP standard](./images/TCP_half_close.png)
+    * The first two segments are the same as for a regular close: a FIN by the initiator, followed by an ACK of the FIN by the recipient. The operation then differs from Figure 13-1, because the side that receives the half-close can still send data.
   * Ref:
     * https://notfalse.net/7/three-way-handshake
-    * 1. Client machine sends a SYN packet to the server over the internet asking if it is open for new connections.
-    * 2. If the server has open ports that can accept and initiate new connections, it’ll respond with an ACKnowledgment of the SYN packet using a SYN/ACK packet.
-    * 3. The client will receive the SYN/ACK packet from the server and will acknowledge it by sending an ACK packet.
-
+    * https://notes.shichao.io/tcpv1/ch13/
 
 
