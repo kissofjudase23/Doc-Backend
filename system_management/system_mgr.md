@@ -5,7 +5,7 @@
   - [ag:](#ag)
   - [grep (egrep)](#grep-egrep)
   - [fgrep](#fgrep)
-  - [aws](#aws)
+  - [awk](#awk)
   - [sed](#sed)
   - [sort](#sort)
   - [uniq](#uniq)
@@ -15,6 +15,8 @@
   - [fmt](#fmt)
   - [echo](#echo)
 - [Network](#network)
+  - [ifconfig](#ifconfig)
+  - [ifup, ifdown, ifquery](#ifup-ifdown-ifquery)
   - [ping](#ping)
   - [dig](#dig)
   - [nslookup](#nslookup)
@@ -46,7 +48,7 @@
     * Load in sysctl settings from the file specified or /etc/sysctl.conf if none given.
 # Text Manipulation
 ## find:
-  * usage:
+  * Use Cases:
     * `$ find -name "*.sh" -type f maxdepth 5| xargs rm -f`
   * options:
     * -type:
@@ -57,14 +59,21 @@
     * maxdepth
     * mindepth
 ## ag:
-  * usage:
+  * Use Cases:
+    * 
   * options:
+    * -w:
+      * Only match whole words.
+    * -C:
+      * Print  NUM  lines of output context.
     * depth
       * -1 is unlimited
 ## grep (egrep)
-  * Usage
-    * `$grep -inrH ".*darwin" *.sh `
-    * `$grep `
+  * Use Cases
+    * case insenditive + recursive + print filename
+      * `$grep -inrH ".*darwin" --include="*.yml" *`
+    * exactly match
+      * `$grep -w "deiauk" *.sh`
   * options:
     * r:
       * recursive
@@ -74,6 +83,12 @@
       * line number
     * -H:
       * print filename for each match
+    * -v:
+      * invert match
+    * -w:
+      * Only match whole words.
+    * -C:
+      * Print  NUM  lines of output context.
     * --include
       * specify file pattern
 ## fgrep
@@ -89,11 +104,12 @@
 
 # Network
 ## ifconfig
-  * Usage:
+  * Use Cases:
     * Show all network interfaces
       * `$ifconfig `
     * Shoe the specific network interface
       * `$ifconfig ${interface}`
+
 ## ifup, ifdown, ifquery
   * up
     * Bring a network interface up
@@ -101,7 +117,7 @@
     * Take a network interface up
   * query
     * Parse interface configuration
-  * Usage:
+  * Use Cases:
     * `ifup -i ${interface_file}`
     * `ifup -a`
     * `ifup eth0`
@@ -116,18 +132,20 @@
     * -i FILE:
       * Read interface definitions from FILE instead of from /etc/network/interfaces.
 
+## /etc/networks/interfaces
+  [Good detailed explanation of /etc/network/interfaces syntax](https://unix.stackexchange.com/questions/128439/good-detailed-explanation-of-etc-network-interfaces-syntax)
 
 ## ping
-  * Usage:
+  * Use Cases:
     * `$ping -c 2${domain}`
     * `$ping -c 2${ip}`
-    *  
+      
   * Options:
     * -c: count
     * -W: timeout
-    * 
+  
 ## dig
-  * Usage:
+  * Use Cases:
     * NS
       * find Name server of the from.ers.trendmicro.com
       * `$dig NS from.ers.trendmicro.com`
@@ -146,13 +164,42 @@
   * query Internet name servers interactively
     * `$nslookup google.com.tw`
 ## route
-  * Usage:
-    * `$route -n`
-    * `$netstat -nr` can show routing table as well.
   * show / manipulate the IP routing table
+  * Use cases:
+    * show
+      * `$route -n`
+      * `$netstat -nr` can show routing table as well.
+    * add route
+      * `$route del -net 169.254.0.0 netmask 255.255.0.0 dev eth0`
+    * delete route
+      * `route del -net 169.254.0.0 netmask 255.255.0.0 dev eth0`
+    * add default gateway
+      * `route add default gw 192.168.1.250`
+    * options:
+      * -n:
+        * Do not resolve hostanme
+      * -net
+        * The target is a network.
+      * -host
+        * The target is a host
+    * flags:
+      * U (route is up)
+      * H (target is a host)
+      * G (use gateway)
+      * R (reinstate route for dynamic routing)
+      * D (dynamically installed by daemon or redirect)
+      * M (modified from routing daemon or redirect)
+      * A (installed by addrconf)
+      * C (cache entry)
+      * !  (reject route)
  
 ## traceroute
   * each endpoint tests 3 times.
+  * Use cases:
+      * UDP
+        * `$ traceroute google.com.tw`
+      * TCP, wait 1 sec, do not resolve host name
+        * `$ traceroute -T -n -w 1 google.com.tw`
   * Options:
     * -4: 
       * ipv4
@@ -171,13 +218,10 @@
       * use ICMP echo for tracerouting
     * -p:
       * port
-  * UDP
-    * `$ traceroute google.com.tw`
-  * TCP, wait 1 sec, do not resolve host name
-    * `$ traceroute -T -n -w 1 google.com.tw`
+  
 ## iptables
 ## netstat
-  * Usage
+  * Use Cases
     * list listening services
       * `$ netstat -tulnp`
     * list all services
@@ -198,7 +242,7 @@
       * Display the routing table
 ## ss
   * ss is included in iproute2 package and is the substitute of the netstat. ss is used to dump socket statistics. It shows information similar to netstat. It can display more TCP and state information than other tools. It is a new, incredibly useful and faster (compared to netstat) tool for tracking TCP connections and sockets.
-  * Usage:
+  * Use Cases:
     * list all services
       * `$ ss -atup`
     * list all tcp socket with port 3306 (mysql)
@@ -215,8 +259,82 @@
     * -p: show processes using socket
     * -4: ipv4
     * -6: ipv6
+
 ## tcpdump
+  * Use cases:
+    * Basic
+      * Specify the monitor interface
+        * `$ tcpdump -i eth0`
+      * Find traffic by IP
+        * `$ tcpdump src host 1.1.1.1`
+      * Find traffic by Network (IP Range)
+        * `$ tcpdump src 192.168.0.0/16`
+      * Get Packets Contents with Hex Output
+        * `$ tcpdump -c 1 -X icmp`
+      * Show traffic of One Protocol
+        * `$ tcpdump icmp`
+      * Find traffic Using Port ranges
+        * `$ tcpdump port 80`
+        * `$ tcpdump portrange 21-23`
+      * Writing Captures to a File (pcap)
+        * `$ tcpdump port 80 -w capture_file`
+      * Reading Captures from a File
+        * `$ tcpdump -r capture_file`
+    * Advanced:
+      * Raw Output View
+        * `$ tcpdump -ttnnvvS`
+      * From specific IP and destined for a specific Port
+        * `$ tcpdump -nnvvS src 10.5.2.3 and dst port 3389`
+      * From One Network to Another
+        * `$ tcpdump -nvX src net 192.168.0.0/16 and dst net 10.0.0.0/8 or 172.16.0.0/16`
+      * Non ICMP Traffic Going to a Specific IP
+        * `$ tcpdump dst 192.168.0.2 and src net and not icmp`
+      * Traffic From a Host That Isn’t on a Specific Port
+        * `$ tcpdump -vv src mars and not dst port 22`
+    * Isolate TCP Flags
+      * Isolate TCP RST flags
+        * `$ tcpdump 'tcp[13] & 4!=0'`
+        * `$ tcpdump 'tcp[tcpflags] == tcp-rst'` 
+      * Isolate TCP SYN flags
+        * `$ tcpdump 'tcp[13] & 2!=0'`
+        * `$ tcpdump 'tcp[tcpflags] == tcp-syn'`
+      * Isolate packets that have both the SYN and ACK flags set.
+        * `$ tcpdump 'tcp[13]=18'`
+      * Isolocate TCP URG Flags
+        * `$ tcpdump 'tcp[13] & 32!=0'`
+        * `$ tcpdump 'tcp[tcpflags] == tcp-urg'`
+      * Isolocate TCP ACK Flags
+        * `$ tcpdump 'tcp[13] & 16!=0'`
+        * `$ tcpdump 'tcp[tcpflags] == tcp-ack'` 
+      * Isolocate TCP PSH Flags
+        * `$ tcpdump 'tcp[13] & 8!=0'`
+        * `$ tcpdump 'tcp[tcpflags] == tcp-psh'`
+      * Isolocate TCP FIN Flags
+        * `$ tcpdump 'tcp[13] & 1!=0'`
+        * `$ tcpdump 'tcp[tcpflags] == tcp-fin'`
+    * HTTP
+      * User Agent
+        * `$ tcpdump -vvAls0 | grep 'User-Agent:'`
+      * GET Requests
+        * `$ tcpdump -vvAls0 | grep 'GET'`
+      * Host Headers
+        * `$ tcpdump -vvAls0 | grep 'Host:'`
+      * Cookike
+        * `$ tcpdump -vvAls0 | grep 'Set-Cookie|Host:|Cookie:'`
+    * DNS
+      * `$ tcpdump -vvAs0 port 53`
+    * FTP
+      * `$ tcpdump -vvAs0 port ftp or ftp-data`
+    * NTP
+      * `$ tcpdump -vvAs0 port 123`
+    * Find Cleartext Passwords
+      * `$ tcpdump port http or port ftp or port smtp or port imap or port pop3 or port telnet -lA | egrep -i -B5 'pass=|pwd=|log=|login=|user=|username=|pw=|passw=|passwd= |password=|pass:|user:|username:|password:|login:|pass |user '`
+
   * options:
+    * -A:
+      * Print each packet (minus its link level header) in ASCII.  Handy for capturing web pages.
+    * -l:
+      * Make stdout line buffered.  Useful if you want to see the data while capturing
     * -i: 
       * interface
     * -n: 
@@ -224,13 +342,15 @@
     * -q:
       * quick output
     * -X:
-      * In addition to printing the headers of each packet, print the data of each packet (minus its link level  header)  in  hex
+      * In addition to printing the headers of each packet, **print the data of each packet** (minus its link level  header)  in  hex
       and ASCII.
     * -XX:
-      * In addition to printing the headers of each packet, print the data of each packet, including its link level header, in hex and ASCII.
+      * Same as -X, but also shows the ethernet header.
     * -w file:
       * Write  the raw packets to file rather than parsing and printing them out.  
       * They can later be printed with the -r option.
+    * -tttt:
+      * Give maximally human-readable timestamp output.
     * -r file:
       * Read packets from file
     * -c: 
@@ -258,7 +378,7 @@
 
 # Process Monitoring
 ## ps
-  * Usage:
+  * Use Cases:
   * `$ps aux|grep ${pattern}`
 ## top
 ## htop
@@ -272,7 +392,7 @@
   * config:
     * Path
       * `/etc/init.d`
-  * Usage:
+  * Use Cases:
     * start the service
     * `$ service ${service_name} start`
     * stop the service
@@ -300,7 +420,7 @@
             exec $PROGRAM $OPTIONS
         end script
         `
-  * Usage:
+  * Use Cases:
     * list
       * `$ initctl list`
     * start the service
@@ -325,7 +445,7 @@
      * /usr/lib/systemd
   * Type:
     * service, socket, target
-  * Usage:
+  * Use Cases:
    * List installed unit files
      * `$ systemctl list-unit-files`
    * List socket units currently in memory.
@@ -359,7 +479,7 @@
     * https://blog.gtwang.org/linux/linux-basic-systemctl-systemd-service-unit-tutorial-examples/
     * http://linux.vbird.org/linux_basic/0560daemons.php#systemctl_cmd
 ## Systemd Journal
-  * Usage:
+  * Use Cases:
     * Show the newest entries first
       * `$ journalctl -r -n 20 prometheus.service`
         * -r : reverse, show the latest
