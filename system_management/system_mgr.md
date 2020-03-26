@@ -44,6 +44,11 @@
   - [Upstart](#upstart)
   - [Systemd](#systemd)
   - [Systemd Journal](#systemd-journal)
+- [Packages Management](#packages-management)
+  - [apt](#apt)
+  - [dpkg](#dpkg)
+  - [yum](#yum)
+  - [rpm](#rpm)
 
 # kernel:
 ## sysctl
