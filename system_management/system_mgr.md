@@ -484,20 +484,20 @@
      * `$ systemctl list-units --type=service --state=active,failed`
    * Check the config
      * `$ systemctl cat ${service_name}.service`
-   * start the service
+   * Start the service
      * `$ systemctl start ${service_name}.service`
-   * stop the service
+   * Stop the service
      * `$ systemctl stop ${service_name}.service`
-   * reload the service
+   * Reload the service
      * `$ systemctl reload ${service_name}.service`
-   * restart the service
+   * Restart the service
      * `$ systemctl restart ${service_name}.service`
      * `$ systemctl condrestart  ${service_name}.service`
        * restart the service if it is running.
-   * enable the service when start up
-     * `$ systemctl enable  ${service_name}.service`
-   * disable the service when start up
-     * `$ systemctl disable  ${service_name}.service`
+   * Enable the service when start up
+     * `$ systemctl enable ${service_name}.service`
+   * Disable the service when start up
+     * `$ systemctl disable ${service_name}.service`
   * Ref:
     * https://www.ibm.com/developerworks/cn/linux/1407_liuming_init3/index.html?ca=drs-
     * https://blog.gtwang.org/linux/linux-basic-systemctl-systemd-service-unit-tutorial-examples/
@@ -531,3 +531,60 @@
 
   * Ref:
     * https://linuxtoy.org/archives/systemd-journal.html
+
+
+# Packages Management
+
+## apt
+* use cases:
+  * see also APT-GET(8) and sources.list(5)
+  * configs:
+    * `/etc/apt`
+    * sources.list(5):
+      * `/etc/apt/sources.list`
+  * install
+    * `$apt install ${packge-name}`
+    * `$apt install -f` 
+  * update
+    * update is used to resynchronize the package index files from their sources.
+    * `$apt update` 
+  * upgrade
+    * upgrade is used to install available upgrades of all packages currently installed on the system from the sources configured via sources.list(5).
+    * New packages will be installed if required to satisfy dependencies, but existing packages will never be removed. If an upgrade for a package requires the remove of an installed package the upgrade for this package isn't performed.
+  * remove
+    * remove is identical to install except that packages are removed instead of installed. 
+    * Note that removing a package leaves its configuration files
+      on the system. 
+    * `$ apt remove {package-name}`  
+  * purge
+    * purge is identical to remove except that packages are removed and purged (any configuration files are deleted too).
+    * `$ apt purge {package-name}`
+  * options:
+    * -f, --fix-broken
+      * Fix; attempt to correct a system with broken dependencies in place.
+   
+
+## dpkg
+ * use cases:
+   * install packages
+     * `$dpkg -i ${packge-file}`
+   * remove packages
+     * `$dpkg -r ${packge-name}`
+   * List packages 
+     * `$dpkg -l` 
+     * `$dpkg -l ${pattern}`
+   * List files installed to your system from packge-name
+      * `$dpkg -L ${package-name}`
+   * configure packages
+     * configure all unconfigure packages
+       * `$dpkg --configure -a`
+     * configure a specific package
+       * `$dpkg --configure ${packge-name}`
+
+## yum
+
+## rpm
+
+
+
+
