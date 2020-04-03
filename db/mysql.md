@@ -1,4 +1,4 @@
-###### tags: `db` `mysql` 
+###### tags: `db` `mysql`
 
 # MySQL
 
@@ -38,17 +38,12 @@
     * Ref:
       * https://www.quora.com/Whats-the-difference-between-sharding-DB-tables-and-partitioning-them
   * How to find slow query
-    * before
-      * explain
-      * ...
-    * after
-      * Enable slow query log
-      * Use SHOW PROCESS LIST
-      * ...
+    * explain
+    * Enable slow query log
+    * Use SHOW PROCESS LIST
     * Ref:
       * Examining Thread Information
         * https://dev.mysql.com/doc/refman/8.0/en/thread-information.html
-
   * SQL vs NoSQL
     * SQL
       * Relation data model
@@ -85,11 +80,13 @@
   * **Profiling**:
     * mtop: monitoring tool
     * Slow query log
-    * EXPLAIN
+    * [EXPLAIN](https://dev.mysql.com/doc/refman/8.0/en/explain.html)
       * EXPLAIN is used to obtain a query execution plan (that is, an explanation of how MySQL would execute a query).
     * [SHOW PROCESSLIST](https://dev.mysql.com/doc/refman/8.0/en/show-processlist.html)
       * SHOW PROCESSLIST shows which threads are running. If you have the PROCESS privilege, you can see all threads.
-      * The SHOW PROCESSLIST statement is very useful if you get the “too many connections” error message and want to find out what is going on.
+      * The SHOW PROCESSLIST statement is very useful if you get the "too many connections" error message and want to find out what is going on.
+      * or use
+        * `$nestat -atnp | grep 3306`
     * [SHOW STATUS](https://dev.mysql.com/doc/refman/8.0/en/show-status.html)
       * SHOW STATUS provides server status information. This statement does not require any privilege. It requires only the ability to connect to the server.
     * Ref:
@@ -125,7 +122,7 @@
     * BLOB
       * Avoid storing large BLOBS, store the location of where to get the object instead.
     * Constraints
-      * Set the **NOT NULL** constraint where applicable to improve search performance.
+      * Set the **NOT NULL** constraint where applicable to **improve search performance**.
       * Declare columns to be NOT NULL if possible. It makes SQL operations faster, by enabling better use of indexes and eliminating overhead for testing whether each value is NULL. You also save some storage space, one bit per column. If you really need NULL values in your tables, use them. Just avoid the default setting that allows NULL values in every column.
   * Use good **indexes**
     * Basic
@@ -174,6 +171,7 @@
   * Ref:
     * [10 Tips for Optimizing MySQL Queries](https://aiddroid.com/10-tips-optimizing-mysql-queries-dont-suck/)
     * https://dev.mysql.com/doc/refman/8.0/en/optimization.html
+
 ## [Data Types](https://dev.mysql.com/doc/refman/8.0/en/data-type-overview.html)
   * [Numeric Type](https://dev.mysql.com/doc/refman/8.0/en/numeric-type-overview.html)
   * [Date and Time Type](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-type-overview.html)
@@ -217,7 +215,7 @@
         ```sql
         SELECT * FROM users WHERE name = '' OR '1'='1';
         ```
-    * Solution:
+    * Solutions:
       * **Prepare statement**, **Parameter Binding**
         * If you have any "special" characters (such as semicolons or apostrophes) in your data, they will be **automatically quoted** for you by the SQLEngine object, so you don't have to worry about quoting.
           ```python
@@ -243,11 +241,11 @@
           ```
        * [Pure ORM](https://stackoverflow.com/questions/6501583/sqlalchemy-sql-injection/6501664)
          *  This also means that unless you deliberately bypass SQLAlchemy's quoting mechanisms, SQL-injection attacks are basically impossible.
-         * Correct Example:
+         * Good:
            ```python
            session.query(MyClass).filter(MyClass.foo==getArgs['val']))
            ```
-         * Bad Example:
+         * Bad:
             ```python
             session.query(MyClass).filter("foo={}".format(getArgs['val']))
             ```
@@ -260,11 +258,14 @@
       * It is a database **design technique** which organizes tables in a manner that **reduces redundancy and dependency** of data.
       *  It divides larger tables to smaller tables and links them using relationships.
     * **1NF**
-      * Every column of a table should be atomic. That means you **can not put multiple values in a database column**.
+      * Every column of a table should be atomic.
+      * That means you **can not put multiple values in a database column**.
     * **2NF**
-      * If we have **composite primary key! every non key field should be fully **depended on both key**. 
+      * Based on 1NF
+      * If we have **composite primary key, every non key field should be fully depended on both key**. 
     * **3NF**
-      * When a database table is in second normal form, there should be no transitive functional dependency. That means **any non primary key field should not be depend on other** on primary key field.
+      * When a database table is in second normal form, there should be no transitive functional dependency.
+      * That means **any non primary key field should not be depend on other** on primary key field.
     * **BCNF**
     * **4NF**
     * **5NF**
@@ -360,11 +361,11 @@
   * [Subpartition](https://dev.mysql.com/doc/refman/5.7/en/partitioning-subpartitions.html)
 
   * Restrictions and Limitations on Partitioning
-  * every unique key on the table must use every column in the table's partitioning expression
-      * All columns used in the partitioning expression for a partitioned table must be part of every unique key that the table may have.
-      * In other words, **every unique key on the table must use every column in the table's partitioning expression. (This also includes the table's primary key**, since it is by definition a unique key. 
-    * Ref:
-      * https://dev.mysql.com/doc/refman/8.0/en/partitioning-limitations.html
+  * [limitations](https://dev.mysql.com/doc/refman/8.0/en/partitioning-limitations.html)
+    * every unique key on the table must use every column in the table's partitioning expression
+        * All columns used in the partitioning expression for a partitioned table must be part of every unique key that the table may have.
+        * In other words, **every unique key on the table must use every column in the table's partitioning expression. (This also includes the table's primary key**, since it is by definition a unique key. 
+
 
 ## [Sharding](https://medium.com/system-design-blog/database-sharding-69f3f4bd96db)
   * FAQ:
@@ -395,7 +396,7 @@
     * Joining data from two databases is more complex with a server link.
 
 ## [Stored Objects](https://dev.mysql.com/doc/refman/8.0/en/stored-objects.html)
-  * Stored procedure
+  * Stored procedure (function)
     * An object created with CREATE FUNCTION and used much **like a built-in function**. You invoke it in an expression and it returns a value during expression evaluation.
   * Trigger
     * An object created with CREATE TRIGGER that is associated with a table. **A trigger is activated when a particular event occurs for the table**, such as an insert or update.
@@ -411,40 +412,38 @@
         * When you define a PRIMARY KEY on your table, InnoDB uses it as the clustered index.
         * If you do not define a PRIMARY KEY for your table, MySQL locates the first UNIQUE index where all the key columns are NOT NULL andInnoDB uses it as the clustered index.
         * If the table has no PRIMARY KEY or suitable UNIQUE index, InnoDB internally generates a hidden clustered index named GEN_CLUST_INDEX on a synthetic column containing row ID values.
-      * Data Structure
-        * **B-Tree**
-            * Every node is a page which is the minimum unit InnoDB stores records.
-            * Non-Leaf Nodes
-               *  **The val of Clustered Keys** and **Pointers to the Child Nodes**
-            * Leaf Nodes
-               *  **Records** and **Pointers to other leaf nodes**
-            * ![cluster_indexes](images/cluster_indexes.png)
+      * B-Tree
+          * Every node is a page which is the minimum unit InnoDB stores records.
+          * Non-Leaf Nodes
+             *  **The val of Clustered Keys** and **Pointers to the Child Nodes**
+          * Leaf Nodes
+             *  **Records** and **Pointers to other leaf nodes**
+          * ![cluster_indexes](images/cluster_indexes.png)
       * Data Coverage:
         * All, since list of leaf nodes is the table.
       * Condition Coverage:
         * Depended on the clustered key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
     * Secondary Indexes
       * In InnoDB, each record in a secondary index contains the **primary key columns** for the row, as well as the **columns specified for the secondary index**. InnoDB uses this primary key value to search for the row in the clustered index.
-      * Data Structure
-        * B-Tree
-          * Every node is a page which is the minimum unit InnoDB stores records.
-          * Non-Leaf Nodes
-             *  **Values of Secondary Keys** and **Pointers to the Child Nodes**
-          * Leaf Nodes
-             *  **Values of Secondary Keys** , **Values Clustered Keys** and and **Pointers to the Leaf Nodes**
-             *  Clustered Kye points to the table (records)
-          * ![secondary_indexes](images/secondary_indexes.png)
-            * **The data structure in the bottom are the table (records).**
-            * *  **If the primary key is long, the secondary indexes use more space**.
-            * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
-            * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
+      * B-Tree
+        * Every node is a page which is the minimum unit InnoDB stores records.
+        * Non-Leaf Nodes
+           *  **Values of Secondary Keys** and **Pointers to the Child Nodes**
+        * Leaf Nodes
+           *  **Values of Secondary Keys** , **Values of Clustered Keys** and and **Pointers to the Leaf Nodes**
+           * Clustered Key points to the table (records)
+        * ![secondary_indexes](images/secondary_indexes.png)
+          * **The data structure in the bottom are the table (records).**
+          * *  **If the primary key is long, the secondary indexes use more space**.
+          * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
+          * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
       * Data Coverage:
         * Fields in **secondary key and clustered key** (permutation)
       * Condition Coverage:
         * Depended on the secondary key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
   * Ref:
-    * https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe
-    * https://medium.com/@genchilu/a-brief-introduction-to-cluster-index-and-secondary-index-in-innodb-9b8874d4da6a
+    * [Single vs Composite Indexes in Relational Databases](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe)
+    * [A Brief Introduction to Cluster Index and Secondary Index in InnoDB](https://medium.com/@genchilu/a-brief-introduction-to-cluster-index-and-secondary-index-in-innodb-9b8874d4da6a)
 
 
 ## Locking and Transaction Model
@@ -465,43 +464,66 @@
     * Ref:
       * https://dev.mysql.com/doc/refman/8.0/en/mysql-acid.html
 
-  * Concurrency Control Policies
+  * Concurrency Control
     * Introduction:
       * In Concurrency Control theory, there are two ways you can deal with conflicts:
+      * Pessimistic Locking 
         * **You can avoid them**, by employing a pessimistic locking mechanism
           * e.g. Read/Write locks, Two-Phase Locking
+      * Optimistic Locking
         * **You can allow conflicts to occur**, but you need to detect them using an optimistic locking mechanism
           * e.g. logical clock, MVCC
-    * **2PL** (2 Phase Locking)
-      * Locks alone are not sufficient for preventing conflicts. A concurrency control strategy must define how locks are being acquired and released because this also has an impact on transaction interleaving.
-      * For this purpose, the 2PL protocol defines a lock management strategy for ensuring strict serializability.
-        * **expanding** phase (locks are acquired, and no lock is allowed to be released)
-        * **shrinking** phase (all locks are released, and no other lock can be further acquired).
-      * Initially, all database systems employed 2PL for implementing Serializable transactions, but, with time, many vendors have moved towards MVCC (Multi-Version Concurrency Control) concurrency control mechanisms.
-    * **MVCC** (multi version concurrency control)
-      * When using 2PL, every read requires a shared lock acquisition, while a write operation requires taking an exclusive lock.
-        * a shared lock blocks Writers, but it allows other Readers to acquire the same shared lock
-        * an exclusive lock blocks both Readers and Writers concurring for the same lock
-      * Goal
-        * **locking incurs contention, and contention affects scalability**.
-        * For this reason, database researchers have come up with a different Concurrency Control model which tries to reduce locking to a bare minimum so that:
-          * **Readers don’t block Writers**
-          * **Writers don’t block Readers** (but still block Writers)
-          * (The readers means non-blocking reads)
+    * Pessimistic Locking 
+      * **2PL** (2 Phase Locking)
+        * Locks alone are not sufficient for preventing conflicts. A concurrency control strategy must define how locks are being acquired and released because this also has an impact on transaction interleaving.
+        * For this purpose, the 2PL protocol defines a lock management strategy for ensuring strict serializability.
+          * **expanding** phase (locks are acquired, and no lock is allowed to be released)
+          * **shrinking** phase (all locks are released, and no other lock can be further acquired).
+        * Initially, all database systems employed 2PL for implementing Serializable transactions, but, with time, many vendors have moved towards MVCC (Multi-Version Concurrency Control) concurrency control mechanisms.
+    * Optimistic Locking
+      * **MVCC** (Multi Version Concurrency Control)
+        * When using 2PL, every read requires a shared lock acquisition, while a write operation requires taking an exclusive lock.
+          * **A shared lock** blocks Writers, but it allows other Readers to acquire the same shared lock
+          * **An exclusive lock** blocks both Readers and Writers concurring for the same lock
+        * Goal
+          * **locking incurs contention, and contention affects scalability**.
+          * For this reason, database researchers have come up with a different Concurrency Control model which tries to reduce locking to a bare minimum so that:
+            * **Readers don't block Writers**
+            * **Writers don't block Readers** (but still block Writers)
+        * The overall answer for allowing concurrent reads and writes is pretty simple:
+          * Writes create new versions of rows.
+          * Reads see the version that was current when they started. (consistent read)
+      * MySQL MVCC
+        * InnoDB is a multi-versioned storage engine: it keeps information about old versions of changed rows, to support transactional features such as concurrency and rollback. This information is stored in the tablespace in a data structure called a **rollback segment** (after an analogous data structure in Oracle). 
+          * **InnoDB uses the information in the rollback segment to perform the undo operations needed in a transaction rollback.**
+          * It also uses the information to **build earlier versions of a row for a consistent read**.
+      * Note:
+        * Big transactions are painful
+          * Long running transactions don’t just tie up a connection, they force the database to preserve history for longer.
+        * Multi-statement transactions need to commit quickly
+        * Writes make index scans less useful
+        * Rapid-fire writes magnify the penalties for reads.
+          * If you have a lot of data to write, especially to the same row, write it in chunks instead of one-by-one. Each write generates a transaction id, relevant undo logs, and makes a mess of secondary indexes.
+        * "Hot" rows are hot for all columns, not just updated ones.
+          * A row that stores a frequently updated counter forces more row transaction id updates and undo log entries. Queries that start before the counter is incremented, even if they don’t use the counter, still have to traverse undo logs for the row state when they started.
+
     * Ref:
-      * https://vladmihalcea.com/2pl-two-phase-locking/
-      * https://vladmihalcea.com/how-does-mvcc-multi-version-concurrency-control-work/
+      * [2 phase locking](https://vladmihalcea.com/2pl-two-phase-locking/)
+      * [MVCC](https://vladmihalcea.com/how-does-mvcc-multi-version-concurrency-control-work/)
+      * [Mysql MVCC](https://dev.mysql.com/doc/refman/8.0/en/innodb-multi-versioning.html)
+      * [PostgreSQL MVCC](https://vladmihalcea.com/how-does-mvcc-multi-version-concurrency-control-work/)
+      * [Understanding MySQL MVCC](https://medium.com/@ajones1_999/understanding-mysql-multiversion-concurrency-control-6b52f1bd5b7e)
 
   * Phenomenon caused by concurrent transactions
-    * Dirty Read
+    * **Dirty Read**
       * Dirty read is **the situation when a transaction reads a data that has not yet been commited.**
     * **Non Repetable Read** (different val in the same field)
       * **Non Repeatable read occurs when a transaction reads same row twice, and get a different value each time.**
       * For example, suppose transaction T1 reads a data. Due to concurrency, another transaction T2 updates the same data and commit, Now if transaction T1 rereads the same data, it will retrieve a different value.
-    * Phantom Read (get different data sets)
+    * **Phantom Read** (get different data sets)
       * **Phantom Read occurs when two same queries are executed, but the rows retrieved by the two are different.**
       * For example, suppose transaction T1 retrieves a set of rows that satisfy some search criteria. Now, Transaction T2 generates some new rows that matches the search criteria for transaction T1. If transaction T1 re-executes the statement that reads the rows, it gets a different set of rows this time
-    * **Lost Update**
+    * **Lost Update** (special case of write skew)
       * If two transactions read a value and update the same value, then the first update is lost.
       * example:
         * quantity os A is 4
@@ -523,7 +545,7 @@
           ```
         * And we got error qnantity 2 (should be 0)
       * Solutions:
-        * Atomic Operation:
+        * Use Atomic Operations:
           * DB supports atomic updates
           * atomic check and set
             ```sql
@@ -544,51 +566,15 @@
           * Mysql does not support ?
         * Compare and set operation
           * Some dbs don’t support transaction but support a compare and set operation to prevent lost updates. But if it reads from old snapshot, it might not prevent lost updates.
-    * Write Skew
+    * **Write Skew**
+      * Many databases such as Postgres, SQLServer in repeatable read isolation level can detect lost update (a special case of write skew) but others don't. (i.e: InnoDB engine in MySQL)
+		  * There are situations that most of the database engines cannot detect in the repeatable read isolation. One case is when 2 concurrent transactions modifies 2 different objects and making race conditions
+		  * example:
+  		  * [doctor on-call shifts](https://stackoverflow.com/questions/48417632/why-write-skew-can-happen-in-repeatable-reads)
+
     * Ref:
       * https://medium.com/@thisisananth/acid-transactions-69b9af755e4c
 
-  * Isolation Level:
-    * General Guideline:
-      * READ COMMITTED or even READ UNCOMMITTED
-        * you can relax the consistency rules with READ COMMITTED or even READ UNCOMMITTED, in situations such as bulk reporting where precise consistency and repeatable results are less important than minimizing the amount of overhead for locking.
-  	  * REPEATABLE READ (default isolation)
-  		  * InnoDB supports each of the transaction isolation levels described here using different locking strategies. You can enforce a high degree of consistency with the default REPEATABLE READ level, for operations on crucial data where ACID compliance is important.
-      * SERIALIZABLE 
-        * SERIALIZABLE enforces even stricter rules than REPEATABLE READ, and is used mainly in specialized situations, such as with XA transactions and for troubleshooting issues with concurrency and deadlocks.
-    * Read Uncommitted (dirty read)
-      * **One transaction may read not yet commited changes made by other transaction**, thereby allowing dirty reads.
-    * **Read Committed** (MVCC)
-      * This isolation level **guarantees that any data read is committed at the moment it is read (but do not guarantee Repeatable read).**
-      * For **nonlocking read**
-        * Even within the same transaction, sets and reads its own fresh snapshot.
-        * The snapshot is reset to the time of each consistent read operation.
-      * For **locking reads** (SELECT with FOR UPDATE or FOR SHARE), UPDATE statements, and DELETE statements
-        * InnoDB locks only index records, not the gaps before them, and thus permits the free insertion of new records next to locked records.
-        * Gap locking is only used for foreign-key constraint checking and duplicate-key checking.
-        * Using READ COMMITTED has additional effects
-          * For UPDATE or DELETE statements
-            * InnoDB holds locks only for rows that it updates or deletes. **Record locks for nonmatching rows are released after MySQL has evaluated the WHERE condition.** This greatly reduces the probability of deadlocks, but they can still happen.
-      	  * For UPDATE statements
-        	  * if a row is **already locked**, **InnoDB performs a "semi-consistent" read returning the latest committed version to MySQL so that MySQL can determine whether the row matches the WHERE condition of the UPDATE.**
-          	  * If the row matches (must be updated), MySQL reads the row again and this time InnoDB either locks it or waits for a lock on it.
-    * **Repeatable Read** (MVCC)
-      * This is the default isolation level for InnoDB. 
-      * For **nonlocking reads**
-        * This means that if you issue several plain (nonlocking) SELECT statements within the same transaction,these SELECT statements are consistent also with respect to each other.
-        * **Consistent reads within the same transaction read the snapshot established by the first read.**
-          * The snapshot is based on the time when the first read operation is performed.
-      * For **locking reads** (SELECT with FOR UPDATE or FOR SHARE), UPDATE, and DELETE statements
-        * locking depends on whether the statement uses a unique index with a unique search condition, or a range-type search condition.
-          * For a unique index with a unique search condition
-            * InnoDB locks only the index record found, not the gap before it.
-          * For other search conditions
-            * InnoDB locks the index range scanned, using gap locks or next-key locks to block insertions by other sessions into the gaps covered by the range.
-    * Serialisable
-      * **A serialisable execution is guaranteed to be serialisable.** Serialisable execution is defined to be an execution of operations in which concurrently executing transactions appears to be serially executing.
-      * This level is like REPEATABLE READ, but InnoDB implicitly converts all plain SELECT statements to SELECT ... **FOR SHARE if** autocommit is disabled.
-    * Ref:
-      * https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html
 
   * Lock Types:
     * **Shared** Locks (S)
@@ -658,7 +644,7 @@
               ```sql
               SELECT counter_field FROM child_codes FOR UPDATE;
               UPDATE child_codes SET counter_field = counter_field + 1;
-              ``` 
+              ```
             * Use LAST_INSERT_ID
               * The currently executing statement does not affect the value of LAST_INSERT_ID(). 
               ```sql
@@ -670,26 +656,68 @@
           * A locking read that uses NOWAIT never waits to acquire a row lock. The query executes immediately, **failing with an error if a requested row is locked.**
         * SKIP LOCKED
           * A locking read that uses SKIP LOCKED never waits to acquire a row lock. The query executes immediately, **removing locked rows from the result set.**
-          * skip the locked rows.
       * Ref:
-        * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html
+        * [innodb locking reads](https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html)
     * **Consistent Nonlocking** Reads
       * Whit is Nonlocking ?
         * **Readers don’t block Writers**
-        * **Writers don’t block Readers** (but still block Writers)
-      * **A read operation that uses snapshot information to present query results based on a point in time, regardless of changes performed by other transactions running at the same time.** If queried data has been changed by another transaction, the original data is reconstructed based on the contents of the undo log. This technique avoids some of the locking issues that can reduce concurrency by forcing transactions to wait for other transactions to finish.
+        * **Writers don’t block Readers**
+      * **A read operation that uses snapshot information to present query results based on a point in time, regardless of changes performed by other transactions running at the same time.**
+        * If queried data has been changed by another transaction, the original data is reconstructed based on the contents of the **undo log**. This technique avoids some of the locking issues that can reduce concurrency by forcing transactions to wait for other transactions to finish.
       * With **REPEATABLE READ** isolation level
         * The snapshot is based on the time when the first read operation is performed.
       * With **READ COMMITTED** isolation level
         * The snapshot is reset to the time of each consistent read operation.
       * Consistent read is the default mode in which InnoDB processes SELECT statements in READ COMMITTED and REPEATABLE READ isolation levels. Because **a consistent read does not set any locks on the tables it accesses**, other sessions are free to modify those tables while a consistent read is being performed on the table.
       * Ref:
-        * https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read
-        * https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html
+        * [glos_consistent_read](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read)
+        * [innodb consistent read](https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html)
     * Ref:
       * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-transaction-model.html
       * [How does a database server handle thousands of concurrent requests](https://medium.com/how-the-web-works/how-does-a-database-server-handle-thousands-of-concurrent-requests-d54352310183)
       * [TritonHo](https://github.com/TritonHo/slides/tree/master/Taipei%202015-01%20talk)
+
+ * Isolation Level:
+    * General Guideline:
+      * READ COMMITTED or even READ UNCOMMITTED
+        * You can relax the consistency rules with READ COMMITTED or even READ UNCOMMITTED, in situations such as bulk reporting where precise consistency and repeatable results are less important than minimizing the amount of overhead for locking.
+  	  * REPEATABLE READ (default isolation)
+  		  * InnoDB supports each of the transaction isolation levels described here using different locking strategies. You can enforce a high degree of consistency with the default REPEATABLE READ level, for operations on crucial data where ACID compliance is important.
+      * SERIALIZABLE 
+        * SERIALIZABLE enforces even stricter rules than REPEATABLE READ, and is used mainly in specialized situations, such as with XA transactions and for troubleshooting issues with concurrency and deadlocks.
+    * Read Uncommitted (dirty read)
+      * **One transaction may read not yet commited changes made by other transaction**, thereby allowing dirty reads.
+    * **Read Committed** (MVCC)
+      * This isolation level **guarantees that any data read is committed at the moment it is read (but do not guarantee Repeatable read).**
+      * For **nonlocking read**
+        * Even within the same transaction, sets and reads its own fresh snapshot.
+        * The snapshot is reset to the time of each consistent read operation.
+      * For **locking reads** (SELECT with FOR UPDATE or FOR SHARE), UPDATE statements, and DELETE statements
+        * InnoDB locks only index records, not the gaps before them, and thus permits the free insertion of new records next to locked records.
+        * Gap locking is only used for foreign-key constraint checking and duplicate-key checking.
+        * Using READ COMMITTED has additional effects
+          * For UPDATE or DELETE statements
+            * InnoDB holds locks only for rows that it updates or deletes. **Record locks for nonmatching rows are released after MySQL has evaluated the WHERE condition.** This greatly reduces the probability of deadlocks, but they can still happen.
+      	  * For UPDATE statements
+        	  * if a row is **already locked**, **InnoDB performs a "semi-consistent" read returning the latest committed version to MySQL so that MySQL can determine whether the row matches the WHERE condition of the UPDATE.**
+          	  * If the row matches (must be updated), MySQL reads the row again and this time InnoDB either locks it or waits for a lock on it.
+    * **Repeatable Read** (MVCC)
+      * This is the default isolation level for InnoDB. 
+      * For **nonlocking reads**
+        * This means that if you issue several plain (nonlocking) SELECT statements within the same transaction,these SELECT statements are consistent also with respect to each other.
+        * **Consistent reads within the same transaction read the snapshot established by the first read.**
+          * The snapshot is based on the time when the first read operation is performed.
+      * For **locking reads** (SELECT with FOR UPDATE or FOR SHARE), UPDATE, and DELETE statements
+        * locking depends on whether the statement uses a unique index with a unique search condition, or a range-type search condition.
+          * For a unique index with a unique search condition
+            * InnoDB locks only the index record found, not the gap before it.
+          * For other search conditions
+            * InnoDB locks the index range scanned, using gap locks or next-key locks to block insertions by other sessions into the gaps covered by the range.
+    * Serialisable
+      * **A serialisable execution is guaranteed to be serialisable.** Serialisable execution is defined to be an execution of operations in which concurrently executing transactions appears to be serially executing.
+      * This level is like REPEATABLE READ, but InnoDB implicitly converts all plain SELECT statements to SELECT ... **FOR SHARE if** autocommit is disabled.
+    * Ref:
+      * https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html
 
 
 ## Join
@@ -834,10 +862,3 @@
         SELECT c.Customer, c.State, e.Entry
         FROM Customer AS c LEFT JOIN (SELECT * FROM Entry WHERE Category='D') AS e ON c.Customer=e.Customer
         ```
-
-
-
-
-
-
-
