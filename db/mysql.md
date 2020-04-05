@@ -777,8 +777,9 @@
         * StudentName
 
       * StudentCourses:
-        * CourseID
         * StudentID
+        * CourseID
+
     * Implement a query to get a list of all students and how many course each student is enrolled in.
       * **We can only select values that are in aggregate function or in the GROUP BY clause.**
       * Approach1: group by multiple keys
@@ -787,7 +788,7 @@
         FROM (Students LEFT JOIN StudentCourses ON Students.StudentID = StudentCourses.StudentID)
         GROUP BY Students.StudentID, Students.StudentName;
         ```
-      * Approach2: Use 2 aggregated functions
+      * Approach2: Use 2 aggregated functions (count, max)
         ```sql
         SELECT StudentID, max(Students.StudentName), count(StudentCourses.CourseID) as [Cnt]
         FROM (Students LEFT JOIN StudentCourses ON Students.StudentID = StudentCourses.StudentID)
