@@ -19,6 +19,7 @@
   - [df](#df)
 - [Network](#network)
   - [ifconfig](#ifconfig)
+  - [ip](#ip)
   - [ifup, ifdown, ifquery](#ifup-ifdown-ifquery)
   - [/etc/networks/interfaces](#etcnetworksinterfaces)
   - [ping](#ping)
@@ -69,7 +70,7 @@
     * mindepth
 ## ag:
   * Use Cases:
-    * 
+    *
   * options:
     * -w:
       * Only match whole words.
@@ -120,7 +121,7 @@
     * -h: human readable
     * -s: Display an entry for each specified file.
     * -x: File system mount points are not traversed.
-    * 
+
 ## df
   * display free space
   * Use cases:
@@ -132,12 +133,48 @@
       * * human readable output
 
 # Network
-## ifconfig
+## ifconfig (Use ip command in the new linux distribution)
   * Use Cases:
     * Show all network interfaces
       * `$ifconfig `
+      * or `$ifconfig a`
     * Shoe the specific network interface
       * `$ifconfig ${interface}`
+
+## ip
+  * ip from iproute2 is intended to be a replacement for the older ifconfig, route and arp net-tools programs, providing a more consistent interface.
+  * It also supports various new features not supported by net-tools such as policy routing, multiple IPv4 addresses per interface (without the need for :aliases), or CIDR instead of subnet masks. (As far as I know, net-tools haven't been maintained since 2001.)
+  * Form:
+    * ip [options] OBJECT COMMAND
+  * Use cases:
+    * Show alll network interfaces
+      * `$ifconfig address` or `$ifconfig a`
+    * Show routing
+      * `$ifconfig route` or `$ifconfig r`
+  * Ref:
+    * [what's the difference between “ip a” and “ifconfig” under SUSE 11](https://superuser.com/questions/350535/whats-the-difference-between-ip-a-and-ifconfig-under-suse-11)
+    * [Linux IP command examples](https://www.cyberciti.biz/faq/linux-ip-command-examples-usage-syntax/#4)
+  * Old vs New Tools
+    | Old Command                                                 | New Command                                             |
+    |-------------------------------------------------------------|---------------------------------------------------------|
+    | ifconfig -a                                                 | ip a                                                    |
+    | ifconfig enp6s0 down                                        | ip link set enp6s0 down                                 |
+    | ifconfig enp6s0 up                                          | ip link set enp6s0 up                                   |
+    | ifconfig enp6s0 192.168.2.24                                | ip addr add 192.168.2.24/24 dev enp6s0                  |
+    | ifconfig enp6s0 netmask 255.255.255.0                       | ip addr add 192.168.1.1/24 dev enp6s0                   |
+    | ifconfig enp6s0 mtu 9000                                    | ip link set enp6s0 mtu 9000                             |
+    | ifconfig enp6s0:0 192.168.2.25 (IP Alias)                   | ip addr add 192.168.2.25/24 dev enp6s0                  |
+    | netstat                                                     | ss                                                      |
+    | netstat -tulpn                                              | ss -tulpn                                               |
+    | netstat -neopa                                              | ss -neopa                                               |
+    | netstat -g                                                  | ip maddr                                                |
+    | netstat -g                                                  | ip a                                                    |
+    | route add -net 192.168.2.0 netmask 255.255.255.0 dev enp6s0 | ip route add 192.168.2.0/24 dev enp6s0                  |
+    | route add default gw 192.168.2.254                          | ip route add default via 192.168.2.254                  |
+    | arp -a                                                      | ip neigh                                                |
+    | arp -v                                                      | ip neigh                                                |
+    | arp -s 192.168.2.33 1:2:3:4:5:6                             | ip neigh add 192.168.3.33 lladdr 1:2:3:4:5:6 dev enp6s0 |
+    | arp -i enp6s0 -d 192.168.2.254                              | ip neigh del 192.168.2.254 dev wlp7s0                   |
 
 ## ifup, ifdown, ifquery
   * up
@@ -153,10 +190,10 @@
     * `ifquery -l`
     * `ifquery eth0`
   * Options:
-    * -a: --all 
+    * -a: --all
       * If given to ifup
-        * affect all interfaces marked auto. Interfaces are brought up in the order in which they are defined in /etc/network/interfaces. 
-      * If given to ifdown, 
+        * affect all interfaces marked auto. Interfaces are brought up in the order in which they are defined in /etc/network/interfaces.
+      * If given to ifdown,
         * affect all defined interfaces. Interfaces are brought down in the order in which they are currently listed in the state file. Only  interfaces  defined  in /etc/network/interfaces will be brought down.
     * -i FILE:
       * Read interface definitions from FILE instead of from /etc/network/interfaces.
@@ -168,11 +205,11 @@
   * Use Cases:
     * `$ping -c 2${domain}`
     * `$ping -c 2${ip}`
-      
+
   * Options:
     * -c: count
     * -W: timeout
-  
+
 ## dig
   * Use Cases:
     * NS
@@ -183,10 +220,10 @@
     * AAAA (IPv6)
       * `$dig AAAA hashsrv.ers.trendmicro.com`
     * Reverse DNS lookup
-      * `$dig -x 8.8.8.8` 
+      * `$dig -x 8.8.8.8`
     * Specify DNS server
       * `@{ip_or_hostname}`
-     
+
   * Ref:
     * http://dns-learning.twnic.net.tw/bind/intro6.html
 ## nslookup
@@ -197,7 +234,7 @@
   * Use cases:
     * show
       * `$route -n`
-      * `$netstat -nr` can show routing table as well.
+      * or use `$ip a`
     * add route
       * `$route del -net 169.254.0.0 netmask 255.255.0.0 dev eth0`
     * delete route
@@ -221,7 +258,7 @@
       * A (installed by addrconf)
       * C (cache entry)
       * !  (reject route)
- 
+
 ## traceroute
   * each endpoint tests 3 times.
   * Use cases:
@@ -230,24 +267,24 @@
       * TCP, wait 1 sec, do not resolve host name
         * `$ traceroute -T -n -w 1 google.com.tw`
   * Options:
-    * -4: 
+    * -4:
       * ipv4
-    * -6: 
+    * -6:
       * ipv6
-    * -w 
+    * -w
       * (--wait)
-    * -n: 
-      * do not resolve IP addresses to their domain names 
-    * -U (--udp): 
+    * -n:
+      * do not resolve IP addresses to their domain names
+    * -U (--udp):
       * default
       * use UDP with port 53
-    * -T (--tcp): 
+    * -T (--tcp):
       * use TCP SYN to tracerouting
-    * -I (--icmp) 
+    * -I (--icmp)
       * use ICMP echo for tracerouting
     * -p:
       * port
-  
+
 ## iptables
 ## netstat
   * Use Cases
@@ -323,7 +360,7 @@
     * Isolate TCP Flags
       * Isolate TCP RST flags
         * `$ tcpdump 'tcp[13] & 4!=0'`
-        * `$ tcpdump 'tcp[tcpflags] == tcp-rst'` 
+        * `$ tcpdump 'tcp[tcpflags] == tcp-rst'`
       * Isolate TCP SYN flags
         * `$ tcpdump 'tcp[13] & 2!=0'`
         * `$ tcpdump 'tcp[tcpflags] == tcp-syn'`
@@ -334,7 +371,7 @@
         * `$ tcpdump 'tcp[tcpflags] == tcp-urg'`
       * Isolocate TCP ACK Flags
         * `$ tcpdump 'tcp[13] & 16!=0'`
-        * `$ tcpdump 'tcp[tcpflags] == tcp-ack'` 
+        * `$ tcpdump 'tcp[tcpflags] == tcp-ack'`
       * Isolocate TCP PSH Flags
         * `$ tcpdump 'tcp[13] & 8!=0'`
         * `$ tcpdump 'tcp[tcpflags] == tcp-psh'`
@@ -364,9 +401,9 @@
       * Print each packet (minus its link level header) in ASCII.  Handy for capturing web pages.
     * -l:
       * Make stdout line buffered.  Useful if you want to see the data while capturing
-    * -i: 
+    * -i:
       * interface
-    * -n: 
+    * -n:
       * Don't convert addresses (i.e., host addresses, port numbers, etc.) to names.
     * -q:
       * quick output
@@ -376,13 +413,13 @@
     * -XX:
       * Same as -X, but also shows the ethernet header.
     * -w file:
-      * Write  the raw packets to file rather than parsing and printing them out.  
+      * Write  the raw packets to file rather than parsing and printing them out.
       * They can later be printed with the -r option.
     * -tttt:
       * Give maximally human-readable timestamp output.
     * -r file:
       * Read packets from file
-    * -c: 
+    * -c:
       * count, exit after receiving count packets
     * protocol :
       * tcp, udp, ip, arp, rarp, fddi, icmp
@@ -391,7 +428,7 @@
     * host
       * hostname
     * net
-      * IP range  
+      * IP range
     * port ${port_number}:
       * specify port number
     * portrange
@@ -549,25 +586,25 @@
       * `/etc/apt/sources.list`
   * install
     * `$apt install ${packge-name}`
-    * `$apt install -f` 
+    * `$apt install -f`
   * update
     * update is used to resynchronize the package index files from their sources.
-    * `$apt update` 
+    * `$apt update`
   * upgrade
     * upgrade is used to install available upgrades of all packages currently installed on the system from the sources configured via sources.list(5).
     * New packages will be installed if required to satisfy dependencies, but existing packages will never be removed. If an upgrade for a package requires the remove of an installed package the upgrade for this package isn't performed.
   * remove
-    * remove is identical to install except that packages are removed instead of installed. 
+    * remove is identical to install except that packages are removed instead of installed.
     * Note that removing a package leaves its configuration files
-      on the system. 
-    * `$ apt remove {package-name}`  
+      on the system.
+    * `$ apt remove {package-name}`
   * purge
     * purge is identical to remove except that packages are removed and purged (any configuration files are deleted too).
     * `$ apt purge {package-name}`
   * options:
     * -f, --fix-broken
       * Fix; attempt to correct a system with broken dependencies in place.
-   
+
 
 ## dpkg
  * use cases:
@@ -575,8 +612,8 @@
      * `$dpkg -i ${packge-file}`
    * remove packages
      * `$dpkg -r ${packge-name}`
-   * List packages 
-     * `$dpkg -l` 
+   * List packages
+     * `$dpkg -l`
      * `$dpkg -l ${pattern}`
    * List files installed to your system from packge-name
       * `$dpkg -L ${package-name}`
@@ -589,7 +626,3 @@
 ## yum
 
 ## rpm
-
-
-
-
