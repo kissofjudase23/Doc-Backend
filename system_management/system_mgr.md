@@ -81,9 +81,11 @@
 ## grep (egrep)
   * Use Cases
     * case insenditive + recursive + print filename
-      * `$grep -inrH ".*darwin" --include="*.yml" *`
+      * `$grep -inrH ".*darwin" --include="*.yml"`
+      * or
+      * `$grep -inrH ".*darwin" --include "*.yml"`
     * exactly match
-      * `$grep -w "deiauk" *.sh`
+      * `$grep -w "deiauk" * -C 4`
   * options:
     * r:
       * recursive
@@ -97,8 +99,12 @@
       * invert match
     * -w:
       * Only match whole words.
-    * -C:
-      * Print  NUM  lines of output context.
+    * -C NUM:
+      * Print NUM lines of output context.
+    * -B NUM:
+      * Print NUM lines of leading context before matching lines.
+    * -A NUM:
+      * Print  NUM  lines  of trailing context after matching lines.
     * --include
       * specify file pattern
 ## fgrep
@@ -148,9 +154,11 @@
     * ip [options] OBJECT COMMAND
   * Use cases:
     * Show alll network interfaces
-      * `$ifconfig address` or `$ifconfig a`
+      * `$ip address` or `$ip a`
     * Show routing
-      * `$ifconfig route` or `$ifconfig r`
+      * `$ip route` or `$ip r`
+    * Show network interface
+      * `$ip link show`
   * Ref:
     * [what's the difference between “ip a” and “ifconfig” under SUSE 11](https://superuser.com/questions/350535/whats-the-difference-between-ip-a-and-ifconfig-under-suse-11)
     * [Linux IP command examples](https://www.cyberciti.biz/faq/linux-ip-command-examples-usage-syntax/#4)
