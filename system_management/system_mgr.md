@@ -120,7 +120,7 @@
 
 # File System
 ## du
-  * dispaly disk usage statistics
+  * Dispaly disk usage statistics
   * Use cases:
     * $ `$ du -sh`
   * Optinons:
@@ -129,14 +129,40 @@
     * -x: File system mount points are not traversed.
 
 ## df
-  * display free space
+  * Display free space
   * Use cases:
-    * $ `df -h`
+    * `df -h`
+    * `df -h /dev/sda`
   * options:
     * -h: (using base 2 or sizes)
       * human readable output
     * -H:  (using base 10 or sizes)
       * * human readable output
+
+## hdparm
+  * get/set SATA/IDE device parameters
+  * Use cases:
+    * Ｔest Read speed
+      * `sudo hdparm -Tt /dev/sda`
+      * output:
+        * Timing cached reads:   13298 MB in  2.00 seconds = 6665.25 MB/sec
+        * Timing buffered disk reads: 336 MB in  3.01 seconds = 111.54 MB/sec
+
+## dd
+  * Use case:
+    * Test Write Speed
+    * `dd if=/dev/zero of=/tmp/output bs=8k count=10k; rm -f /tmp/output`
+  * Ref:
+    * [What is the average read write speed of an SSD hard drive?](https://www.quora.com/What-is-the-average-read-write-speed-of-an-SSD-hard-drive)
+    * [How to check hard disk performance](https://askubuntu.com/questions/87035/how-to-check-hard-disk-performance)
+
+
+## lsblk
+  * list block devices
+    * `lsblk`
+
+## fdisk
+  * manipulate disk partition table
 
 # Network
 ## ifconfig (Use ip command in the new linux distribution)
