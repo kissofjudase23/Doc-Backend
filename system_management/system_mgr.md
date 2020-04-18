@@ -59,7 +59,7 @@
 # Text Manipulation
 ## find:
   * Use Cases:
-    * `$ find -name "*.sh" -type f maxdepth 5| xargs rm -f`
+    * `$ find . -name "*.sh" -type f maxdepth 5| xargs rm -f`
   * options:
     * -type:
       * file type
@@ -70,7 +70,7 @@
     * mindepth
 ## ag:
   * Use Cases:
-    *
+    * `ag pattern`
   * options:
     * -w:
       * Only match whole words.
@@ -87,12 +87,12 @@
     * exactly match
       * `$grep -w "deiauk" * -C 4`
   * options:
-    * r:
+    * -r:
       * recursive
     * -i
       * case insensitive
     * -n:
-      * line number
+      * print line number
     * -H:
       * print filename for each match
     * -v:
@@ -159,9 +159,6 @@
       * `$ip route` or `$ip r`
     * Show network interface
       * `$ip link show`
-  * Ref:
-    * [what's the difference between “ip a” and “ifconfig” under SUSE 11](https://superuser.com/questions/350535/whats-the-difference-between-ip-a-and-ifconfig-under-suse-11)
-    * [Linux IP command examples](https://www.cyberciti.biz/faq/linux-ip-command-examples-usage-syntax/#4)
   * Old vs New Tools
     | Old Command                                                 | New Command                                             |
     |-------------------------------------------------------------|---------------------------------------------------------|
@@ -183,6 +180,10 @@
     | arp -v                                                      | ip neigh                                                |
     | arp -s 192.168.2.33 1:2:3:4:5:6                             | ip neigh add 192.168.3.33 lladdr 1:2:3:4:5:6 dev enp6s0 |
     | arp -i enp6s0 -d 192.168.2.254                              | ip neigh del 192.168.2.254 dev wlp7s0                   |
+  * Ref:
+    * [what's the difference between “ip a” and “ifconfig” under SUSE 11](https://superuser.com/questions/350535/whats-the-difference-between-ip-a-and-ifconfig-under-suse-11)
+    * [Linux IP command examples](https://www.cyberciti.biz/faq/linux-ip-command-examples-usage-syntax/#4)
+    *
 
 ## ifup, ifdown, ifquery
   * up
@@ -213,7 +214,6 @@
   * Use Cases:
     * `$ping -c 2${domain}`
     * `$ping -c 2${ip}`
-
   * Options:
     * -c: count
     * -W: timeout
@@ -231,12 +231,13 @@
       * `$dig -x 8.8.8.8`
     * Specify DNS server
       * `@{ip_or_hostname}`
-
   * Ref:
     * http://dns-learning.twnic.net.tw/bind/intro6.html
-## nslookup
+
+## nslookup (prefer to use dig)
   * query Internet name servers interactively
     * `$nslookup google.com.tw`
+
 ## route
   * show / manipulate the IP routing table
   * Use cases:
@@ -294,7 +295,100 @@
       * port
 
 ## iptables
-## netstat
+  * Tables and Chains:
+    * filter
+      * Packet filtering
+      * Chains
+        * INPUT
+        * OUTPUT
+        * FORWARD
+    * nat
+      * Network Address Translation
+      * Chains
+        * PREROUTING
+        * PPOSTROUTING
+        * OUTPUTCHAIN
+    * mangle
+      * TCP header modification
+  * Packet flow diagram
+    * ![flow](./images/iptables_packet_flow_diagram.gif)
+  * Use cases:
+    * Listing
+      * iptables -t [table] -L [chain]
+      * List all chains in the filter table
+        * `iptables -t filter -L -n` or `iptables -L -n`
+      * List POSTROUTING chains in the nat table
+        * `iptables -t nat -L POSTROUTING -n`
+      * List POSTROUTING chains in the nat table
+        * `iptables -t nat -L POSTROUTING -n -v`
+      * note:
+        * default table is filter
+        * if no chain is selected, all chains are listed
+        * -v can show network interfaces
+    * Dump iptables rules
+      * `iptables-save`
+        * The [0:0] or [1280:144299] or whatever are the count of [Packets:Bytes] that have been trough the chain .
+    * Apply new iptables rules
+      * `iptables-restore ${RULES}`
+    * Clean iptables rules
+      ```shell
+      # safe clear iptables rules
+      iptables -P INPUT ACCEPT
+      iptables -P FORWARD ACCEPT
+      iptables -P OUTPUT ACCEPT
+
+      # delete all the rules in the chains
+      iptables -t nat -F
+      iptables -t mangle -F
+      iptables -t filter -F
+
+      # delete all non-builtin chains
+      iptables -t nat -X
+      iptables -t mangle -X
+      iptables -t filter -X
+
+      # zero the packet and bytes counter in all chains
+      iptables -t nat -Z
+      iptables -t mangle -Z
+      iptables -t filter -Z
+      ```
+    * Add new chains
+      * `iptables -n -t [table_name] -N [new_chain_name]`
+      * `iptables -t filter -N my_white_list`
+    * Add new rules:
+      * Accpet all packets coming from 192.168.100.0/24
+        * `iptables -A INPUT -i eth1 -s 192.168.100.0/24 -j ACCEPT`
+      * Append a new rule which jumps to self-defined chain(my_whilte_list)
+        * iptables -A INPUT -j my_whilte_list
+    * SNAT (POSTROUTING)
+      * MASQUERADE (dynamic)
+        * Modify the source ip to the binded ip of eth0
+          * `iptables -t nat -A POSTROUTING -s $innet -o eth0 -j MASQUERADE`
+      * Fixed source ip (192.168.1.102)
+        * `iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source 192.168.1.`100
+    * DNAT (PREROUTING)
+      * `iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80
+     -j DNAT --to-destination 192.168.100.10:80`
+  * Options:
+    * -n:
+      * do not resolve host name
+    * -P:
+      * default policy
+    * -F, --flush [chain]
+      * Flush the selected chain (all the chains in the table if none is given).
+      * This is equivalent to deleting all the rules one by one.
+    * -X, --delete-chain [chain]
+      * Delete the optional user-defined chain specified.
+      * If  no argument is given, it will attempt to delete every non-builtin chain in the table.
+
+
+  * Ref:
+    * [鳥哥](http://linux.vbird.org/linux_server/0250simple_firewall.php#netfilter)
+    * [linux home networking](http://www.linuxhomenetworking.com/wiki/index.php/Quick_HOWTO_:_Ch14_:_Linux_Firewalls_Using_iptables#Introduction)
+    * [iptables-persistent, netfilter-persistent](https://unix.stackexchange.com/questions/125833/why-isnt-the-iptables-persistent-service-saving-my-changes)
+
+
+## netstat (use ss in the new Linux distribution)
   * Use Cases
     * list listening services
       * `$ netstat -tulnp`
@@ -322,27 +416,37 @@
     * list all tcp socket with port 3306 (mysql)
       * `$ ss -atnp | grep 3306`
       * `$ ss -atrp | grep 3306`  (resolve hostname)
-
   * Options
-    * -a: all
-    * -l: list listen services
-    * -t: tcp
-    * -u: udp
-    * -n: don't resolve service name
-    * -r: resolve hostname
-    * -p: show processes using socket
-    * -4: ipv4
-    * -6: ipv6
+    * -a:
+      * all
+    * -l:
+      * list listen services
+    * -t:
+      * tcp
+    * -u:
+      * udp
+    * -n:
+      * don't resolve service name
+    * -r:
+      * resolve hostname
+    * -p:
+      * show processes using socket
+    * -4:
+      * ipv4
+    * -6:
+      * ipv6
 
 ## tcpdump
   * Use cases:
     * Basic
       * Specify the monitor interface
         * `$ tcpdump -i eth0`
-      * Find traffic by IP
-        * `$ tcpdump src host 1.1.1.1`
+      * Listen from all interfaces
+        * `$ tcpdump -i any`
+      * Find traffic by IP (TCP)
+        * `$ tcpdump tcp and src host 1.1.1.1`
       * Find traffic by Network (IP Range)
-        * `$ tcpdump src 192.168.0.0/16`
+        * `$ tcpdump tcp and src net 192.168.0.0/16`
       * Get Packets Contents with Hex Output
         * `$ tcpdump -c 1 -X icmp`
       * Show traffic of One Protocol
@@ -354,6 +458,9 @@
         * `$ tcpdump port 80 -w capture_file`
       * Reading Captures from a File
         * `$ tcpdump -r capture_file`
+    * ICMP
+      * Listen icmp packet from 192.168.7.1 of all interfaces
+        * `$tcpdump -i any icmp and src 192.168.7.1`
     * Advanced:
       * Raw Output View
         * `$ tcpdump -ttnnvvS`
@@ -411,6 +518,10 @@
       * Make stdout line buffered.  Useful if you want to see the data while capturing
     * -i:
       * interface
+      * If unspecified, tcpdump searches the system interface list for the lowest numbered, configured up interface (excluding loopback), which may turn out to be, for example, ``eth0''.
+      * 'any'
+        * can be used to capture  packets  from  all  interfaces.
+        * Note that captures on the ``any'' device will not be done in promiscuous mode.
     * -n:
       * Don't convert addresses (i.e., host addresses, port numbers, etc.) to names.
     * -q:

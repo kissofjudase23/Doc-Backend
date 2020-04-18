@@ -85,7 +85,7 @@ ComputerNetwork
     * ![TCP Header](./images/TCP_header.png)
     * Sequence number
       * Sequence number of TCP packet
-    * Acknowledge number 
+    * Acknowledge number
     * TCP Code (control flags)
       * URG
         * urgent
@@ -99,18 +99,16 @@ ComputerNetwork
         * Sync
       * FIN
         * Finish
-  
+
   * Standard:
     * ![TCP standard](./images/TCP_flow.png)
     * Connection Set-up
     * Data Transfer
     * Connection Close
-      
+
   * TCP half Close
     * ![TCP standard](./images/TCP_half_close.png)
     * The first two segments are the same as for a regular close: a FIN by the initiator, followed by an ACK of the FIN by the recipient. The operation then differs from Figure 13-1, because the side that receives the half-close can still send data.
   * Ref:
     * https://notfalse.net/7/three-way-handshake
     * https://notes.shichao.io/tcpv1/ch13/
-
-
