@@ -17,26 +17,35 @@
 - [File System](#file-system)
   - [du](#du)
   - [df](#df)
+  - [hdparm](#hdparm)
+  - [dd](#dd)
+  - [lsblk](#lsblk)
+  - [fdisk](#fdisk)
 - [Network](#network)
-  - [ifconfig](#ifconfig)
+  - [ifconfig (Use ip command in the new linux distribution)](#ifconfig-use-ip-command-in-the-new-linux-distribution)
   - [ip](#ip)
   - [ifup, ifdown, ifquery](#ifup-ifdown-ifquery)
   - [/etc/networks/interfaces](#etcnetworksinterfaces)
   - [ping](#ping)
   - [dig](#dig)
-  - [nslookup](#nslookup)
+  - [nslookup (prefer to use dig)](#nslookup-prefer-to-use-dig)
   - [route](#route)
   - [traceroute](#traceroute)
   - [iptables](#iptables)
-  - [netstat](#netstat)
+  - [netstat (use ss in the new Linux distribution)](#netstat-use-ss-in-the-new-linux-distribution)
   - [ss](#ss)
   - [tcpdump](#tcpdump)
+  - [nc (prefer to user namp)](#nc-prefer-to-user-namp)
+  - [nmap](#nmap)
   - [airmon](#airmon)
   - [airodump](#airodump)
-- [Process Monitoring](#process-monitoring)
+- [Monitoring](#monitoring)
+  - [uptime](#uptime)
   - [ps](#ps)
   - [top](#top)
   - [htop](#htop)
+  - [iotop](#iotop)
+  - [iftop](#iftop)
   - [atop](#atop)
   - [glace](#glace)
   - [lsof](#lsof)
@@ -122,9 +131,13 @@
 ## du
   * Dispaly disk usage statistics
   * Use cases:
-    * $ `$ du -sh`
+    * Show summary
+      * `$ du -sh .`
+    * Show disk usage with maximum depth 1
+      * `$ du -h -d1 .`
   * Optinons:
     * -h: human readable
+    * -d: depth
     * -s: Display an entry for each specified file.
     * -x: File system mount points are not traversed.
 
@@ -584,19 +597,67 @@
       * https://danielmiessler.com/study/tcpdump/#protocol
       * https://colobu.com/2019/07/16/a-tcpdump-tutorial-with-examples/#%E6%A0%B9%E6%8D%AE%E7%BD%91%E6%AE%B5%E8%BF%9B%E8%A1%8C%E6%9F%A5%E6%89%BE
 
+## nc (prefer to user namp)
+  * arbitrary TCP and UDP connections and listens
+  * Use cases:
+    * `nc -zvw3 ${remote_host}`
+  * Options:
+    * -z:
+      * Specifies that nc should just scan for listening daemons, without sending any data to them.  It is an error to use this option
+        in conjunction with the -l option.
+    * -v:
+      * verbose
+    * -w [timeout]
+
+## nmap
+  * nmap - Network exploration tool and security / port scanner
+  * Use cases:
+    * scan all ports
+      * `nmap ${remote_host}`
+    * only specific port
+      * `nmap ${remote_host}`
+  * Options:
+    * -p: only scan specified ports
+
+
 ## airmon
 ## airodump
 
-# Process Monitoring
+# Monitoring
+## uptime
+  * Show The current time, how long the system has been running, how many users are currently logged on, and the system **load averages for the past 1, 5, and 15 minutes**.
+  * `uptime`
 ## ps
   * Use Cases:
   * `$ps aux|grep ${pattern}`
 ## top
 ## htop
+  * htop setup can add more columns if you want
+  * setup (F2) -> Columns -> Active Columns
+    *
+## iotop
+  * iotop - simple top-like I/O monitor
+  * Use the left and right arrows to change the sorting
+  * `iotop`
+## iftop
+  * iftop - display bandwidth usage on an interface by host
+  * Each addresses has 2 connections in pair. Iftop show us the interaction at the 2, 10, 40 seconds interval.
+  * Use cases:
+    * `iftop -i any -B -P`
+  * sort:
+    * 1, 2, 3
+  * options:
+    * -B: Display bandwidth rates in bytes/sec rather than bits/sec.
+    * -P: Turn on port display
+  * Ref:
+    * https://ez3c.tw/2714
+    * https://linoxide.com/monitoring-2/iftop-network-traffic/
 ## atop
 ## glace
 ## lsof
   * list open files
+  * Ref:
+    * https://blog.gtwang.org/linux/linux-lsof-command-list-open-files-tutorial-examples/
 
 # Service Management
 ## Sysvinit
@@ -657,6 +718,9 @@
   * Type:
     * service, socket, target
   * Use Cases:
+   * Reload the systemd manager.
+     * `$ systemctl daemon-reload`
+     * Reload the systemd manager configuration. This will rerun all generators (see systemd.generator(7)), reload all unit files, and recreate the entire dependency tree. While the daemon is being reloaded, all sockets systemd listens on behalf of user configuration will stay accessible.
    * List installed unit files
      * `$ systemctl list-unit-files`
    * List socket units currently in memory.
@@ -689,6 +753,7 @@
     * https://www.ibm.com/developerworks/cn/linux/1407_liuming_init3/index.html?ca=drs-
     * https://blog.gtwang.org/linux/linux-basic-systemctl-systemd-service-unit-tutorial-examples/
     * http://linux.vbird.org/linux_basic/0560daemons.php#systemctl_cmd
+
 ## Systemd Journal
   * Use Cases:
     * Show the newest entries first
@@ -732,6 +797,10 @@
   * install
     * `$apt install ${packge-name}`
     * `$apt install -f`
+  * search
+    * `$apt install {package_name}`
+  * list all versions of a package
+    * `$apt-cache madion {package_name}`
   * update
     * update is used to resynchronize the package index files from their sources.
     * `$apt update`
@@ -761,7 +830,7 @@
      * `$dpkg -l`
      * `$dpkg -l ${pattern}`
    * List files installed to your system from packge-name
-      * `$dpkg -L ${package-name}`
+     * `$dpkg -L ${package-name}`
    * configure packages
      * configure all unconfigure packages
        * `$dpkg --configure -a`
