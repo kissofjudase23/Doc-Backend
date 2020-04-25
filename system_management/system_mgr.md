@@ -66,7 +66,7 @@
   * -p [FILE], --load
     * Load in sysctl settings from the file specified or /etc/sysctl.conf if none given.
 # Text Manipulation
-## find:
+## find
   * Use Cases:
     * `$ find . -name "*.sh" -type f maxdepth 5| xargs rm -f`
   * options:
@@ -77,7 +77,7 @@
     * -iname: case insensitive of version of name
     * maxdepth
     * mindepth
-## ag:
+## ag
   * Use Cases:
     * `ag pattern`
   * options:
@@ -474,7 +474,6 @@
       * ipv4
     * -6:
       * ipv6
-
 ## tcpdump
   * Use cases:
     * Basic
@@ -608,7 +607,6 @@
     * -v:
       * verbose
     * -w [timeout]
-
 ## nmap
   * nmap - Network exploration tool and security / port scanner
   * Use cases:
@@ -618,27 +616,6 @@
       * `nmap ${remote_host}`
   * Options:
     * -p: only scan specified ports
-
-
-## airmon
-## airodump
-
-# Monitoring
-## uptime
-  * Show The current time, how long the system has been running, how many users are currently logged on, and the system **load averages for the past 1, 5, and 15 minutes**.
-  * `uptime`
-## ps
-  * Use Cases:
-  * `$ps aux|grep ${pattern}`
-## top
-## htop
-  * htop setup can add more columns if you want
-  * setup (F2) -> Columns -> Active Columns
-    *
-## iotop
-  * iotop - simple top-like I/O monitor
-  * Use the left and right arrows to change the sorting
-  * `iotop`
 ## iftop
   * iftop - display bandwidth usage on an interface by host
   * Each addresses has 2 connections in pair. Iftop show us the interaction at the 2, 10, 40 seconds interval.
@@ -652,12 +629,53 @@
   * Ref:
     * https://ez3c.tw/2714
     * https://linoxide.com/monitoring-2/iftop-network-traffic/
+## airmon
+## airodump
+## mtr
+# Monitoring
+## uname
+  * Print system information
+  * use cases:
+    * `uname -a`
+## uptime
+  * Show The current time, how long the system has been running, how many users are currently logged on, and the system **load averages for the past 1, 5, and 15 minutes**.
+  * `uptime`
+## ps
+  * Use Cases:
+  * `$ps aux|grep ${pattern}`
+## top
 ## atop
-## glace
+  * Advanced System & Process Monitor
+## htop
+  * htop setup can add more columns if you want
+  * setup (F2) -> Columns -> Active Columns
+## iotop
+  * iotop - simple top-like I/O monitor
+  * Use the left and right arrows to change the sorting
+  * `iotop`
+## iostat
+  * Use cases:
+    * `iostat -x 1`
+  * Options:
+    * -x: Display extended statistics
+    * num: refresh internal
 ## lsof
   * list open files
   * Ref:
     * https://blog.gtwang.org/linux/linux-lsof-command-list-open-files-tutorial-examples/
+## nmon
+## iostat
+## sar
+  * sar - Collect, report, or save system activity information.
+## vmstat
+  * vmstat - Report virtual memory statistics
+
+
+## Others
+ * stract
+ * dtrace
+ * systemtap
+
 
 # Service Management
 ## Sysvinit
@@ -786,7 +804,6 @@
 
 
 # Packages Management
-
 ## apt
 * use cases:
   * see also APT-GET(8) and sources.list(5)
@@ -818,8 +835,6 @@
   * options:
     * -f, --fix-broken
       * Fix; attempt to correct a system with broken dependencies in place.
-
-
 ## dpkg
  * use cases:
    * install packages
@@ -836,7 +851,5 @@
        * `$dpkg --configure -a`
      * configure a specific package
        * `$dpkg --configure ${packge-name}`
-
 ## yum
-
 ## rpm
