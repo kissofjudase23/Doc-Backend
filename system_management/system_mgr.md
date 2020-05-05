@@ -72,9 +72,17 @@
   * options:
     * -type:
       * file type
+      * b: block special
+      * c: character
+      * d: dir
+      * f: regular file
+      * l: symbolic link
+      * p: FIFO
+      * s: socket
     * -name:
       * True if the last component of the pathname being examined matches pattern
-    * -iname: case insensitive of version of name
+    * -iname:
+      * case insensitive of version of name
     * maxdepth
     * mindepth
 ## ag
@@ -90,11 +98,11 @@
 ## grep (egrep)
   * Use Cases
     * case insenditive + recursive + print filename
-      * `$grep -inrH ".*darwin" --include="*.yml"`
+      * `$grep -inrH ".*darwin" --include="*.yml" .`
       * or
-      * `$grep -inrH ".*darwin" --include "*.yml"`
+      * `$grep -inrH ".*darwin" --include="*.yml" .`
     * exactly match
-      * `$grep -w "deiauk" * -C 4`
+      * `$grep -w "deiauk" -C 4 .`
   * options:
     * -r:
       * recursive
@@ -115,7 +123,15 @@
     * -A NUM:
       * Print  NUM  lines  of trailing context after matching lines.
     * --include
-      * specify file pattern
+      * If specified, only files matching the given filename pattern are searched.
+      * Note that --exclude patterns take priority over --include patterns.
+    * --exclude
+      * If specified, it excludes files matching the given filename pattern from the search.
+      * Note:
+        * --exclude patterns take priority over --include patterns
+        * if no --include pattern is specified, all files are searched that are not excluded.
+    * --include-dir
+    * --exclude-dir
 ## fgrep
 ## awk
 ## sed
