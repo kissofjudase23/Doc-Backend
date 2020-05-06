@@ -783,6 +783,10 @@
      * `$ systemctl enable ${service_name}.service`
    * Disable the service when start up
      * `$ systemctl disable ${service_name}.service`
+   * Mask the service
+     * `$ systemctl mask ${service_name}.service`
+   * Analysis:
+     * `$ systemd-analyze blame`
   * Ref:
     * https://www.ibm.com/developerworks/cn/linux/1407_liuming_init3/index.html?ca=drs-
     * https://blog.gtwang.org/linux/linux-basic-systemctl-systemd-service-unit-tutorial-examples/
@@ -859,7 +863,6 @@
      * `$dpkg -r ${packge-name}`
    * List packages
      * `$dpkg -l`
-     * `$dpkg -l ${pattern}`
    * List files installed to your system from packge-name
      * `$dpkg -L ${package-name}`
    * configure packages
