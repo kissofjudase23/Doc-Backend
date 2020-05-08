@@ -825,14 +825,52 @@
 
 # Packages Management
 ## apt
-* use cases:
+ * apt auto update
+   * triggered by
+     * systemd timer and service
+       * `apt-daily`
+         * download the update packages
+         * `apt-daily.timer`
+         * `apt-daily.service`
+       * `apt-daily-upgrade`
+         * install the update packages and cleanup
+         * `apt-daily-upgrade.timer`
+         * `apt-daily-upgrade.service`
+     * dailly cron:
+       * `/etc/cron.daily/apt-compat`
+   * how to disable:
+     * daily cron:
+       * drop a config to `/etc/apt/apt.conf.d/99disable-auto-update`
+       *  ```txt
+          // Enable the update/upgrade script (0=disable)
+          APT::Periodic::Enable "0";
+
+          // Do "apt-get update" automatically every n-days (0=disable)
+          APT::Periodic::Update-Package-Lists "0";
+
+          // Do "apt-get upgrade --download-only" every n-days (0=disable)
+          APT::Periodic::Download-Upgradeable-Packages "0";
+          // Run the "unattended-upgrade" security upgrade script
+          // every n-days (0=disabled)
+          // Requires the package "unattended-upgrades" and will write
+          // a log in /var/log/unattended-upgrades
+          APT::Periodic::Unattended-Upgrade "0";
+          ```
+   * Ref:
+     * https://wiki.debian.org/UnattendedUpgrades
+     * https://help.ubuntu.com/community/AutomaticSecurityUpdates
+     * https://unix.stackexchange.com/questions/342663/who-starts-unattended-upgrades
+ * use cases:
   * see also APT-GET(8) and sources.list(5)
-  * configs:
-    * `/etc/apt`
-    * sources.list(5):
+  * sources.list(5):
       * `/etc/apt/sources.list`
+  * apt.config.d
+    *  `/etc/apt/apt.conf.d`
+  * dump config:
+    * `apt-config dump`
   * install
     * `$apt install ${packge-name}`
+  * fix broken
     * `$apt install -f`
   * search
     * `$apt install {package_name}`
