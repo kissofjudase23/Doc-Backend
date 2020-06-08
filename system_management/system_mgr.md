@@ -747,20 +747,26 @@
 ## Systemd
   * **Systemd is Compatible with Sysvinit**.
   * config
-   * path
+  * Path of the service unit files
      * /usr/lib/systemd
-  * Type:
+     * example:
+       * The service unit file
+         * /usr/lib/systemd/foo.service
+       * User customized config
+         * /usr/lib/systemd/foo.service.d/overwrite.conf
+         * Along with a unit file foo.service, a "drop-in" directory foo.service.d/ may exist. All files with the suffix ".conf" from this directory will be parsed after the unit file itself is parsed. This is useful to alter or add configuration settings for a unit, without having to modify unit files.
+  * Types:
     * service, socket, target
   * Use Cases:
    * Reload the systemd manager.
      * `$ systemctl daemon-reload`
      * Reload the systemd manager configuration. This will rerun all generators (see systemd.generator(7)), reload all unit files, and recreate the entire dependency tree. While the daemon is being reloaded, all sockets systemd listens on behalf of user configuration will stay accessible.
-   * List installed unit files
-     * `$ systemctl list-unit-files`
    * List socket units currently in memory.
      * `$ systemctl list-sockets`
    * List jobs
      * `$ systemctl list-jobs`
+   * List installed unit files
+     * `$ systemctl list-unit-files`
    * List units currently in memory
      * `$ systemctl list-units`
    * List services currently in memory
@@ -792,8 +798,17 @@
     * https://blog.gtwang.org/linux/linux-basic-systemctl-systemd-service-unit-tutorial-examples/
     * http://linux.vbird.org/linux_basic/0560daemons.php#systemctl_cmd
 
-## Systemd Journal
+## Journal
+  * Log directory
+    * /var/log/journal
+  * Runtime directory:
+    * /run/log/journal
+  * Socket
+    * /run/systemd/journal/dev-log
   * Use Cases:
+    * debug:
+      * `$ journalctl -a`
+      * `$ journalctl -xe`
     * Show the newest entries first
       * `$ journalctl -r -n 20 prometheus.service`
         * -r : reverse, show the latest
@@ -890,6 +905,10 @@
   * purge
     * purge is identical to remove except that packages are removed and purged (any configuration files are deleted too).
     * `$ apt purge {package-name}`
+  * clean
+    * `$ apt-get clean`
+    * clean clears out the local repository of retrieved package files.
+    * It removes everything but the lock file from /var/cache/apt/archives/ and /var/cache/apt/archives/partial/.
   * options:
     * -f, --fix-broken
       * Fix; attempt to correct a system with broken dependencies in place.
