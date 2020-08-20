@@ -212,6 +212,8 @@
       * `$ip address` or `$ip a`
     * Show routing
       * `$ip route` or `$ip r`
+    * Trace route
+      * `$ ip route get google.com.tw`
     * Show network interface
       * `$ip link show`
   * Old vs New Tools
@@ -238,7 +240,7 @@
   * Ref:
     * [what's the difference between “ip a” and “ifconfig” under SUSE 11](https://superuser.com/questions/350535/whats-the-difference-between-ip-a-and-ifconfig-under-suse-11)
     * [Linux IP command examples](https://www.cyberciti.biz/faq/linux-ip-command-examples-usage-syntax/#4)
-    *
+
 
 ## ifup, ifdown, ifquery
   * up
@@ -328,6 +330,8 @@
   * Use cases:
       * UDP
         * `$ traceroute google.com.tw`
+        * or use
+        * `$ ip route get google.com.tw`
       * TCP, wait 1 sec, do not resolve host name
         * `$ traceroute -T -n -w 1 google.com.tw`
   * Options:
@@ -926,6 +930,6 @@
      * configure all unconfigure packages
        * `$dpkg --configure -a`
      * configure a specific package
-       * `$dpkg --configure ${packge-name}`
+       * `$dpkg --configure ${package-name}`
 ## yum
 ## rpm
