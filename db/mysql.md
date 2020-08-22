@@ -523,9 +523,11 @@
     * **Phantom Read** (get different data sets)
       * **Phantom Read occurs when two same queries are executed, but the rows retrieved by the two are different.**
       * For example, suppose transaction T1 retrieves a set of rows that satisfy some search criteria. Now, Transaction T2 generates some new rows that matches the search criteria for transaction T1. If transaction T1 re-executes the statement that reads the rows, it gets a different set of rows this time
+    * example:
+      * ![phantom_read_caused_by_write_skew](images/phantom_read.png)
     * **Lost Update** (special case of write skew)
       * If two transactions read a value and update the same value, then the first update is lost.
-      * example:
+      * case1:
         * quantity os A is 4
         * T1:
           ```sql
@@ -544,6 +546,8 @@
           UPDATE inventory SET qnantity=quantity - 2 Where item = A
           ```
         * And we got error qnantity 2 (should be 0)
+      * case2:
+        * ![lost_update](images/lost_update.png)
       * Solutions:
         * Use Atomic Operations:
           * DB supports atomic updates
@@ -570,10 +574,11 @@
       * Many databases such as Postgres, SQLServer in repeatable read isolation level can detect lost update (a special case of write skew) but others don't. (i.e: InnoDB engine in MySQL)
 		  * There are situations that most of the database engines cannot detect in the repeatable read isolation. One case is when 2 concurrent transactions modifies 2 different objects and making race conditions
 		  * example:
-  		  * [doctor on-call shifts](https://stackoverflow.com/questions/48417632/why-write-skew-can-happen-in-repeatable-reads)
+    		* [doctor on-call shifts](https://stackoverflow.com/questions/48417632/why-write-skew-can-happen-in-repeatable-reads)
 
     * Ref:
-      * https://medium.com/@thisisananth/acid-transactions-69b9af755e4c
+      * [Transactions & ACID Properties](https://medium.com/@thisisananth/acid-transactions-69b9af755e4c)
+      * [對於 MySQL Repeatable Read Isolation 常見的三個誤解](https://medium.com/@chester.yw.chu/%E5%B0%8D%E6%96%BC-mysql-repeatable-read-isolation-%E5%B8%B8%E8%A6%8B%E7%9A%84%E4%B8%89%E5%80%8B%E8%AA%A4%E8%A7%A3-7a9afbac65af)
 
 
   * Lock Types:
@@ -678,6 +683,13 @@
       * [TritonHo](https://github.com/TritonHo/slides/tree/master/Taipei%202015-01%20talk)
 
  * Isolation Level:
+    * Note:
+      * Nobody really knows what repeatable read (RR) means.
+      * Each DB vendor has their own RR implementation.
+      * mysql
+        * ![mysql_isolation_level](images/mysql_isolation_level.png)
+      * postgreSQL
+        * ![postgre_isolation_level](images/postgresql_isolation_level.png)
     * General Guideline:
       * READ COMMITTED or even READ UNCOMMITTED
         * You can relax the consistency rules with READ COMMITTED or even READ UNCOMMITTED, in situations such as bulk reporting where precise consistency and repeatable results are less important than minimizing the amount of overhead for locking.
