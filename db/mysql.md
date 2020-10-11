@@ -415,23 +415,27 @@
       * B-Tree
           * Every node is a page which is the minimum unit InnoDB stores records.
           * Non-Leaf Nodes
-             *  **The val of Clustered Keys** and **Pointers to the Child Nodes**
+             *  **Value of the clustered key**
+             *  **Pointer to child nodes**
           * Leaf Nodes
-             *  **Records** and **Pointers to other leaf nodes**
+             *  **Records (table)**
+             *  **Pointers to neighbor leaf nodes**
           * ![cluster_indexes](images/cluster_indexes.png)
       * Data Coverage:
         * All, since list of leaf nodes is the table.
       * Condition Coverage:
         * Depended on the clustered key, please refer [rule of composite indexes](https://medium.com/@User3141592/single-vs-composite-indexes-in-relational-databases-58d0eb045cbe) (The condition order is important)
     * Secondary Indexes
-      * In InnoDB, each record in a secondary index contains the **primary key columns** for the row, as well as the **columns specified for the secondary index**. InnoDB uses this primary key value to search for the row in the clustered index.
+      * The secondary index is similar to the clustered index except that it does not store records in the leaf node but only **store the key of the secondary index and the clustered key (it’s usually the primary key) to lookup records**
       * B-Tree
         * Every node is a page which is the minimum unit InnoDB stores records.
         * Non-Leaf Nodes
-           *  **Values of Secondary Keys** and **Pointers to the Child Nodes**
+           *  **Values of Secondary Keys**
+           *  **Pointers to the Child Nodes**
         * Leaf Nodes
-           *  **Values of Secondary Keys** , **Values of Clustered Keys** and and **Pointers to the Leaf Nodes**
-           * Clustered Key points to the table (records)
+           *  **Values of Secondary Keys**
+           *  **Values of Clustered Keys**
+           *  **Pointers to the records**
         * ![secondary_indexes](images/secondary_indexes.png)
           * **The data structure in the bottom are the table (records).**
           * *  **If the primary key is long, the secondary indexes use more space**.
