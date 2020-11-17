@@ -9,6 +9,18 @@ ComputerNetwork
 ## FAQ
   * [OSI Model](https://en.wikipedia.org/wiki/OSI_model)
   * [TCP vs UDP](https://stackoverflow.com/questions/5970383/difference-between-tcp-and-udp)
+  * DNS
+    * Root Domain (.)
+    * Top Level Domain (TLD)
+      * general TLD (gTLD)
+        * .com .net .edu .org
+      * country-code TLD (ccTLD)
+        * tw, hk, us
+    * Secondary Domain
+      * microsoft.com, google.com
+    * Sub Domain
+      * sales.microsoft.com
+
 
 ## IPv4
   * Net_ID, Host_ID, CIDR(netmask)
@@ -40,6 +52,20 @@ ComputerNetwork
   * Domain Name System
   * ![Hierarchy](./images/hierarchy.png)
     * For maps.google.com, first, the DNS recursor will contact the root name server. The root name server will redirect it to .com domain name server. .com name server will redirect it to google.com name server. google.com name server will find the matching IP address for maps.google.com in its’ DNS records and return it to your DNS recursor which will send it back to your browser.
+    * Root Domain (.)
+    * Top Level Domain (TLD)
+      * general TLD (gTLD)
+        * .com .net .edu .org
+      * country-code TLD (ccTLD)
+        * tw, hk, us
+    * Secondary Domain
+      * microsoft.com, google.com
+    * Sub Domain
+      * sales.microsoft.com
+  * DNS Query Flow
+  * ![Query_FLOW](./images/dns_query_flow.jpg)
+  * Recurisve DNS nameservers
+  * Authoritative DNS nameservers
   * Resource Record:
     * SOA:
       * Start of authorith
@@ -75,10 +101,12 @@ ComputerNetwork
       * One Alias can map to Mutliple domain(1-to-many).
     * URL
       * Redirects the name to the target name using the HTTP 301 status cod
+
   * Ref:
     * https://webhostinggeeks.com/guides/dns/
     * http://dns-learning.twnic.net.tw/bind/intro6.html
-
+    * [What are Top-Level Domain (TLD) Name Servers?](https://dnsmap.io/articles/what-are-top-level-domain-(tld)-name-servers)
+    * [What is the difference between authoritative and recursive DNS nameservers?](https://umbrella.cisco.com/blog/what-is-the-difference-between-authoritative-and-recursive-dns-nameservers)
 
 ## TCP
   * TCP Header
