@@ -41,23 +41,45 @@
 ## FAQ
  * [Memcached vs. Redis](https://stackoverflow.com/questions/10558465/memcached-vs-redis)
    * Redis is more powerful, more popular, and better supported than memcached. Memcached can only do a small fraction of the things Redis can do. Redis is better even where their features overlap. For anything new, use Redis
- * How to evaluate redis hit rate?
+ * How to evaluate cache hit rate?
    * Overall:
      * You can see **keyspace_hits** and **keyspace_misses** in redis [info]((https://redis.io/commands/info))
    * Specific key:
      * Write log and do some post process.
-     * Use redis cnt (INCR command) or HyperLogLog ?
-     * Use monitor
-
+ * [Pipelining vs transaction in redis](https://stackoverflow.com/questions/29327544/pipelining-vs-transaction-in-redis)
+   * Pipelining is primarily a network optimization. It essentially means the client buffers up a bunch of commands and ships them to the server in one go. The commands are not guaranteed to be executed in a transaction. The benefit here is saving network round trip time for every command.
+   * Redis is single threaded so an individual command is always atomic, but two given commands from different clients can execute in sequence, alternating between them for example.
+   * Multi/exec, however, ensures no other clients are executing commands in between the commands in the multi/exec sequence
 
 ## Performance enhancement
-   * [Mget](https://redis.io/commands/mget)
-      * Returns the values of **all specified keys**
-   * [Pipelining](https://redis.io/topics/pipelining)
-     * If you have many redis commands you want to execute you can use pipelining to send them to redis all-at-once instead of one-at-a-time.
-     * Only one round trip time
+   * Reduce TTL time
+     * [Mget](https://redis.io/commands/mget)
+        * Returns the values of **all specified keys**
+     * [Pipelining](https://redis.io/topics/pipelining)
+       * If you have many redis commands you want to execute you can use pipelining to send them to redis all-at-once instead of one-at-a-time.
+       * Only one round trip time
+       * Example:
 
+          ```python
+          import redis
+          r = redis.Redis(host='localhost', port=6379, db=0)
 
+          # Create a pipeline instance
+          pipe = r.pipeline()
+
+          # Send the commands to be executed in batch
+          pipe.set("key1", "value1")
+          pipe.get("key2")
+          pipe.hgetall("key3")
+          pipe.set("key4","value4")
+
+          # execute all the buffered commands
+          responses = pipe.execute()
+
+          # get the results
+          for response in responses:
+              print(response)
+          ```
 ## [Info](https://redis.io/commands/info)
   * Ref:
     * [AWS ElastiCache Metrics](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/CacheMetrics.Redis.html)
@@ -98,7 +120,7 @@
 ## [Transactions](https://redis.io/topics/transactions)
   * They allow the execution of a group of commands in a single step, with two important guarantees:
     * **Atomicity**
-      * Either **all of the commands or none are processed**.
+      * **Either all of the commands or none are processed**.
     * **Isolation**
       * All the commands in a transaction are serialized and executed sequentially.
       * **It can never happen that a request issued by another client is served in the middle of the execution** of a Redis transaction.
@@ -150,26 +172,7 @@
   * Returns the values of **all specified keys**
 ### [Pipelining](https://redis.io/topics/pipelining)
   * If you have many redis commands you want to execute you can use pipelining to send them to redis all-at-once instead of one-at-a-time.
-  * ```python
-    import redis
-    r = redis.Redis(host='localhost', port=6379, db=0)
 
-    # Create a pipeline instance
-    pipe = r.pipeline()
-
-    # Send the commands to be executed in batch
-    pipe.set("key1", "value1")
-    pipe.get("key2")
-    pipe.hgetall("key3")
-    pipe.set("key4","value4")
-
-    # execute all the buffered commands
-    responses = pipe.execute()
-
-    # get the results
-    for response in responses:
-        print(response)
-    ```
 
 ## Design Patterns
 ### [Reliable queue](https://redis.io/commands/rpoplpush)
@@ -232,6 +235,9 @@ Alternatively, consider using pubsub.close(). That will shut down everything, in
 	* Sample Code:
     	* [redlock](https://github.com/SPSCommerce/redlock-py/blob/master/redlock/__init__.py)
     	* [test_redlock](https://github.com/SPSCommerce/redlock-py/blob/master/tests/test_redlock.py)
+
+	* Note:
+  	* Need at least 3 machines (vote).
 
   * Implementation
     * [Redlock-py](https://github.com/SPSCommerce/redlock-py)
