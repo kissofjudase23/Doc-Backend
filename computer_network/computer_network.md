@@ -52,7 +52,8 @@ ComputerNetwork
   * Domain Name System
   * ![Hierarchy](./images/hierarchy.png)
     * For maps.google.com, first, the DNS recursor will contact the root name server. The root name server will redirect it to .com domain name server. .com name server will redirect it to google.com name server. google.com name server will find the matching IP address for maps.google.com in its’ DNS records and return it to your DNS recursor which will send it back to your browser.
-    * Root Domain (.)
+    * Root Domain
+      * .
     * Top Level Domain (TLD)
       * general TLD (gTLD)
         * .com .net .edu .org
@@ -63,9 +64,15 @@ ComputerNetwork
     * Sub Domain
       * sales.microsoft.com
   * DNS Query Flow
-  * ![Query_FLOW](./images/dns_query_flow.jpg)
-  * Recurisve DNS nameservers
-  * Authoritative DNS nameservers
+    * ![Query_FLOW](./images/dns_query_flow.jpg)
+    * Recurisve DNS nameservers （provided by ISP)
+    * Authoritative DNS nameservers
+    * FLow:
+      * Your computer asks the recursive DNS server to locate the IP address of www.google.com. **The recursive DNS nameserver is now assigned the task of finding the IP address of the website**.
+      * The recursive DNS server first asks the root domain nameserver for the IP address of the .com TLD server, since www.google.com is within the .com TLD. The root domain nameserver responds with the address of the TLD server.
+      * Next, the recursive DNS server asks the TLD authoritative server where it can find the authoritative DNS server for www.google.com. The TLD authoritative server responds, and the process continues.
+      * The authoritative server for www.google.com is asked where to find www.google.com and the server responds with the answer. Once the Cisco Umbrella recursive DNS server knows the IP address for the website, it responds to your computer with the appropriate IP address.
+
   * Resource Record:
     * SOA:
       * Start of authorith
