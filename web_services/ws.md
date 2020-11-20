@@ -22,7 +22,7 @@ WebServices
       *  refers to rules that determine who is allowed to do what. E.g. Adam may be authorized to create and delete databases, while Usama is only authorised to read.
 
   * Forward vs Redirect:
-    * Redirect
+    * Redirect (3xx)
       * **Redirect sets the response status to 302, and the new url in a Location header, and sends the response to the browser.** Then the browser, according to the http specification, **makes another request** to the new url
     * Forward
       * **Forward happens entirely on the server. The servlet container just forwards the same request to the target url, without the browser knowing about that.**
@@ -34,6 +34,8 @@ WebServices
       * **Header Compression**
       * Allows servers to “push” responses proactively into client caches
 
+  * [HTTP/3]
+
   * [What happens when you type an URL in the brower and press enter](https://medium.com/@maneesha.wijesinghe1/what-happens-when-you-type-an-url-in-the-browser-and-press-enter-bb0aa2449c1a)
     * DNS look up
       * check brower cache
@@ -41,9 +43,9 @@ WebServices
       * check router cache
       * DNS query
     * TCP/IP three-way handshake
-      * 1. Client machine sends a SYN packet to the server over the internet asking if it is open for new connections.
-      * 2. If the server has open ports that can accept and initiate new connections, it’ll respond with an ACKnowledgment of the SYN packet using a SYN/ACK packet.
-      * 3. The client will receive the SYN/ACK packet from the server and will acknowledge it by sending an ACK packet.
+      1. Client machine sends a SYN packet to the server over the internet asking if it is open for new connections.
+      2. If the server has open ports that can accept and initiate new connections, it’ll respond with an ACKnowledgment of the SYN packet using a SYN/ACK packet.
+      3. The client will receive the SYN/ACK packet from the server and will acknowledge it by sending an ACK packet.
     * TLS handshake
     * Send HTTP request
     * Render the page and display content
@@ -92,17 +94,18 @@ WebServices
 
   * [Cipher Suite](https://docs.microsoft.com/zh-tw/windows/win32/secauthn/cipher-suites-in-schannel?redirectedfrom=MSDN)
     *![Cipher Suite](./images/cipher_suite.png)
-      * TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
-        * TLS:
-          * Indicate the protocol
-        * ECDHE:
-          * Signifies the **key exchang**e algorithm
-        * ECDSA:
-          * Signifies the **authentication** algorithm
-        * AES_256_CBC:
-          * Indicates the **bulk encryption** algorithm
-        * SHA384:
-          * Indicates the MAC algorithm (for **integrity**)
+      * Example:
+        * TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+          * TLS:
+            * Indicate the protocol
+          * ECDHE:
+            * Signifies the **key exchang**e algorithm
+          * ECDSA:
+            * Signifies the **authentication** algorithm
+          * AES_256_CBC:
+            * Indicates the **bulk encryption** algorithm
+          * SHA384:
+            * Indicates the MAC algorithm (for **integrity**)
 
   * TLS handshake overview
     * ![TLS hand shake](./images/TLS_handshake.png)
@@ -140,7 +143,7 @@ WebServices
     * The **digital signature** is checked
       * The signature verifies a certificate, not a server.
     * The **certificate chain** is checked you should have intermediate CA certificates
-    * The expiry and activation dates and the validity period are checked.
+    * The expire and activation dates and the validity period are checked.
     * The revocation status of the certificate is checked
 
   * Certificate Chain checking
@@ -165,11 +168,21 @@ WebServices
     * step5:
       * Validate the next certificate down the line using this same process.
 
-
     * Ref:
       * https://support.dnsimple.com/articles/what-is-ssl-certificate-chain/
       * https://crypto.stackexchange.com/questions/24968/
 
+
+  * [CA digital signature checking](https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/702577/#outline__5)
+    * Signature:
+      * 用頒發機構的private key，對下級證書的public key 進行加密生成。
+        * digital_sign = CA_pr_key + sub_cert_ppu_key
+    * Decrypt:
+      * 用頒發機構的public key 對digital signatue 進行解密，對比下級證書的public key 和解密後的值是否一致。
+    * Flow:
+      * 頒發機構 A，用自己的private key將需要生成的下級證書 B 的public key 進行加密，生成數字簽名，然後再帶上相關信息：公鑰，公鑰的指紋，數字簽名，證書名，簽發機構等。
+      * 瀏覽器解析下級證書 B 的相關信息，找到簽發機構和數字簽名。
+      * 然後，找到簽發機構 A，使用 A 的公鑰去解密數字簽名，然後對比下級證書 B 的公鑰。如果成功則合法，反之，不合法。
 
 ## RESTful
   * Key Conecpt:
@@ -202,11 +215,12 @@ WebServices
     * Handle Errors with HTTP status codes
     * Allow overriding HTTP method
 
+
   * Example:
-    * | Resource  | GET                   | POST                     | PUT                    | DELETE                |
-      |-----------|-----------------------|--------------------------|------------------------|-----------------------|
-      | /car      | Return a list of cars | Create a new car         | Bulk Update            | Delete all cars       |
-      | /cars/711 | Return a specific car | Method not allowed (405) | Updates a specific car | Delete a specific car |
+    | *         | Resource              | GET                      | POST                   | PUT                   | DELETE |
+    | --------- | --------------------- | ------------------------ | ---------------------- | --------------------- |
+    | /car      | Return a list of cars | Create a new car         | Bulk Update            | Delete all cars       |
+    | /cars/711 | Return a specific car | Method not allowed (405) | Updates a specific car | Delete a specific car |
 
   * Ref:
     * [TritonHo](https://github.com/TritonHo/slides/blob/master/Taipei%202016-04%20talk/RESTful%20API%20Design-tw-2.1.pdf)
@@ -230,7 +244,7 @@ WebServices
       * update the resource
     * DELETE:
       * delete the resource
-    * Options
+    * **Options**
       * Returns info about API (supported methods, Content-Type, etc.)
       * Identifying which HTTP methods a resource supports.
       * Testing whether a resource exists and is accessible.
@@ -400,11 +414,11 @@ WebServices
     * Wildcard name
       * Another way is to use a certificate with a wildcard name, for example, *.example.org. A wildcard certificate secures all subdomains of the specified domain
       * Limitations:
-        * There shall be only one "*" character in the name
+        * **There shall be only one "*" character** in the name
             * so no "\*.\*.stackexchange.com", to take an actual case.
-        * The "*" must appear as first character, not elsewhere
-            * so no "meta.*.stackexchange.com", to continue on that real-life situation.
-        * The "*" must stand for a complete name component
+        * The "*" must appear as **first character**, not elsewhere
+            * So no "meta.*.stackexchange.com", to continue on that real-life situation.
+        * The "*" must stand for a **complete name component**
             * hence "\*.example.com" but not "\*foo.example.com"
         * Ref:
           * [How many hostnames can be supported by a wildcard ssl certificate? Is there any limit?](https://security.stackexchange.com/questions/70882/how-many-hostnames-can-be-supported-by-a-wildcard-ssl-certificate-is-there-any)
@@ -412,7 +426,7 @@ WebServices
         * SubjectAltName and wildcard name can be combined
         * A certificate may contain exact and wildcard names in the SubjectAltName field, for example, example.org and *.example.org.
     * Server Name Indication (SNI)
-      * A more generic solution for running several HTTPS servers on a single IP address is TLS Server Name Indication extension (SNI, RFC 6066), which allows a browser to pass a requested server name during the SSL handshake
+      * A more generic solution for running several HTTPS servers on a single IP address is TLS Server Name Indication extension (SNI, RFC 6066), which **allows a browser to pass a requested server name during the SSL handshake**.
 
 ## Performance
   * Ref:
