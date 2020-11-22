@@ -10,16 +10,17 @@ ComputerNetwork
   * [OSI Model](https://en.wikipedia.org/wiki/OSI_model)
   * [TCP vs UDP](https://stackoverflow.com/questions/5970383/difference-between-tcp-and-udp)
   * DNS
-    * Root Domain (.)
-    * Top Level Domain (TLD)
-      * general TLD (gTLD)
-        * .com .net .edu .org
-      * country-code TLD (ccTLD)
-        * tw, hk, us
-    * Secondary Domain
-      * microsoft.com, google.com
-    * Sub Domain
-      * sales.microsoft.com
+    * Domain Name System
+      * Root Domain (.)
+      * Top Level Domain (TLD)
+        * general TLD (gTLD)
+          * .com .net .edu .org
+        * country-code TLD (ccTLD)
+          * tw, hk, us
+      * Secondary Domain
+        * microsoft.com, google.com
+      * Sub Domain
+        * sales.microsoft.com
 
 
 ## IPv4
