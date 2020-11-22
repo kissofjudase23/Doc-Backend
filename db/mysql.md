@@ -49,12 +49,12 @@
       * Relation data model
         * **Highly-Structured** table organization with rigidly-defined data forrmats and record structure.
       * Reasons for SQL
-        * Structured data
+        * **Structured data**
         * **Strict schema**
         * Relational data
         * **Transactions** (Mongo 4.0 also supports transaction)
       * Drawbacks:
-        * Need for complex joins
+        * Complex joins querys.
 
     * NoSQL
       * Document data model
@@ -266,6 +266,22 @@
     * **3NF**
       * When a database table is in second normal form, there should be no transitive functional dependency.
       * That means **any non primary key field should not be depend on other** on primary key field.
+      * Example:
+        * before 3NF
+          * T1
+            * Review_ID (PK)
+            * Review
+            * Start
+            * Start_meaning
+        * After 3NF
+          * T1:
+            * Review_ID (PK)
+            * Review
+            * Start_ID (FK)
+          * T2:
+            * Start_ID (PK)
+            * Start
+            * Start_meaning
     * **BCNF**
     * **4NF**
     * **5NF**
@@ -569,6 +585,7 @@
           * see locking read
             * https://dev.mysql.com/doc/refman/8.0/en/innodb-locking-reads.html
         * Change Isolation Level (Serialisable)
+          * The default select will be change to "select for share".
         * Automatic detection
           * Oracle, Postgresql, sql server etc have automatic lost update detection in the repeatable read isolation level and automatically abort the second transaction.
           * Mysql does not support ?
