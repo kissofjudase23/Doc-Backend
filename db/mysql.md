@@ -25,13 +25,8 @@
 ## FAQ
   * Normalized vs. Denormalized Databases
     * **Normalized databases** are designed to minimize **redundancy**
-    * While **denomalized databases** are designed to optimized **read time**.
-    * For example:
-      * In a traditional normzlied database with data like Courses and Teachers, Courses might contain a column called TeachersID, which is a foreign key to Teacher.
-        * One Benefit of this is that information about the teacher is **only stored once in the databases**.
-        * The drawback is that many common queries will require expensive joins.
-    * Ref:
-      * https://medium.com/@katedoesdev/normalized-vs-denormalized-databases-210e1d67927d
+    * While **denormalized databases** are designed to optimized **read time**.
+
   * Partition vs Sharding
     * Partitioning is more a generic term for **dividing data across tables or databases**.
     * **Sharding is one specific type of partitioning**, namely horizontal partitioning.
@@ -453,8 +448,8 @@
            *  **Values of Clustered Keys**
            *  **Pointers to the records**
         * ![secondary_indexes](images/secondary_indexes.png)
-          * **The data structure in the bottom are the table (records).**
-          * *  **If the primary key is long, the secondary indexes use more space**.
+          * **The data structure in the bottom is the table (clustered indexes).**
+          * **If the primary key is long, the secondary indexes use more space**.
           * **Need another lookup to get raw data in the clustered index if the secondary key and clustered key can not cover the wanted columns**, that is, explain will show "Using Index Condition".
           * [Using Index vs Using Index Condition](https://stackoverflow.com/questions/1687548/mysql-explain-using-index-vs-using-index-condition)
       * Data Coverage:
