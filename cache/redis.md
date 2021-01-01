@@ -32,7 +32,7 @@
 
 ## Reference
   * [Redis.io](https://redis.io/)
-  * [Try.Redis.io](try.redis.io)
+  * [Try.Redis.io](https://try.redis.io/)
   * Redis-py
     * [sample code](https://github.com/andymccurdy/redis-py)
     * [document](https://redis-py.readthedocs.io/en/latest/)
