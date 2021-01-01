@@ -515,12 +515,12 @@
       * Note:
         * Big transactions are painful
           * Long running transactions don’t just tie up a connection, they force the database to preserve history for longer.
-        * Multi-statement transactions need to commit quickly
-        * Writes make index scans less useful
+        * Multi-statement transactions need to commited quickly
         * Rapid-fire writes magnify the penalties for reads.
-          * If you have a lot of data to write, especially to the same row, write it in chunks instead of one-by-one. Each write generates a transaction id, relevant undo logs, and makes a mess of secondary indexes.
+          * If you have a lot of data to write, especially to the same row, **write it in chunks instead of one-by-one**. Each write generates a transaction id, relevant undo logs, and makes a mess of secondary indexes.
         * "Hot" rows are hot for all columns, not just updated ones.
-          * A row that stores a frequently updated counter forces more row transaction id updates and undo log entries. Queries that start before the counter is incremented, even if they don’t use the counter, still have to traverse undo logs for the row state when they started.
+          * A row that stores a frequently updated counter forces more row transaction id updates and undo log entries. 
+          * Queries that start before the counter is incremented, even if they don’t use the counter, still have to traverse undo logs for the row state when they started.
 
     * Ref:
       * [2 phase locking](https://vladmihalcea.com/2pl-two-phase-locking/)
