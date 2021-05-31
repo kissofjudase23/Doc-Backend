@@ -372,11 +372,57 @@
   * [Subpartition](https://dev.mysql.com/doc/refman/5.7/en/partitioning-subpartitions.html)
 
   * Restrictions and Limitations on Partitioning
-  * [limitations](https://dev.mysql.com/doc/refman/8.0/en/partitioning-limitations.html)
-    * every unique key on the table must use every column in the table's partitioning expression
-        * All columns used in the partitioning expression for a partitioned table must be part of every unique key that the table may have.
-        * In other words, **every unique key on the table must use every column in the table's partitioning expression. (This also includes the table's primary key**, since it is by definition a unique key. 
+  * [limitations]
+    * https://dev.mysql.com/doc/refman/8.0/en/partitioning-limitations.html
+    * https://dev.mysql.com/doc/refman/8.0/en/partitioning-limitations-partitioning-keys-unique-keys.html
 
+    * All columns used in the partitioning expression for a partitioned table must be part of every unique key that the table may have. 
+        * invalid cases
+          ```sql
+          CREATE TABLE t1 (
+              col1 INT NOT NULL,
+              col2 DATE NOT NULL,
+              col3 INT NOT NULL,
+              col4 INT NOT NULL,
+              UNIQUE KEY (col1, col2)
+          )
+          PARTITION BY HASH(col3)
+          PARTITIONS 4;
+
+          CREATE TABLE t2 (
+              col1 INT NOT NULL,
+              col2 DATE NOT NULL,
+              col3 INT NOT NULL,
+              col4 INT NOT NULL,
+              UNIQUE KEY (col1),
+              UNIQUE KEY (col3)
+          )
+          PARTITION BY HASH(col1 + col3)
+          PARTITIONS 4;
+          ```
+
+        * valid cases
+          ```sql
+          CREATE TABLE t1 (
+            col1 INT NOT NULL,
+            col2 DATE NOT NULL,
+            col3 INT NOT NULL,
+            col4 INT NOT NULL,
+            UNIQUE KEY (col1, col2, col3)
+          )
+          PARTITION BY HASH(col3)
+          PARTITIONS 4;
+
+          CREATE TABLE t2 (
+              col1 INT NOT NULL,
+              col2 DATE NOT NULL,
+              col3 INT NOT NULL,
+              col4 INT NOT NULL,
+              UNIQUE KEY (col1, col3)
+          )
+          PARTITION BY HASH(col1 + col3)
+          PARTITIONS 4;
+          ```
 
 ## [Sharding](https://medium.com/system-design-blog/database-sharding-69f3f4bd96db)
   * FAQ:
@@ -519,7 +565,7 @@
         * Rapid-fire writes magnify the penalties for reads.
           * If you have a lot of data to write, especially to the same row, **write it in chunks instead of one-by-one**. Each write generates a transaction id, relevant undo logs, and makes a mess of secondary indexes.
         * "Hot" rows are hot for all columns, not just updated ones.
-          * A row that stores a frequently updated counter forces more row transaction id updates and undo log entries. 
+          * A row that stores a frequently updated counter forces more row transaction id updates and undo log entries.
           * Queries that start before the counter is incremented, even if they don’t use the counter, still have to traverse undo logs for the row state when they started.
 
     * Ref:
